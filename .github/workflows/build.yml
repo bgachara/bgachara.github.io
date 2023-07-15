@@ -5,6 +5,9 @@ on:
     branches: [ master ]
     
 permissions:
+  pull-requests: write
+  issues: write
+  repository-projects: write
   contents: read
   pages: write
   id-token: write
