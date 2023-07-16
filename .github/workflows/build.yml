@@ -5,9 +5,6 @@ on:
     branches: [ master ]
     
 permissions:
-  pull-requests: write
-  issues: write
-  repository-projects: write
   contents: read
   pages: write
   id-token: write
@@ -18,7 +15,7 @@ jobs:
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Deno environment
         uses: denoland/setup-deno@v1
@@ -26,12 +23,20 @@ jobs:
           deno-version: v1.x
 
       - name: Build site
-        run: |
-          deno task build --location=https://bgachara.github.io
-
-      - name: Deploy
-        uses: crazy-max/ghaction-github-pages@v2.0.1
+        run: deno task build
+  # deno task build --location=https://bgachara.github.io
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          build_dir: _site
+          path: '_site'
+          
+      - name: Deploy
+        id: Deployment
+        uses: actions/deploy-pages@v1
+       # uses: crazy-max/ghaction-github-pages@v2.0.1
+       # with:
+        
+        # build_dir: _site
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_ACCESS_TOKEN }}
