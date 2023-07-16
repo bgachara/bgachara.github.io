@@ -27,7 +27,7 @@ jobs:
 
       - name: Build site
         run: |
-          deno task build --location=https://bgachara.github.io/bgachara.github.io
+          deno task build --location=https://bgachara.github.io
 
       - name: Deploy
         uses: crazy-max/ghaction-github-pages@v2.0.1
