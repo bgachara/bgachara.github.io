@@ -7,4 +7,5 @@ menu:
   order: 2
 ---
 
-I am a person that writes stuff.
+I think this is where my CV should go.
+I will get back to you with shortly.
