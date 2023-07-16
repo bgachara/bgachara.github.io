@@ -1,9 +1,13 @@
-# Understanding NodeJS
+---
+title: NodeJs
+description: Javasccript runtime notes
+date: 2022-06-01
+tags:
+  - nodejs
+  - cododev
+---
 
-Ref:
-`cododev: understanding Nodejs`
-`nodejs.dev`
-
+## X
 
 - You cannot find ready-made solutions for every occasion, but if you understand inner mechanismsof a complex system,
   you will be able to analyze and critically evaluate other people's experience and come at your own conclusions.

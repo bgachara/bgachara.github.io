@@ -1,6 +1,12 @@
-# Technical books to read.
-
-`List of computer science oriented books I plan to read and the subject matter targeted`
+---
+title: Reading List
+description: List of CS books I plan to read
+date: 2023-07-01
+tags:
+   - technical
+   - reading
+   - CS
+---
 
 `Great code is software that is written using a consistent and prioritized set of good software characteristics`
 

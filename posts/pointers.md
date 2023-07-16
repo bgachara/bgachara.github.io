@@ -1,6 +1,11 @@
-# Pointers in C
-
-`Notes from the book with the same name and on the same topic`
+---
+title: Pointers in C
+description: Notes from the same book
+date: 2023-07-01
+tags:
+  - pointers
+  - c
+---
 
 ## Introduction
 

@@ -1,3 +1,14 @@
+---
+title: Parallel Programming
+description: Getting into parallel programming
+date: 2023-08-01
+tags:
+  - parallel programming
+  - structured parallel
+ref:
+  - Patterns for parallel programming
+---
+
 # Parallel Programming
 
 `Notes from Patterns for parallel programming`

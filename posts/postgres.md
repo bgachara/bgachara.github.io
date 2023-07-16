@@ -1,6 +1,13 @@
-# Reference Notes on Postgres
+---
+title: Postgres
+description: Reference notes on Postgres.
+date: 2023-08-01
+tags:
+  - postgres
+  - database
+  - admin
 
-`Notes on Postgresql and side notes on Mysql ecosystem`
+---
 
 ## Init
 

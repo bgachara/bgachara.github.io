@@ -1,5 +1,11 @@
-# Design Patterns
-
+---
+title: Design Patterns
+description: Dive into Design Patterms
+date: 2023-07-01
+tags:
+  - design patterns
+  - OOP
+---
 ref: Dive-into-design-patterns
 
 ## Object-Oriented Patterns

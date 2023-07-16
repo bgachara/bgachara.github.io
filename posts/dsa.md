@@ -1,5 +1,11 @@
-# Data Structures and Algorithms
-
+---
+title: DSA
+description: Data structures and Algorithms
+date: 2023-07-01
+tags:
+  - dsa
+  - primegean
+---
 ref paper: `Primegean Frontend Masters course`
            `A common sense guide to DSA`
            `Introduction to the design and Analysis of Algorithms`

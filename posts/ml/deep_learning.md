@@ -1,4 +1,12 @@
-# Deep Learning
+---
+title: Deep Learning
+description: short ramp-up to DL
+date: 2023-04-01
+tags:
+  - Dl
+  - AI Models
+  - Andrej Karpathy
+---
 
 `Notes from the Introduction to Deep Learning MIT course`
 `Notes also from Andrej Karpathy YT series on Neural Networks`

@@ -1,8 +1,12 @@
-# Notes on Javascript
-
-`Colt Steele: Modern Javascript`
-`Javascript tips from all over`
-
+---
+title: Javascript
+description: Reference notes on the js language
+date: 2023-06-01
+tags:
+  - js
+  - ecmascript
+---
+`Colt Steele: Modern Javascript` `Javascript tips from all over`
 
 # Introduction
 

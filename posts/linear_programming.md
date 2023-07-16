@@ -1,7 +1,11 @@
-# Linear Programming
+---
+title: Linear Programming
+description: 
+date: 2023-06-01
+tags:
+ - linear programming
 
-`Notes on what linear programming tackels`
-
+---
 ## Abstract
 
 - Ability to state general goals and lay out a path of detailed decisions to take in order to "best" achieve its goals.

@@ -1,11 +1,12 @@
-# Assembly Language 101
-
-`Notes from Introduction to 64bit Intel Assembly Language Processing for Linux`
-`Also Assembly 64`
-`Assembly programming with ARM on FreecodeCamp`
-`Assembly - Pwn Zero to Hero`
-
-
+---
+title: Asssembly Language
+description: Learn and Read Assembly
+date: 2023-05-01
+tags:
+    - assembly
+    - 64bit
+--- 
+ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Linux` `Also Assembly 64` `Assembly programming with ARM on FreecodeCamp` `Assembly - Pwn Zero to Hero`
 
 ## Introduction
 

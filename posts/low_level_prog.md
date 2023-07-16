@@ -1,11 +1,12 @@
-# Low Level Programming
-
-`Notes from the following books `
-` - Low level programming.`
-` - Secret life of programs`
-` - Write Great Code: Understanding the machine`
-
-
+---
+title: Low Level Programming
+description: bits and bytes 
+dates: 2023-07-01
+tags:
+  - low level prog
+  - secret life of programs
+  - write great code
+---
 ## Introduction
 
 - Model of computation is a set of basic operations and their respective costs.

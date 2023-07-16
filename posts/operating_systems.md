@@ -1,3 +1,13 @@
+---
+title: Operating Systems
+description: Reference notes on Operating system
+date: 2023-06-01
+tags:
+  - operating system
+  - linux
+ref:
+  - Modern Operating Tanenbaum
+---
 # Operating Systems
 
 ref:

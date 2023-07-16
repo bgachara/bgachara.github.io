@@ -1,5 +1,12 @@
-# PROGRAMMING LANGUAGES BACKEND
-
+---
+title: Programming languages backend
+description: Understanding what's behind your favorite pl
+date: 2022-04-01
+tags:
+  - pl
+  - compiler
+  - interpreter
+---
 `everything behind the programming language syntax and semantics`
 
 - A language feature is defined by its statics, the rules governing the use of the feature in a program, and its dynamics, the

@@ -1,5 +1,13 @@
-# High Performance Browser Networking
-
+---
+title: High Performance Browser Networking
+description: Notes on the book of the same name
+date: 2023-01-10
+tags:
+  - http
+  - tcp
+  - browser
+  - networking
+---
 ref:`High Performance Browser Networking`
     `HTTP: The Definitive Guide`
     

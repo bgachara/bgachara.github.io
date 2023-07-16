@@ -1,5 +1,11 @@
-# Harvard Resume Tips
-
+---
+title: Harvard Resume Tips
+description: Notes from the Harvard Resume Guide
+date: 2023-06-01
+tags:
+  - harvard
+  - resume
+---
 ## What is it Catherine??
 
 - This is a brief, informative summary of your abilities, education and experience.

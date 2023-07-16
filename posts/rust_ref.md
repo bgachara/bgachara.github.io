@@ -1,5 +1,12 @@
-# Notes of Rust PL
-
+---
+title: Rust Lang
+description: Language reference for rust
+date: 2023-01-01
+tags:
+    - rust
+    - pl
+    - codeacademy
+---
 Ref:
 `CodeAcademy Rust Tutorial`
 `Comprehensive Rust Google Android`

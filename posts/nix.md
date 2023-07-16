@@ -1,7 +1,11 @@
-# Notes on NIX and it's ecosystem.
-
-`source: Eelco Dolstra PHD Thesis`
-
+---
+title: Nix
+description: Eelco Dolstra PHD thesis
+date: 2023-01-01
+tags:
+    - Nix
+    - OS
+---
 - Main categories of the deployment issues:
     - Environment Issues.
         - S/w makes demand on the enviroment it is to run(components, configs, mods)

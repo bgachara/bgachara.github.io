@@ -1,8 +1,11 @@
-# Web Design
-
-`Notes from the web design course on envato tuts`
-
-
+---
+title: Design
+description: Web design
+date: 2023-06-01
+tags:
+  - design
+  - web
+---
 ### Design systems
 
 - Set of design standards used to build an ecosystem of products

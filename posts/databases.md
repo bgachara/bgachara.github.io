@@ -1,13 +1,22 @@
+---
+title: Databases
+description: Notes from the CMU database course
+date: 2023-01-01
+tags:
+  - databases
+  - CMU
+  - Engineering
+---
 # Databases 
 
 Ref:
-`Jamie Brandon What is a database TigerBeetle talk`
-`Database Engineering by Meta`
-`Expert Mysql`
-`Database System Concepts 7th Edition`
-`CMU: Intro to Databases Systems`
-`Mysql for Developers: Aaron@planetscale.com`
-`Database Internals: Alex Petrov`
+`Jamie Brandon What is a database TigerBeetle talk`\
+`Database Engineering by Meta`\\
+`Expert Mysql`\\
+`Database System Concepts 7th Edition`\\
+`CMU: Intro to Databases Systems`\\
+`Mysql for Developers: Aaron@planetscale.com`\\
+`Database Internals: Alex Petrov`\\
 
 
 ## Introduction

@@ -1,10 +1,10 @@
 .post-header {
-  padding: 5vh 0;
+  padding: 1vh 0;
 }
 .post-title {
-  font-size: 4rem;
+  font-size: 1.5rem;
   font-size: clamp(2rem, 10vw, 4rem);
-  line-height: 1;
+  line-height: 0.8;  
   letter-spacing: -0.02em;
   margin: 0 0 0.25em;
 }
@@ -12,13 +12,13 @@
   display: inline;
 }
 .post-body {
-  font-size: 1.2em;
-  line-height: 1.4;
+  font-size: 1em;
+  line-height: 1.2;
 
   & p,
   & ul,
   & ol {
-    max-width: 45em;
+    max-width: 90em;
   }
 
   & h2,

@@ -1,5 +1,10 @@
-# Understanding Programming Languages
-
+---
+title: Understanding Programming Languages
+description: Notes on approaching a new PL
+date: 2023-06-01
+tags:
+    - PL
+---
 ## Properties of PL.
 
 1. Syntax.

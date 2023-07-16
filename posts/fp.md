@@ -1,5 +1,11 @@
-# Functional Programming
-
+---
+title: Functional Programming
+description: Jab at FP
+date: 2023-08-01
+tags:
+  - Haskell
+  - FP
+---
 ref: `Haskell for Imperative programmers: Philipp Hagenlocher`
      `Haskell Beginners: chshersh`
 

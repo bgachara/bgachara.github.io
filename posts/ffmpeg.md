@@ -1,6 +1,12 @@
-# FFMPEG
-
-
+---
+title: FFMPEG
+description: Image processing with FFMPEG
+date: 2023-06-01
+tags:
+  - ffmpeg
+  - images
+  - compression
+---
 ## Introduction
 
   - Acronym for Fast Forward Motion Picture Expert Group.

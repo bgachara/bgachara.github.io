@@ -1,7 +1,11 @@
-# Jara Programming Language Design Sheet.
-
-`This is my guiding design specification for the Jara programming language.`
-
+---
+title: Jara PL
+description: Design spec sheet for a programming language I might impelement some day
+date: 2023-07-01
+tags:
+    - pl
+    - design 
+---
 ## Notes to keep in mind
 
 - Prioritise a functional programming paradigm language.

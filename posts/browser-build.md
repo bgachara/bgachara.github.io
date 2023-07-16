@@ -1,7 +1,11 @@
-# How browsers work + How to build one
-
-ref: `How browsers work`. Tali Garsiel
-
+---
+title: How browsers work
+description: Notes on that Tali Garsiel article
+date: 2023-07-01
+tags:
+  - browsers
+  - build one
+---
 ## Introduction
 
 - Browsers are the most widely used software.

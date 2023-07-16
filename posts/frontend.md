@@ -1,7 +1,13 @@
-# Concepts in FE Development
-
-ref: `patterns.dev`
-
+---
+title: Frontend Development
+description: Reference notes on frontend development
+date: 2023-06-01
+tags:
+  - frontend
+  - pattens.dev
+  - react
+  - design patterns
+---
 *Understand and document the important concepts in front end development*
 
 - Client side vs Server side rendering.

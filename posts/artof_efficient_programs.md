@@ -1,7 +1,12 @@
-# Art of Efficient Programs
-
+---
+title: Art of Efficient Programs
+description: Notes on the book by the same name
+date: 2023-09-01
+tags:
+  - programs
+  - efficiency
+---
 `notes from the book by the same name and additional notes on optimizations`
-
 
 ## Performance Fundamentals
 

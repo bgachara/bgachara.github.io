@@ -1,5 +1,12 @@
-# Understanding eBPF
-
+---
+title: eBPF
+description: understanding packet filtering with eBPF
+date: 2023-05-01
+tags:
+  - eBPF
+  - linux
+  - kernel
+---
 ref: `Learning eBPF`
 
 ## What and Why

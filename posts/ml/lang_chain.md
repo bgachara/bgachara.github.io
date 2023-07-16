@@ -1,9 +1,20 @@
+---
+title: LangChain
+description: Understanding the LLM chain tech
+date: 2022-03-01
+tags:
+  - ml
+  - llm
+  - ai
+---
+
 # Lang Chain and Vector Databases
 
 `LLMs and private data go super nova`
-`A vector database indexes and stores vector embeddings for fast retrieval and similar search with capabilities like CRUD operations, metadata filtering
-and horizontal scaling`
-``
+
+- A vector database indexes and stores vector embeddings for fast retrieval and similar search with capabilities like CRUD operations, metadata filtering
+  and horizontal scaling
+
 
 ## Introduction
 

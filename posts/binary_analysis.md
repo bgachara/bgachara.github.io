@@ -1,5 +1,12 @@
-# Binary Analysis
-
+---
+title: Binary Analysis
+description: Reference binary notes
+date: 2023-04-01
+tags:
+  - binary
+  - linux
+  - language
+---
 Ref:
 `Practical Binary Analysis book`
 `Mastering Reversing Engineering`

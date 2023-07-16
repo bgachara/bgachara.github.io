@@ -1,7 +1,11 @@
-# CSS tiny reference
-
-ref: `web.dev css`
-
+---
+title: CSS
+description: CSS tiny reference
+date: 2023-07-01
+tags:
+  - web.dev css
+  - css
+---
 ## Terms and Ideas
 
 ### Box model

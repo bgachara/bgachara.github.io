@@ -1,5 +1,11 @@
-# Distributed Systems
-
+---
+title: Distributed Systems
+description: 
+date: 2023-07-01
+tags:
+  - distributed
+  - MIT
+---
 ref: `MIT 6.824: Distributed Systems`
 
 

@@ -1,5 +1,11 @@
-# Notes on my own brand of Computer Science
-
+---
+title: Jara CS
+description: Notes on my brand of CS
+date: 2023-12-01
+tags:
+  - cs
+  - practical
+---
 `Rethinking of my computer science education on account of exposure to the real practical world`
 
 ## Short Introduction

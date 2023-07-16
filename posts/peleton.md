@@ -1,7 +1,11 @@
-# Peleton
-
-`The Self Driving Database`
-
+---
+title: Peleton DB
+description: The self driving database
+date: 2023-07-01
+tags:
+  - CMU
+  - Database
+---
 ## Introduction
 
 - Challenges

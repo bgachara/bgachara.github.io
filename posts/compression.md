@@ -1,5 +1,10 @@
-# Data Compression
-
+---
+title: Data Compression
+description: data compression
+date: 2023-08-01
+tags:
+  - compression
+---
 ref:`data compression complete reference`
     `managing compression`
     `introduction of data compression`
