@@ -7,10 +7,9 @@ tags:
   - CMU
   - Engineering
 ---
-# Databases 
+## References 
 
-Ref:
-`Jamie Brandon What is a database TigerBeetle talk`\
+`Jamie Brandon What is a database TigerBeetle talk`\\
 `Database Engineering by Meta`\\
 `Expert Mysql`\\
 `Database System Concepts 7th Edition`\\

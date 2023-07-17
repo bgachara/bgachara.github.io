@@ -1,16 +1,11 @@
 ---
-title: Web Design
+title: Design Web
 description: Notes on web design course on Envato Tuts
 date: 2023-05-01
 tags:
-  - Design
+  - web
 
 ---
-# Web Design
-
-`Notes from the web design course on envato tuts`
-
-
 ## Introduction
 
 - UX(user experience) design

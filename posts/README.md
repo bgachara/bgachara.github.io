@@ -1,7 +1,12 @@
-# TECHNICAL NOTES
-
-`This will be included on my personal dev site`
-
+---
+title: Technical Notes
+description: scope of areas covered by the documentation
+date: 2022-03-01
+tags:
+  - notes
+  - scope
+  - cs
+--- 
 ## AREAS COVERED.
 
 - Cheat Sheets i.e programming languages.

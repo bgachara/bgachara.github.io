@@ -1,5 +1,9 @@
-# Computer Science from the Bottom Up.
-
-`Notes from the book Computer Science from the Bottom up.`
-
-## 
+---
+title: Bottom Up Cs
+description: Notes from the same book
+date: 2023-08-01
+tags:
+  - bottom-up
+  - cs
+---
+## Introduction 

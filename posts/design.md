@@ -1,9 +1,8 @@
 ---
 title: Design
-description: Web design
+description: Not Web design
 date: 2023-06-01
 tags:
-  - design
   - web
 ---
 ### Design systems
