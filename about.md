@@ -7,7 +7,7 @@ menu:
   order: 2
 ---
   
-## Guiding Pointers
+## Brag Paragraphs
 
 - Been a support engineer since 2018, around 5 years.
 - Support for both customers and new employees.
@@ -50,7 +50,7 @@ menu:
 
 ## Ultimate Target
 
-- Performance Nerd.
+- System Performance Nerd.
 
 
 ## Abilities

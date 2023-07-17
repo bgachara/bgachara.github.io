@@ -1,10 +1,11 @@
 :root {
-  --red: #c04;
+  --red: #292120;
   --lightgray: #e6e6e6;
   --darkgray: #0d1117;
   --blue: #135;
-  --white: #fff;
+  --white: #B2DFDB;
   --font-family: -apple-system, system-ui, sans-serif;
+  --bg-color: #000033
 }
 
 html,
@@ -12,7 +13,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: var(--font-family);
-  color: var(--darkgray);
+  color: var(--bg-color);
   background-color: var(--white);
 
   /** Pagefind variables */
@@ -45,6 +46,15 @@ a {
 .warning {
   background-color: #ffc;
   padding: 1em 0.5em;
+}
+
+footer {
+  line-height: 1;
+  display: flex;
+  align-items: end;
+  flex-direction: row-reverse;
+  padding-right: 5vw;
+  margin-top: -10vh;
 }
 
 table {
