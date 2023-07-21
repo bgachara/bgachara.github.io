@@ -7,7 +7,7 @@ tags:
   - compiler
   - interpreter
 ---
-`everything behind the programming language syntax and semantics`
+**Everything behind the programming language syntax and semantics**
 
 - A language feature is defined by its statics, the rules governing the use of the feature in a program, and its dynamics, the
   rules defining how programs using this feature are to be executed. The concept of safety
@@ -193,25 +193,30 @@ There is a tendency to prefer constructions that are simplest in that language r
 - I'm talking garbage collectors that run in other threads and clean up after me without ever stopping me in the middle of what I'm doing.
 
 
-## Ahead of Time compilation(**AOT**) vs Just in Time compilation(**JIT**)
+## AOT vs JIT
 
 ## AOT
 
+- Ahead of Time.
 - Most straightforward compilers are ahead-of-time.
 - Also known as Static Compilation.
 
 
 ## JIT
 
+- Just in Time.
 - also called dynamic translation.
 - is a hybrid of compiled and interpreted languages, runs interpreted first then notices the "hot" code which it then compiles in order to optimize.
 - Trace based vs Method based.
-- Trace: analyses what paths(traces) are often used, and to which methods they belong, more efficient and more overhead.
-- Method / Tiering: only analyses the calls, less efficient and less overhead.
-- Disadvantage: memory usage and warmup time.
-- Memory usage: you have to have both the compiled and interpreted version stored in memory.
-- Also has to keep information about the method i.e number of times called, arguments, times spent.
-- Warmup time: has to recognize that a method is called a lot and then take time to compile it.
+  - Trace: 
+    - Analyses what paths(traces) are often used, and to which methods they belong, more efficient and more overhead.
+  - Method / Tiering: 
+    - Only analyses the calls, less efficient and less overhead.
+- Disadvantage: 
+    - Memory usage and warmup time.
+      - Memory usage: you have to have both the compiled and interpreted version stored in memory.
+      - Also has to keep information about the method i.e number of times called, arguments, times spent.
+      - Warmup time: has to recognize that a method is called a lot and then take time to compile it.
 - Assumed goal of avoiding premature optimization.
 - Loops and Functions are typical candidates for optimizations.
 - JIT is good for programs that run for a long time, background and network servers.
@@ -275,21 +280,26 @@ There is a tendency to prefer constructions that are simplest in that language r
 - Fundamental register is the *instruction register* through which moves the bytes representing the fundamental machine-level instructions that processor can obey.
 - Instructions can be extremely simple i.e "clear a register" or "move a byte from one register to another".
 - Program counter or Instruction pointer is used to keep track of the address in memory of the next instruction to be fed to the processor's instruction register.
-- 
 
 ### Address modes
 
-- **Three-address code** - an *opcode*(operation code) is followed by two operands and a destination.
-- operation   destination, operand, operand
-- **Two-address code** - an operand is followed by one operand and one destination.
-- operation   destination, operand
-- **One-address code** - common in accumulator machines.
+- **Three-address code**  
+  - An *opcode*(operation code) is followed by two operands and a destination.
+  - operation   destination, operand, operand
+- **Two-address code**
+  - An operand is followed by one operand and one destination.
+  - operation   destination, operand
+- **One-address code** 
+  - Common in accumulator machines.
 
 ## Formal Languages
 
-- Metalanguage - a language used to describe another language. i.e English is a kinda metalanguage.
-- Syntax rules: describe the form.
-- Semantic rules: describe the meaning.
+- Metalanguage 
+  - A language used to describe another language. i.e English is a kinda metalanguage.
+- Syntax rules: 
+  - Describe the form.
+- Semantic rules:
+  - Describe the meaning.
 - Backus-Naur-Form
 
 ## Grammars

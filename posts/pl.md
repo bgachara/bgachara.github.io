@@ -5,6 +5,11 @@ date: 2023-06-01
 tags:
     - languages
 ---
+## Motivation
+
+  Understanding the principles that run across languages, appreciating which language features are best suited for which type of application and
+  knowing how to craft interpreters that bring these languages to life : Essentials of programming languages.
+
 ## Properties of PL.
 
 1. Syntax.
@@ -16,12 +21,12 @@ tags:
 7. Abstraction Mechanism.
 
 
--Increased ability to express ideas
--Improved background for choosing appropriate languages
--Increased ability to learn new languages
--Better understanding of significance of implementation
--Better use of languages that are already known
--Overall advancement of computing
+- Increased ability to express ideas
+- Improved background for choosing appropriate languages
+- Increased ability to learn new languages
+- Better understanding of significance of implementation
+- Better use of languages that are already known
+- Overall advancement of computing
 
 ## Language Features.
 
@@ -47,13 +52,19 @@ tags:
 - Type Inference.
 / buffer overflows, out-of-bound array access, dangling pointers.
 
-*What is the standard library of a language*
-*How do you know when a programming language is taking advantage of modern HPC*
-*What and How important are programming paradigms*
-*Regular vs Context-free languages*
-*Clear understanding of Static Analysis*
-*Cost of runtime safety checks and garbage collection*
+- *What is the standard library of a language*
 
+- *How do you know when a programming language is taking advantage of modern HPC*
+
+- *What and How important are programming paradigms*
+
+- *Regular vs Context-free languages*
+
+- *Clear understanding of Static Analysis*
+
+- *Cost of runtime safety checks and garbage collection*
+
+- *What is hidden control flow??(someonefindmeziggg!)*
 
 - Control Structures.
     - Direct sequencing.
@@ -92,12 +103,14 @@ tags:
 
 ```eng
 
-**Defn:**
+Defn:
 
 A toolchain is a set of tools that are used in a chain with the purpose of compiling and running code written in
 a specific programming language.
 
-The C toolchain is a toolchain because in addition to the compiler, you also need the standard library which contains the implementations of standard functions in binary form (CPU instructions), the assembler, because technically the compiler outputs assembly language, which is a human readable format for the CPU instructions which is converted to the actual binary CPU instructions by the assembler (also called the object file), and finally the linker which links the standard library, our object files and possibly other libraries together to form the final executable.
+The C toolchain is a toolchain because in addition to the compiler, you also need the standard library which contains the implementations of standard functions in binary form (CPU instructions), 
+the assembler, because technically the compiler outputs assembly language, which is a human readable format for the CPU instructions which is converted to the actual binary CPU instructions by the assembler (also called the object file),
+and finally the linker which links the standard library, our object files and possibly other libraries together to form the final executable.
 
 ```
 
@@ -113,7 +126,7 @@ The C toolchain is a toolchain because in addition to the compiler, you also nee
 
 ```eng
 
-**Orthogonality** - Small set of well thought features that can be combined in a logical way to supply more powerful building blocks.
+Orthogonality - Small set of well thought features that can be combined in a logical way to supply more powerful building blocks.
 Ideally those features should not intefere with one another or hedged out via inconsistencies, exceptional cases and arbitrary restrictions. 
 
 ```
@@ -131,7 +144,6 @@ Ideally those features should not intefere with one another or hedged out via in
 
 Imperative - sequence of statements that represent commands.
 
-- *What is hidden control flow*
 
 ## Data models
 
@@ -141,4 +153,3 @@ Imperative - sequence of statements that represent commands.
 - We may store in that box any value of the correct type for that box, data objects.
 - We may also name boxes, any expression that denotes that box.
 - Operations on data include arithmetic, accessing elements, dereferencing.
-- 
