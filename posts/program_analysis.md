@@ -24,17 +24,24 @@ tags:
 
 ## Introduction
 
-- Compilers have two ways to understand programs
-  - Static Analysis
-    - `Lint, Coverity` - Suspicious error patterns
-    - `Ms SLAM` - check API usage rules
-    - `FB Infer` - Memory leak detection
-    - `ESC/Java` - Verifying invariants
-  - Dynamic Analysis
-    - `Purify` - Array bound checking
-    - `Valgrind` - Memory leak detection
-    - `Eraser` - Datarace detection
-    - `Daikon` - Finding likely invariants
+- Where is program analysis used
+  - Compilers
+  - Bug finding tools
+  - Performance profilers
+  - Code completion
+  - Automated testing
+  - Code Summarization/Documentation
+  
+- Static Analysis
+  - `Lint, Coverity` - Suspicious error patterns
+  - `Ms SLAM` - check API usage rules
+  - `FB Infer` - Memory leak detection
+  - `ESC/Java` - Verifying invariants
+- Dynamic Analysis
+  - `Purify` - Array bound checking
+  - `Valgrind` - Memory leak detection
+  - `Eraser` - Datarace detection
+  - `Daikon` - Finding likely invariants
 
 - Static Analysis:
     - Try to discover information about a program without running it.
@@ -79,7 +86,14 @@ tags:
   - termination determines whether a good program analysis can be designed.
 
 - Operational Semantics
-  - *
+  - what the program does, execution on an idealized machine.
+- Denotational Semantics
+  - What the program means
+  - Mathematical object in some suitable semantic domain, function from states to states
+- Axiomatic Semantics
+  - What properties the program does.
+  - Collection of logical properties afforded by a program, pre and post conditions.
+  
 - Program Invariants  
   - Loop Invarinats
     - a property of a loop that holds before and after each iteration

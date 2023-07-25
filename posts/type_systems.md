@@ -13,13 +13,15 @@ ref: `Type systems for PL`
 ## Introduction
 
 - Core topics
-  - simple type systems
-  - type reconstruction
-  - universal and existential polymorphism
-  - subtyping
-  - bounded quantification
-  - recursive types
-  - type operators
+  - Basic operational semantics and proof techniques.
+  - Untyped lambda calculus.
+  - Simple type systems
+  - Type reconstruction
+  - Universal and existential polymorphism
+  - Subtyping
+  - Bounded quantification
+  - Recursive types
+  - Type operators
   
 ### What is it Catherine??
 

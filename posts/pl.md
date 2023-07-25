@@ -7,19 +7,10 @@ tags:
 ---
 ## Motivation
 
-  Understanding the principles that run across languages, appreciating which language features are best suited for which type of application and
+- Understanding the principles that run across languages, appreciating which language features are best suited for which type of application and
   knowing how to craft interpreters that bring these languages to life : Essentials of programming languages.
 
-## Properties of PL.
-
-1. Syntax.
-2. Names.
-3. Type System.
-4. Semantics.
-5. Memory model.
-6. Evaluation Mechanism.
-7. Abstraction Mechanism.
-
+- Programming languages shapes programming thought and how ideas and computations are expressed.
 
 - Increased ability to express ideas
 - Improved background for choosing appropriate languages
@@ -27,6 +18,25 @@ tags:
 - Better understanding of significance of implementation
 - Better use of languages that are already known
 - Overall advancement of computing
+
+## Properties of PL.
+
+- Syntax.
+- Names.
+- Type System.
+- Semantics.
+  - What do programs mean?
+  - Correct reasoning about programs and interfaces.
+- Idioms
+  - What are typical patterns for using language features to express your computation?
+- Memory model.
+- Libraries
+  - What facilities does the language provide as standard?
+- Tools
+  - What do language implementations provide to make your job easier?
+- Evaluation Mechanism.
+- Abstraction Mechanism.
+
 
 ## Language Features.
 
@@ -42,15 +52,6 @@ tags:
 10. Performance
 11. Explicit memory management
 
-- Type Errors. / accessing memory not allocated to the program. /
-- Types and Optimizations.
-- Type safety and Type checking.
-/ type casting, pointer arihtmetic, explicit deallocation and dangling pointers /
-- Compile time checking, before the program starts.
-- Run time checking, after the program has started.
-- Type checker.
-- Type Inference.
-/ buffer overflows, out-of-bound array access, dangling pointers.
 
 - *What is the standard library of a language*
 
@@ -84,21 +85,17 @@ tags:
 ## Domain Specific Languages.
 
 - Internal Dsl and External Dsl.
-- *identify areas ready for dsl application i.e sql,html,audio,js,*
+  - *identify areas ready for dsl application i.e sql,html,audio,js,*
 
-## PL Error Types/Faults
-
-- Buffer Overflows.
-- Out-of-bounds array access.
-- Dangling pointers (use after free bugs).
 
 ## Taxonomy of safety violations
 
 - Memory Access Errors.
-    - Spatial Access Errors.
-    - Temporal Access Errors.
+  - Spatial Access Errors.
+  - Temporal Access Errors.
 - Type cast Errors.
-- Memory Leak Errors - fail to release all the memory they allocate.
+- Memory Leak Errors 
+  - Fail to release all the memory they allocate.
 
 
 ```eng
@@ -114,7 +111,8 @@ and finally the linker which links the standard library, our object files and po
 
 ```
 
-- Language design is difficult because of the extraordinary complex and unexpected interaction effects between all parts of the language, difficult to design and maintain a strict structuring discipline.
+- Language design is difficult because of the extraordinary complex and unexpected interaction effects between all parts of the language,
+  difficult to design and maintain a strict structuring discipline.
 
 - Programming Languages should aid in program design, documentation and debugging.
 
@@ -124,12 +122,9 @@ and finally the linker which links the standard library, our object files and po
 
 - The concept of safety emerges as the coherence of the statics and dynamics of a language.
 
-```eng
+- Orthogonality - Small set of well thought features that can be combined in a logical way to supply more powerful building blocks.
+  Ideally those features should not intefere with one another or hedged out via inconsistencies, exceptional cases and arbitrary restrictions. 
 
-Orthogonality - Small set of well thought features that can be combined in a logical way to supply more powerful building blocks.
-Ideally those features should not intefere with one another or hedged out via inconsistencies, exceptional cases and arbitrary restrictions. 
-
-```
 
 ## Types of PL abstraction
 
@@ -142,7 +137,7 @@ Ideally those features should not intefere with one another or hedged out via in
 - Structured Abstraction - intermediate information about the structure of a program.
 - Unit Abstraction - large scale information in the program.
 
-Imperative - sequence of statements that represent commands.
+  Imperative - sequence of statements that represent commands.
 
 
 ## Data models
@@ -153,3 +148,24 @@ Imperative - sequence of statements that represent commands.
 - We may store in that box any value of the correct type for that box, data objects.
 - We may also name boxes, any expression that denotes that box.
 - Operations on data include arithmetic, accessing elements, dereferencing.
+
+
+## What is the best programming language??
+
+- *Insert shoe and car analogy.
+- *Also insert good mechanic analogy.
+
+## Programming paradigm
+
+- This is an approach to programming a computer based on a mathematical theory or a coherent set of principles.
+- Each paradigm supports a set of concepts that makes it the best for a certain kind of problem.
+- Different programming problems need different programming concepts to solve them cleanly and one or two paradigms do not contain the right concepts.
+
+### Paradigm property
+
+- Observable non-determinism
+  - non-determinism is when the execution of program is not completely determined by its specification,
+    i.e at some point during the execution the specification allows the program to choose what to do next.
+  - During execution, this choice is made by a part of the runtime called the scheduler.
+  - Non-determinism is observable if a user can see different results from executions that start at the same internal configuration.
+- Named State

@@ -2049,7 +2049,7 @@ ref:`High Performance Browser Networking`
 ### Basic Authentication
 
 - Authentication means showing some proof of your identity.
-- HTTP chellenge/response authentication framework.
+- HTTP challenge/response authentication framework.
 - Authentication protocol and headers
   - challenge - WWW-Authenticate
   - authorization - authorization
