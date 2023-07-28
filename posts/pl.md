@@ -155,6 +155,10 @@ and finally the linker which links the standard library, our object files and po
 - *Insert shoe and car analogy.
 - *Also insert good mechanic analogy.
 
+### Expressions vs Statements
+
+### Scopes and Shadowing
+
 ## Programming paradigm
 
 - This is an approach to programming a computer based on a mathematical theory or a coherent set of principles.
@@ -168,4 +172,11 @@ and finally the linker which links the standard library, our object files and po
     i.e at some point during the execution the specification allows the program to choose what to do next.
   - During execution, this choice is made by a part of the runtime called the scheduler.
   - Non-determinism is observable if a user can see different results from executions that start at the same internal configuration.
+  - Typical effect is race condition, happens when timing affects the choice made by the scheduler.
+  - Observable non-determinism should be supported only if its expressive power is needed, i.e concurrent programming.
 - Named State
+  - Ability to remember information or more precisely to store a sequence of values in time.
+  - It's expressive power is strongly influenced by the paradigm that contains it.
+  - Axes of expressiveness, state is named or unnamed, deterministic or non-deterministic and sequential or concurrent, giving 8 combinations.
+
+- Pick paradigm with just the right concepts. Too few and programs become complicated, Too many and reasoning becomes complicated. 

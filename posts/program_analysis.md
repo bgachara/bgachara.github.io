@@ -17,6 +17,7 @@ tags:
 - Automated analysis of program behaviour, to find errors, optimize performance, find security vulnerabilities.
 - Program Analysis cannot ensure termination, soundness and completeness
 - Heartbleed vulnerability.
+- Four main apporaches of PA:
   - Data Flow Analysis.
   - Constraint Based Analysis.
   - Abstract Interpretation.

@@ -25,6 +25,7 @@ ref: `Type systems for PL`
   
 ### What is it Catherine??
 
+- A type system is a tractable syntactic method for proving the absence of certain program behaviours by classifying phrases according to the kinds of values they compute.
 - Collections of rules for checking the consistency of programs.
 - Typed vs Untyped and Strongly vs Weakly typed.
 - Earliest type systems were used for numerical calculations, differentiate between natural number valued variables and arithmetic expressions allowing compilers
