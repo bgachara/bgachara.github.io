@@ -728,10 +728,34 @@ class Car {
   - Testing can be used to show the presence of bug but never the absence of them.
   - Thomas Alva Edison came up with the word bug, when developing the phonograph
   - JSCheck tool.
-  - 
+
 
 ### How Optimizing Works
-  
+
+  - Scale of problem can grow faster than capacity.
+  - Optimize your optimizing.
+  - Choose language features that give us programs that are readable and maintainable.
+  - Measure, then cut, then measure again.
+  - Most optimizations add complexity to the code by adding alternate paths and removing generality, making code bigger, harder to maintain and test adequately.
+  - Biggest Time sucks in programs
+    - Failure to parallelize
+    - Violating the law of turns
+    - Weak cohesiveness.
+    - Tight coupling
+    - Wrong Algorithms
+    - Thrashing
+    - Bloat
+    - Other people's code.
+  - One of the best optimization investments is the language engine.
+
+### How Transpiling Works
+
+  - Special form of compiling where one language is transformed into another, treating it as a compilation target.
+  - Try and avoid transpilers in production.
+  - 
+
+*Stopped here to go implement the NEO language that follows in the book*
+    
 
   
 ## From Browser Implementations
