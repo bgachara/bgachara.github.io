@@ -79,7 +79,10 @@ ref:
 
 ### Booting up computer
 
+- A bootloader is a small program responsible for loading the kernel of an OS.
 - BIOS started.
+- BIOS contains routines to assist our bootloader in booting our kernel.
+- BIOS is 16bit code meaning only 16 bit code can execute in it properly.
 - Checks to see how much RAM is installed and whether basic devices are installed and responding correctly.
 - Starts by scanning ISA and PCI buses to detect devices attached to them.
 - If new devices from last boot, new devices are configured.
@@ -129,13 +132,74 @@ ref:
 - They request and manipulate resources only via system calls.
 - A process resources, along with the data and statistics related to it are stored in the kernel inside the process pd.
 - Kernel seamlessly and transparently preempts and reschedules processes, sharing system processors among all processes.
+- All processes in the system are created by other processes.
+- Process management API
+  - exit
+  - fork
+    - copy the current process.
+    - new process has different pid
+    - new process contains a single thread.
+  - exec
+    - change the program being run by the current process
+  - wait
+    - wait for a process to finish
+  - kill
+    - send a signal to another process
+  - sigactions
+    - set handlers for signals.
+
 - Threads
   - unit of activity within a process
+  - A single unique execution context.
+  - It provides the abstraction of: A single execution sequence that represents a separately schedulable task.
   - abstraction responsible for executing code and maintaining the process running state.
   - a process can be single threaded or multi-threaded.
   - consists of a stack(stores local variables), processor state and a current location in the object code(stored in processor instruction pointer)
   - majority of other parts of a process are shared among threads, most notable process address space.
   - threads share virtual memory abstraction hwile maintaining the virtualized processor abstraction.
+  - Threads are a mechanism for concurrency(overlapping execution), however they can also run in parallel(simultaneous execution).
+  - Motivation
+    - OS has to handle multiple things at once.
+      - Networked servers
+      - Parallel programs.
+      - User Interface.
+  - Concurrently
+    - Scheduler is free to run threads in any order and interleaving.
+    - May run to completion or time-slice in big chunks or small chunks.
+    - `Have to think about correctness`
+  - Parallelism
+    - Doing multiple things simultaneosly.
+  - Thread mask i/o latency
+  - It can be in one of 3 states
+    - Running
+    - Ready 
+    - Blocked - ineligible to run, waiting on i/o to finish.
+  - OS library API for threads: pthreads
+    - man pthread.
+  - Fork-Join pattern
+  - Thread State
+  - Correctness with concurrent threads
+    - Non-determinism
+    - Independent threads
+    - Cooperating threads.
+    - Goal: correct by design.
+  - Rcae conditions
+  - Synchronization
+    - coordination among threads, usually regarding shared data.
+  - Mutual exclusion
+    - ensuring only one thread does a particular thing at a time.
+    - type of synchronization
+  - Critical section
+    - code exactly one thread can execute at once.
+    - result of mutual exclusion
+  - Lock
+    - an object only one thread can hold at a time.
+    - provides mutual exclusion
+    - two atomic operations
+      - Lock.acquire
+      - lock.release
+    - pthreads have locks i.e mutex.
+  
 - Process hierarchy
   - each process has a unique PID, starting from 1 and all others following from that.
   - in linux they form a strict hierarchy, known as a process tree, rooted at the init process.
