@@ -11,6 +11,8 @@ ref: `Haskell for Imperative programmers: Philipp Hagenlocher`
 
 ## Introduction
 
+- Declarative definitions of transformations as opposed to mutations.
+- Problems are solved via composing.
 - Desired outcomes
   - Pure (mathematical) functions
   - Immutable Data

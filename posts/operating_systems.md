@@ -221,6 +221,7 @@ ref:
 - Before file manipulation, it must be opened, at which time permissions are checked, if permitted, file descriptor returned else error code.
 - An ope file is referenced via a unique descriptor, a mapping from the metadata associated with the open file back to the specific file itself, fd.
 - Large part of linux system programming consists of opening, manipulating, closing and otherwise using file descriptors.
+
 - Regular file
   - contains byes of data organized into a linear array called a byte stream.
   - any of the bytes can read from or written to.
@@ -249,6 +250,26 @@ ref:
   - Symbolic links
     - allow links to span filesystems as hard links are meaningless outside its inode's own filesystem
     - incur more overhead than hard links because resolving a symbolic link effectively involves resolving two files: symbolic link and the linked-to-file.
+- Streams
+  - Unformatted sequences of bytes with a pointer.
+  - open stream is represented by pointer to a file data structure.
+  - positioning the pointer.
+
+- POSIX design patterns
+  - Everything is a file
+  - open before use
+  - byte-oriented
+  - explicit close
+  - Kernel buffered reads.
+
+- High-level vs Low-level File API.
+
+- Why buffer in Userspace? Overhead!
+  - Syscalls are 25x more expensive than function calls.(100ns)
+  - Simplifies operating system.
+
+- Aliasing of file descriptors
+  
 - Special file
   - kernel objects that are represented as files
   - Include
@@ -263,6 +284,7 @@ ref:
     - unix domain sockets
       - advanced form of IPC that work even on two different machines.
   - special files are a way to let certain abstractions fit into the filesystem.
+
 - Filesystems and namespaces
   - Linux provides a global and unified namespace of files and directories.
   - A filesystem is a collection of files and directories in a formal and valid hierarchy.
@@ -276,6 +298,7 @@ ref:
     - common block sizes are 512 bytes, 1KB and 4KB.
   - Linux supports per-process namespace as opposed to the global unified namespace preffered by Unix, allowing each process to have a unique view of system file and directory hierarchy.
   - By default each process inherits namespace of its parent, but a process may elect to create its own namespace with its own set of mount points and a unique root directory
+
 - Mounted file system concept.
 - Special files are provided in order to make i/o devices look like files.
 - Pipe is pseudofile used to connect two processes
@@ -310,6 +333,19 @@ ref:
 ### IPC
 
 - allowing processes toexchange information and notify each other of events is one of an operating systems most important jobs.
+- Process abstraction is desgined to discourage IPC.
+- Producer(writer) and consumer(reader) may be distinct process
+  - potentially separated in time.
+  - How to allow selective communication
+- Variations
+  - Use a file descriptor
+  - in-memory queue, kernel.
+    - UNIX pipe.
+    - always wait.
+- Pipes are an abstraction of a single queue
+  - One end write-only, another read-only
+  - communication between multiple processes on one machine
+  - file descriptors obtained via inheritance
 - IPC mechanisms suppported by Linux include
   - pipes
   - names pipes
@@ -317,7 +353,60 @@ ref:
   - message queues
   - shared memory
   - futexes
-  
+
+- Protocols
+  - This is an agreement on how to communicate
+  - Syntax
+    - How a communocation is specified and structured
+    - Format, order messages are sent and received.
+  - Semantics
+    - What a communication means
+    - Actions taken when transmitting, receiving or when a timer expires.
+  - Described formally by a state machine
+    - often represented as a message transaction diagram.
+
+- Network Connection
+  - Bidirectional stream of bytes between two processes on possibly different machines
+  - Abstractly, a connection between two endpoints A and B consists of
+    - a queue(bounded buffer) for data sent from A to B.
+    - a queue(bounded buffer) for data sent from B to A.
+  - Socket Abstraction
+    - Endpoint for communication
+    - Communication across the world looks like File I/O.
+    - Queues to temporarily hold results.
+    - Two sockets connected over the network, IPC over network.
+    - Standardized by POSIX.
+    - write adds to output queue(destined for other side)
+    - read removes from input queue.
+    - can read or write to either end.
+    - fd obtained via socket/bind/connect/listen/accept.
+    - Inheritance of fd on fork() facilitates handling each connection in a separate process.
+  - Namespaces for communication over IP.
+    - Hostname
+    - IP address
+    - Port Number
+      - 0-1023: well knowm or system ports
+        - superuser priviliges to bind to one.
+      - 1024 - 49151 are registered ports
+        - assigned by IANA for specific services.
+      - 49152 - 65535(2^16 -1) are dynamic or private
+        - allocated as ephemeral ports.
+    - 5 tuple identifies each
+      - Source IP address
+      - Destination IP address
+      - Source Port Number
+      - Destination Port Number
+      - Protocol
+  - Steps
+    - create server socket
+    - bind it to an address
+    - listen for connection
+    - accept syscall
+    - connection socket
+    - read/write request.
+    - write/read response.
+    - close socket
+   
 ### Error Handling
 
 - An error is signified via a functions return value and described via a special variable, errno
@@ -401,4 +490,168 @@ ref:
   - i/o and file descriptors
   - pipes
   - file system
-  - 
+
+## Synchronization
+
+- Using atomic operations to ensure cooperation between threads.
+
+### Multiplexing processes: The process control block
+
+- Kernel represents each process as a process control block
+  - status(running. ready, blocked)
+  - registers state(when not ready)
+  - Process ID, User, Executable, Priority
+  - Execution time
+  - Memory space, translation
+- Kernl scheduler maintains a data structure containing the PCBs
+  - Give out CPU to different processes
+  - This is a policy decision.
+- Give out non-CPU resources
+  - Memory/IO
+  - Another policy decision
+
+- Context Switch
+- Lifecycle of a process or thread
+  - new: process/thread is being created.
+  - ready: waiting to run.
+  - running: instructions being executed.
+  - waiting: process waiting for some event to occur.
+  - terminated: process has finished execution.(parent has to get a result)
+
+- Ready queue and various i/o device queue.
+  - separate queue for each device/signal/condition.
+  - each queue can have a different scheduler policy.
+
+- Scheduling
+  - mechanism for deciding which processes/threads receive the CPU.
+
+- Core of concurrency
+  - conceptually, shceduling loop of the OS looks as follows
+
+```c
+  
+  loop {
+    RunThread();
+    ChooseNextThread();
+    SvaeStateOfCPU(curTCB);
+    LoadStateOfCPU(newTCB);
+  }
+
+```
+  - This is an infinite loop.
+    - One could argue that this is all that the OS does.
+    
+  - `Design document and intuitions behind your design, thought through the tradeoffs well enough`
+  - Running a thread
+    - Load its state(registers, PC, stack pointer) into CPU.
+    - Load environment(virtual memory space)
+    - Jump to the PC
+  
+  - How does the dispatcher get control back?
+    - Internal events:
+      - thread returns control voluntarily.
+      - Blocking on I/O.
+        - requesting I/O implicity yields the CPU.
+      - Waiting on a signla from other thread
+        - thread asks to wait and thus yields the CPU.
+      - Thread executes a yield()
+        - thread volunteers to yield cpu.
+        
+    - External events: thread gets preempted.
+      - Interrupts
+        - signals from h/w or s/w that stop the running code and jump to kernel.
+        - Interrupt is a hardware-invoked context switch
+          - no separate step to choose what to run next
+          - always run the intrrrupt handler immediately
+      - Timers
+        - like an alaram clock that goes off every some milliseconds.
+    
+    - Interrupt Controller
+      - Interrupt invoked with interrupt lines from devices.
+      - Interrupt controller chooses interrupt request to honor.
+        - Interrupt identity specified with ID line.
+        - Mask enables/disables interrupts
+        - Priority encoder picks highest enabled interrupt
+        - Software interrupt set/cleared by s/w
+      - CPU can disable all interrupts with internal flag
+      - Non-maskable Interrupt line (NMI) cant be disabled.
+  
+  - How does dispatcher switch to a new thread?
+    - Save anything next thread may thrash: PC, regs, stack pointer.
+    - Maintain isolation for each thread.
+    - TCB+stacks(user/kernel) contains complete restartable state of thread
+      - can put it on queue for later revival
+    - Cheaper than switching processes
+      - no need to change address space.
+    - Some number from Linux
+      - Freq of context switch: 10-100ms.
+      - Switching between processes: 3-4microsecs
+      - Switching between threads: 100ns
+    - Kernel thread / User thread(stacks available across the environments)
+      - simple one-to-one threading model.
+      - many-to-one.
+      - many-to-many
+  
+  - Processes vs Threads
+    - Switch overhead.
+      - same: low
+      - different: high
+    - Protection
+      - same: low
+      - different: high
+    - Sharing overhead
+      - same: low
+      - different proc, simultaneous core: medium
+      - different proc, offloaded core: high
+    - Parallelism:yes
+  
+  - Hyperthreading / Multithreading.
+    - duplicates register state to make a second thread allowing more instructions to run.
+  
+  - What happends when thread blocks on I/O?
+  - How do we initialize TCB and Stacks?
+  
+  - Threads yield overlapped I/O and computation without deconstructing code into non-blocking fragments.
+    - One thread per request.
+
+- Atomic Operations
+  - To understand a concurrent program, we need to know what the underlying indivisible operations are
+  - An operation that always runs to completion or not at all.
+    - It is indivisible: It cannot be stopped in the middle and state cannot be modified by someone else in the middle.
+    - Fundamental building block- if no atomic operations, then have no way for threads to work together.
+  - Memory references and assignments of words are atomic.
+  - Locks:
+    - prevents someone from doing something
+    - Lock before entering critical section and beore accessing shared data.
+    - Unlock when leaving, after accessing shared data
+    - All synchronization involves waiting.
+    - Locks need to be allocated and initialized.
+    - Acquire(), release().
+    - Use locks to solve the aid on creating critical sections.
+
+- Mutual Exclusion
+  - Ensuring that only one thread does a particular thing at a time.
+  - One thread excludes the other while doing its task.
+  
+- Producer-Consumer with a bounded buffer.
+  - pipes, web services, routers.
+  - circular buffer data structure
+    - read and writer pointers, check their overlap.
+    
+- High-level primitives that Locks
+  - what is the right abstraction for sychronizing threads that share memory.
+  - Synchronization is a way of coordinating multiple concurrent activities that are using shared state.
+
+- Semaphores.
+  - Kind of generalized lock.
+  - Has a non-negative integer calue and supports the following operations
+    - Down() or P()
+      - an atomic operations that waits for semaphores to become positive then decrements it by 1.
+      - think of it as the wait() operation
+    - Up() or V()
+      - an atomic operation that increments thte semaphore by 1, waking up a waiting P, if any
+      - think of this as the signal() operation
+  - Semaphores are like integers, except.
+  - Mutual exclusion
+    - binary semaphore or mutex.
+  - Use a separate semaphore for each constraint.
