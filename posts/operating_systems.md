@@ -197,7 +197,7 @@ ref:
     - provides mutual exclusion
     - two atomic operations
       - Lock.acquire
-      - lock.release
+      - Lock.release
     - pthreads have locks i.e mutex.
   
 - Process hierarchy
@@ -250,6 +250,58 @@ ref:
   - Symbolic links
     - allow links to span filesystems as hard links are meaningless outside its inode's own filesystem
     - incur more overhead than hard links because resolving a symbolic link effectively involves resolving two files: symbolic link and the linked-to-file.
+
+- FUSE
+  - Filesystems in Userspace
+  - S/w layer in userspace.
+  - Allows the creation of custom filesystems
+  - Kernel code stays untouched.
+  - FUSE kernel module
+  - libfuse module in userspace.
+  - Why?
+    - shorter development cycle
+    - easier development, OS-agnostic
+    - Does not affect other parts/services
+    - Safer usage of untrusted filesystems
+  - Real world use cases
+    - On-disk filesystems: NTFS, retro-fuse
+    - Network-based filesystems: MinFS, SSHFS.
+    - Layering filesystems: EncFS, FuseCompress
+    - Archive, backup filesystems: Atlas, Borg
+  - How to use FUSE
+    - A FUSE application is a typical user-space program
+      - applications define how to handle filesystem operations
+      - interactions with libfuse to register the operations
+      - Libfuse invokes the application defined operation upon request.
+    - API from libfuse
+      - Callback mechanism for binding user-defined functions with operations
+      - High-level API -- path level, synchronous
+      - Low-level API -- inode level, asynchronous 
+  - FUSE application workflow
+    - Parse arguments
+    - Mount filesystem
+    - Setup callbacks
+    - fuse_loop -> request -> Process request
+    - fuse_loop -> exit -> Cleanup
+  - FUSE API
+    - allows the user to specify how a file operation will get handled.
+      - user implements a set of functions to handle a file operation
+      - user fills the struct fuse_oeperations or struct fuse_lowlevel_ops with the respective function implementations
+      - user passes the struct to libfuse and upon a request libfuse calls the respective function
+    - FUSE operations
+      - lookup(only in the low-level API)
+      - getaddr
+      - read
+      - write
+      - readdir
+      - mkdir
+      - open
+      - mknod
+      - create
+      - symlink
+      - readlink
+  - Error messages
+    - in case a request fails appropriate errors should be returned.
 - Streams
   - Unformatted sequences of bytes with a pointer.
   - open stream is represented by pointer to a file data structure.
@@ -476,8 +528,114 @@ ref:
 
 ## Windows Fundamentals
 
-- 
+## Performance
 
+- Metrics that quantify the effectiveness/efficiency of computer systems.
+  - Processing time(s)
+    - simulation, numerical computation
+  - Throughput(Op/s, B/s, Tx/s)
+    - HPC, database, network, storage
+  - Latency(s. cycles)
+    - Database, network, storage, HFT
+  - Memory usage( Bytes, pages)
+    - Embedded systems
+  - Energy Usage(V,A,W,W/op)
+    - Embedded systems, laptops, samrtphones, tablets
+  - Binary size(bytes)
+    - embedded systems, loading from remote.
+  - Compiling time(s)
+    - testing, development
+
+- Many features affect the performance of modern computer systems.
+- Developers need to carefully(explicitly) design their code to utilize the features
+  - Hardware
+    - Pipelining
+    - CPU caches
+      - cache size
+      - caching protocol
+      - false sharing
+      - cache misses
+      - prefetcher
+        - fetch data into caches in advance according to recent memory access patterns.
+      - page misses
+    - SIMD instructions
+    - Branch predictor
+    - Interrupts
+    - Simultaneous multithreading
+    - Dynamic frequency scaling.
+    - NUMA
+  
+  - Software
+    - Multithreading
+    - Software caches
+      - page cache
+    - Scheduler
+      - energy wave scheduling
+      - real time scheduling
+      - overcommitment
+      - process priority
+    - Context switch
+    - Swapping
+    - Compiler/Linker optimizations
+    - ASLR
+    - CPU affinity
+    - CPU governor
+  
+### Performance measurement 
+
+- Hardware counter
+  - performance monitoring counters(PMCs) in CPU cores
+  - Monitor how many times a specific event occurred in a certain period of time
+    - elapsed time(cycles), retired instructions, cache misses, CPU stalls
+- Tools
+  - Linux system calls(clock_gettime)
+  - Linux perf
+    - official linux profiler.
+    - supports many profiling/tracing features
+      - CPU performance monitoring counters(PMCs)
+      - Statically defined tracepoints
+      - User and kernel dynamic tracing
+      - Kernel line and local varibale tracing
+      - Stack tracing, libunwind
+      - Code annotation
+    - Perf basic workflow
+      - list -> find events
+      - stat -> count them
+      - record -> write event data to file
+      - report -> browse summary
+      - script -> event dump for post processing
+  - Intel VTune
+- Syscall wrapper
+  - Libraries intercepting syscalls
+  - Counting events and collectinf stack traces
+  - Mainly used for memory profiling
+  - Eg: Gperftools, Heaptrack
+- VM based
+  - Puts application in a vm
+  - Can collect very detailed information
+  - Very slow
+  - Eg: Valgrind
+- Instrumentation
+  - Inject code to function calls
+  - Code takes necessary measurements
+  - Either binary or source code changes
+  - Eg: Orbit, gprof, google benchmark/quick bench.
+- How to get consistent results
+  - Disable turboboost
+  - Disable SMT.
+  - Set scaling_governor to performance
+  - Set cpu affinity
+  - Set process priority
+  - Drop file system cache
+  - Disable ASLR
+  - Measure multiple runs  
+- Common pitfalls
+  - making wrong predictions/random changes
+  - not knowing your data
+    - AoS vs SoA
+  - Overoptimizing/Premature optimization
+  - Bad benchmarks
+  
 ## xv6 
 
 - Provides basic interfaces introduced by Ken Thompson and Ritchie Unix and well as mimicking Unix internal design.

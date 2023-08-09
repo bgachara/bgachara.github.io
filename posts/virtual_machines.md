@@ -10,6 +10,7 @@ tags:
 
 `programming language virtual machines need a page of their own.`
 `Advanced design and Implementation of Virtual Machines`
+
 ## Motivation
 
 - What is the use and need of virtual machine?
@@ -38,6 +39,7 @@ tags:
   - Sun Microsystem JVM, Microsoft CLR.
 
 - Language virtual machine.   
+  - A simulated computer that runs a simple instruction set.
   - provides a runtime engine that executes programs expressed in a guest language.
   - can be categorized by the implementation of its execution engine: component that expresses the application operational semantics.
   - Interpretation and Compilation.
