@@ -60,16 +60,47 @@ ref:
             - which item to remove from cache
             - where to put newly evicted item in main memory
 
-- I/O Devices - consist of the controller and the device itself.
-              - controller is a chip or set of chips that physically controls the device...accepts commands from the OS.
-              - Device driver is s/w that talks to a controller, giving commands and accepting responses.
-              - To be used, device driver has to be put into OS so as to run in kernel mode.
-              - Can run in user mode but rarely is this as its a feature where access in a controlled way is required.
-              - device registers form the I/O port space.
-              - I/O implemented in three ways
-                  - Busy waiting.
-                  - Interrupts.
-                  - Direct Memory Access.
+- I/O Devices 
+  - consist of the controller and the device itself.
+  - controller is a chip or set of chips that physically controls the device...accepts commands from the OS.
+  - Many different types of I/O
+    - Process management - concurrency, multitasking - Architecture dependent Code
+    - Memory management - virtual memory - Memory manager
+    - Filesystems - files and dirs, vfs - File system types / Block Devices
+    - Device control - tty and device access - Device control
+    - Networking - connectivity - Network subsystem / IF drivers
+  - Internal OS file description
+    - Internal Data structure describing everything about the file.
+      - Where it resides
+      - Its status
+      - How to access it.
+  - Pointer strcut file *file
+    - everything accessed with file descriptor has one of these
+  - Struct file_operations *f_op
+    - describes how this particular device implements its operations
+      - for disks: points to file operations
+      - for pipes: points to pipe operations
+      - for sockets: points to socker operations
+    - associated with partocular h/w device or environment
+    - registers/ unregisters itself with the kernel
+    - handler functions for each of the file operations    
+  - Device driver is s/w that talks to a controller, giving commands and accepting responses.
+  - To be used, device driver has to be put into OS so as to run in kernel mode.
+  - Speial device-specific configuration supported with the ioctl() system call.
+  - Can run in user mode but rarely is this as its a feature where access in a controlled way is required.
+  - device registers form the I/O port space.
+  - Device drivers typically divided into two pieces
+    - Top half: accessed in call path from system calls
+      - implements a set of standard, cross-device calls like open(), close(), read(), write(), ioctl(), strategy()
+      - This is the kernel's interface to the device driver.
+      - Top half will start i/o to device, may put thread to sleep until finished
+    - Bottom half: run as interrupt routine
+      - Gets input or transfers next block of output.
+      - May wake sleeping threads if I/O now complete
+  - I/O implemented in three ways
+      - Busy waiting.
+      - Interrupts.
+      - Direct Memory Access.
 
 - Buses - As processors and memories got faster, ability of one bus became strained and thus more were added.
         - i.e : cache, local, memory, PCI, USB, IDE, SCSI and ISA.
@@ -640,18 +671,48 @@ ref:
 
 - Provides basic interfaces introduced by Ken Thompson and Ritchie Unix and well as mimicking Unix internal design.
 - Unix provides a narrow interface whose mechanisms combine well, offering a surprising degree of generality.
+
+### Processes and memory
+
 - An xv6 process consists of user-space memory(instructions, data, stack) and per process state private to the kernel.
-- pid assciated with each process.
+- xv6 can timeshare processes
 - fork() creates new processes.
-- OS interfaces
-  - processes and memory
-  - i/o and file descriptors
-  - pipes
-  - file system
+
+### I/O and File descriptors
+
+- File descriptor is a small integer representing a kernel-managed object that a process can read from or write to.
+- A process may obtain one by opening a file, directory, device, creating a pipe or by duplicating an existing descriptor.
+- Fd abstracts away the differences between files, pipes and devices, making them all look like streams of bytes.
+- xv6 kernel uses the fd as an index into the per-process table, so that every process has a private space of fd starting from zero.
+- stdin(0), stdout(1), stderror(2)
+- call(fd, buf, n), returns bytes read.
+- write(fd, buf, n), returns bytes written.
+- each fd has an offset associated with it.
+
+### Pipes
+
+- This is a small kernel buffer exposed to processes as a pair of file descriptors, one for reading and one for writing.
+- Writing data on one end of the pipe makes that available for reading from the other side of the pipe.
+- Pipes provide process a way to communicate.
+- Pipes advantage over temporary files
+  - Pipes automatically clean themselves up, unlike temp file.
+  - Pipes can pass arbitrary long stream of data, files require enough space to store all data.
+  - Pipes allow for parallel execution of pipeline stages, while file requires one to finish then the other.
+  - In IPC, pipes blocking reads and writes are more efficient than the non-blocking semantics of files.
+ 
+### File system
+
+- xv6 file system provides data files,which are uninterrupted byte arrays and directories which contain named references to data files and other directories.
+- Directories form a tree, starting at root.
+- mkdir, mknod, 
+- fstat, 
+- file's name is distinct from the file itself: same underlying file, called an inode, can have multiple names called links.
+- link system call creates another file system name referring to the same inode as the existing file.
 
 ## Synchronization
 
 - Using atomic operations to ensure cooperation between threads.
+- This is a way of coordinating multiple concurrent activities that are using shared state.
 
 ### Multiplexing processes: The process control block
 
@@ -661,7 +722,18 @@ ref:
   - Process ID, User, Executable, Priority
   - Execution time
   - Memory space, translation
-- Kernl scheduler maintains a data structure containing the PCBs
+
+- For every thread in a process, kernel maintains
+  - The thread's TCB
+  - A kernel stack used for syscalls/interrupts/traps
+    - This kernel-state is sometimes called the "kernel thread"
+    - The kernel thread is suspended(but ready to go) when thread is running in user-space
+- Additionally, some threads just do work in the kernel
+  - Still has TCB
+  - Still has kernel stack
+  - But not part of any process and never executes in user mode.
+  
+- Kernel scheduler maintains a data structure containing the PCBs
   - Give out CPU to different processes
   - This is a policy decision.
 - Give out non-CPU resources
@@ -765,6 +837,9 @@ ref:
   
   - Hyperthreading / Multithreading.
     - duplicates register state to make a second thread allowing more instructions to run.
+    - Traditional implementation strategy
+      - One PCB (process struct) per process
+      - Each PCB constains (or stores pointers to) each thread's TCB.
   
   - What happends when thread blocks on I/O?
   - How do we initialize TCB and Stacks?
@@ -810,6 +885,334 @@ ref:
       - an atomic operation that increments thte semaphore by 1, waking up a waiting P, if any
       - think of this as the signal() operation
   - Semaphores are like integers, except.
-  - Mutual exclusion
-    - binary semaphore or mutex.
+    - No negative values
+    - Only operations allowed are P and V, can't read or write value, except initially.
+    - Operations must be atomic
+      - Two Ps together can decrement value below zero
+      - Thread going to sleep in P won't miss wakeup from V - even if both happen at same time.
+    - POSIX adds ability to read value, but technically not part of proper interface.
+    - Two uses of Semaphores
+      - Mutual exclusion
+        - binary semaphore or mutex.
+        - can be used for mutual exclusion, just like a lock.
+      - Scehduling constraints
+        - Allow thread 1 to wait for a signal from thread 2.
   - Use a separate semaphore for each constraint.
+
+`All synchronization problems are solved by waiting, trick is wait as little as possible, wait cleverly but don't busy wait`
+`Think first, then code`
+`Always write down behaviour first`
+
+- Too much milk motivating synchronization problem, think like a computer.*relook at this in future*
+- How to Implement locks
+  - Separate lock variable, use hardware mechanisms to protect modifications of that variable.
+  - Must be careful not to waste/tie up machine resources
+  
+- Hardware atomicity primitives
+  - Disabling of Interrupts
+    - Maintain a lock variable and impose mutual exclusion only during operations on that variable.
+    - In-Kernel Lock
+    - Cons
+      - Can't give lock implementation to users as ops are in the kernel.
+      - Doesnt work well on multiprocessor, as disabling interrupts on all processor requires messages and would be very time consuming
+  - Read-Modify-Write
+    - Test and set(most architectures)
+    - Swap(x86)
+    - Compare and Swap
+      - use for queues
+    - Load-locked and Store-conditional
+      - use locks for mutual exclusion and condition varible for scheduling constraints
+      - Monitor
+        - a lock and zero or more condition variables for managing concurrent access to shared data.
+          - always acquire lock before accessing shared data.
+          - use condition variables to wait inside critical section
+            - 3 ops: Wait(), Signal(), Broadcast()
+        - represent the sychronization logic of the program
+          - Wait if necessary
+          - Signal when change something so any waiting threads can proceed.
+          - Monitors supported natively in a number of languages
+        - paradigm for concurent programming
+        - Mesa and Hoare monitors
+```c
+//typical structure of monitor-based program
+
+lock
+  while (need to wait) {
+    condvar.wait();        //check and/or update state variables, Wait if necessary
+  }
+  unlock
+  
+  do something so no need to wait
+  
+  lock
+  
+  condvar.signal();       //check and/or update state variables
+  
+  unlock
+```
+      - Basic Readers/Writers
+        - Is using a single lock on the database sufficient. 
+        - what are the correctness constraints??
+        - Basic solution
+          - Reader()
+            - Wait until no writers
+            - Access data base
+            - Check out - wake up a waiting writer
+          - Writer()
+            - Wait until no active readers or writers
+            - Access database
+            - Check out - wake up waiting readers or writer
+          - State variables
+            - AR, active readers; =0
+            - WR, waiting readers; = 0
+            - AW, active writers, = 0
+            - WW, waiting writers; = 0
+            - condition okToRead = 0
+            - condition okToWrite = 0
+```c
+ Reader() {
+  //first check self into system
+  acquire(&lock);
+  while ((AR + WW) > 0) { //is it safe to read
+    WR++                  //No. Writers exist
+    cond_Wait(&okToRead, &lock); //Sleep on cond war
+    WR--                  //No longer waiting
+    }
+    AR++                   //Now we are active
+    release(&lock);
+    //Perform actual read-only access 
+    AccessDatabase(ReadOnly);
+    //Now, check out of system
+    acquire(&lock);
+    AR--;                      //No longer active
+    if (AR == 0 && WW > 0)   //No other active readers
+      cond_signal(&okToWrite); //Wake up one writer
+    release(&lock)
+}
+
+  Writer() {
+    //First check self into system
+    acquire(&lock);
+    while ((AW + AR) > 0) { //iS IT SAFE TO WRITE
+      WW++                    //No. Active users exist
+      cond_Wait(&okToWrite, &lock); //Sleep on cond war
+      WW--;                    //No longer waiting
+    }
+    AW++;                      //Now we are active
+    release(&lock);
+    //Perform actual read/write access
+    AccessDatabase(ReadWrite);
+    //Now, check out of system
+    acquire(&lock);
+    AW--                      //No longer active
+    if (WW > 0) {            //Give priority to writers
+        cond_signal(&okToWrite) //Wake up one writer
+  } else if (WR > 0) {          //Otherwise, wake reader 
+      cond_broadcast(&okToRead); //Wake all readers    
+  }
+    release(&lock);      
+  }
+  
+//can change the okToRead and okToWrite to okToContinue, listen to one channel.
+
+```
+ - Can we construct monitors from semaphores.
+
+## Scheduling
+
+- How is the OS to decide which of several tasks to take off a queue?
+- Process of deciding which threads are given access to resources from moment to moment.
+  - Often, we think in terms of CPU time, but think also about resources.
+- Many implicit assumptions for CPU scheduling, unrealistic but simplify the problem so it can be solved.
+  - One program per user
+  - One thread per program.
+  - Programs are independent        
+- Goal: Dole out CPU time to optimize some desired parameters of system.
+
+- Scheduling policy goals/criteris
+  - Minimize Response Time
+    - minimize elapsed time to do an operation(or job)
+    - response time is what the user sees i.e echo a keystroke, compile a program
+  - Maximize Throughput
+    - maximize operations or jobs per second.
+    - throughput realted to response time, but not identical
+      - minimizing response time will lead to more context switching that if you only maximized throughput
+    - Two parts to maximizing throughput
+      - Minimize overhead( i.e context switching)
+      - Efficient use of resources(CPU, disk, memory)
+  - Fairness
+      - Share CPU among users in some equitable way.
+      - What is equitable way??
+
+- First-Come, First-Served.  
+  - also known as FIFO or run until done.
+  - convoy effect: short process stuck behind long process, convoy of small tasks tend to build up when a large one is running.
+  - Calculate:
+    - Waiting time
+    - Average waiting time.
+    - Average completion time.
+
+- Round Robin scheduling
+  - Preemption
+  - Each process gets a small unit of CPU time, time quantum, usually 10-100 milliseconds
+  - After quantum expires, process is preempted and added to end of the ready queue.
+  - Calculate:
+    - Min/Max waiting time.
+    - Average waiting time/ completion time.
+    - q must be large with respect to context switch, otherwise overhead is too high(all overhead)
+  - How to implement RR in the kernel
+    - FIFO queue but preempt job after quantum expires and send it back to the queue.
+    - How? Timer interrupt and careful synchronization.
+    - How do you choose time slice?
+      - Need to balance short-job performance and long-job throughput.
+  - Aweful for jobs of same length.
+  - In RR cache state must be shared between all jobs but can be devoted to each job with FIFO.
+  
+- Handling Differences in importance
+  - Strict priority scheduling.
+    - Execution Plan
+      - always execute highest priority runable jobs to completion.
+      - each queue can be processed in RR with some time-quantum.
+    - Problems
+      - Starvation
+        - lower priority jobs don't get run because of higher priority jobb
+      - Deadlock: Priority Inversion
+        - Happens when low-priority has lock needed by high-priority task.
+        - Priority donation??
+    - Dynamic priorities
+      - adjust them based on heuristics.
+  
+  - Scheduling fairness
+    - How to implement fairness
+      - Could give each queue some fraction of the CPU
+      - Could increase priority of jobs that don't get service.
+  
+  - Shortest Job First
+    - Shortest Time to Completion First
+  - Shortest Remaining Time First
+    - Shortest Remaining Time to Completion First
+  - Run whatever job has the least amount of computation to do/least remaining amount of computation to do.
+  - These are the best you can do at minimizing average response time
+    - Provably optimal
+    - Since SRTF is always at least as good as SJF, focus on SRTF.
+  
+- Predicting lenght of next cpu burst
+  - Changing policy based on past behaviour.
+    - Works best because programs have predictable behaviour.
+    
+  - Lottery Scheduling
+    - give each job some number of tickets and on each time slice, randomly pick a winning ticket.
+    - assign tickets via approximate SRTF, shorter get more, long running get fewer.
+    - to avoid starvation, every job gets at least one ticket.
+    - Behaves gracefully as load changes compared to strict priority scheduling.
+    
+- How to evaluate a sheduling algorithm?
+  - Deterministic modelling
+    - Take predetermined workload and compute performance of each algorithm for that workload.
+  - Queueing models
+    - Mathematical approach fro handling stochastic workloads
+  - Implementation/Simulation
+    - Build systems which allow actual algorithms to be run against actual data.
+
+  
+### Handling Simultaneous Mix of Diff Types of Apps
+
+- Consider mix of interactive and high throughput apps
+  - How to best schedule them?
+  - How to recognize one from the other?
+  - Should you schedule the set of apps identically on servers, workstations, pads and cellphones.
+- Assumptions encoded into many schedulers.
+  - High compute equates to lower priority
+  - High sleep apps and have short bursts must be interactive apps.
+- Difficult to characterise apps.
+
+- Multi-level feedback scheduling  
+  - Exploit past behaviour
+  - Multiple queues of each with different priorities and their own scheduling algorithms
+  - Automatic promotion/demotion of process priority in order to approximate SJF/SRTF.
+
+- Case study: Linux 0(1) Scheduler.
+  - Notes go here.
+  
+- Multi-core scheduling
+  - Algorithmically, not a huge difference from single-core scheduling
+  - Implementation-wise, helpful to have per-core scheduling data structures
+    - Cache coherence
+  - Affinity scheduling, once a thread is scheduled on a CPU, OS tries to reschedule it on the same CPU.
+    - Cache reuse.
+    
+- Gang scheduling and Parallel Application
+  - When multiple threads work together on a multi-core system, try to schedule them together.
+    - Makes spin-waiting more efficient(inefficient to spin-wait for a thread that's suspended)
+  - Alternative: OS informs a parallel program how many processors its threads are scheduled on(scheduler activations)
+    - Application adapats to number of cores that is has scheduled.
+    - Space sharing with other parallel programs can be more efficient, because parallel speedup is often sublinear with number of cores.
+    
+- Real-Time Scheduling
+  - Goal
+    - Predictability of performance.
+  - We need to predict with confidence worst case response times for systems
+  - In contrast to conventional systems where performance is system/throughput oriented with post-processing, in RTS performance guarantees are task and or class centric.
+  - Hard real-time: for time-critical safety-oriented systems
+    - Meet all deadlines.
+    - Determine in advance if this is possible
+      - Earliest Deadline First 
+        - preemptive priority-based dynamic scheduling.
+        - Scheduler always schedules the active task with the closest absolute deadline.
+      - Least Laxity First
+      - Rate-Monotonic Scheduling, 
+      - Deadline Monotonic Scheduling.
+  - Soft real-time: for multimedia
+    - Attempt to meet deadlines with high probability.
+  - Workload characteristics
+    - Tasks are preemptable, independent with arbitrary arrival(=release) times.
+    - Tasks have deadlines and known computation times.
+
+- Starvation
+  - Thread fails to make progress for an indefinite period of time.
+  - starvation ==! deadlock, this is because starvation could resolve under the right circumstances.
+  - Causes
+    - Scheduling policy never runs a particular thread on the CPU.
+    - Threads wait for wach other or are spinning in a way that will never be resolved.
+  - Work-conserving
+    - A work-conserving scheduler is one that does not leave the cpu idle when there is work to do.
+    - A non-work-scheduler could trivially lead to starvation.
+  - Last-come, First-served
+    - LIFO as a scheduling data structure.
+    - Worst case leads to starvation.
+    - Arrival rate exceeds service rate, queue build up faster than it drains.
+  - How does starvation come about for various scheduling algorithms.
+  
+- Priority Inversion
+  - Where high priority task is blocked waiting on low priority task
+  - Low priority one must run for high priority to make progress.
+  - Medium priority task can strave a high priority one.
+  - Solutions
+    - Priority donation/inheritance.
+  - Case study
+    - Martian pathfinder rover.
+
+- Proportional-share scheduling
+  - Share the CPU proportionally
+    - Give each job a share of the CPU according to its priority.
+    - Low-priority jobs get to run less often
+    - All jobs can at least make progress.
+    
+- Stride scheduling
+  - Achieve proportional share scheduling without resorting to randomness, and overcome the law of small numbers problem.
+  - Stride of each job, take big number W / number of tickets.
+  - Pick job with lowest pass, runs it, add its stride to its pass.
+  - Low-stride jobs run more often.
+  - Example:
+    - Linux Completely Fair Scheduler
+    - More notes.
+    - proportional shares
+
+- Choosing the Right Scheduler
+  - CPU Throughput: FCFS
+  - Avg. Response Time: SRTF Approx.
+  - I/O Throughput: SRTF Approx.
+  - Fairness (CPU Time): Linux CFS.
+  - Fairness (Wait Time): Round Robin
+  - Meeting Deadlines: EDF
+  - Favoring Important Tasks: Priority.

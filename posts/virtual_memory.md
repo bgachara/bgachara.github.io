@@ -6,7 +6,6 @@ tags:
   - memory
   - OS
 ---
-# Virtual Memory
 
 `Notes on Virtual Memory`
 `Any problem in computer science can be solved using indirection`
