@@ -15,7 +15,8 @@ ref:
 `Windows Fundamentals Notes from Reversing - Secrets of Reverse Engineering`
 `CS162 Youtube - John Kubiatowicz`
 `Operating Systems: Three Easy Pieces`
-`linux system programming`
+`Linux system programming`
+`Linux Kernel Development`
 
 *the concepts and design patterns appear at many levels*
 *the better you understand their design and implementation, the better use you'll make of them*
@@ -540,8 +541,12 @@ ref:
 ## Operating system structure.
 
 - Monolithic systems
+  - Implemented entirely as single large processes running entirely in a single address space.
+  - Communication in the kernel is trivial.
 - Layered systems.
 - Microkernels.
+  - Functionality of the kernel is broken down into separate processes, called servers.
+  - Communication is via message-passing, an IPC mechanism built into the system.
 - Client-server systems.
 - Virtual machines.
 - Exokernels.
@@ -1205,8 +1210,9 @@ lock
   - Low-stride jobs run more often.
   - Example:
     - Linux Completely Fair Scheduler
-    - More notes.
-    - proportional shares
+      - Track CPU time per thread and schedule threads to match up average rate of execution.
+      - *More notes.
+      - Proportional shares
 
 - Choosing the Right Scheduler
   - CPU Throughput: FCFS
@@ -1216,3 +1222,262 @@ lock
   - Fairness (Wait Time): Round Robin
   - Meeting Deadlines: EDF
   - Favoring Important Tasks: Priority.
+
+- When do the details of the scheduling policy and fairness really matter
+  - When there aren't enough resources to go around.
+- When should you simply buy a faster computer/network link
+  - Buy it when pays for itself in improved response time.
+  - Sometimes you're paying for worse response time in reduced productivity, customer angst, etc.
+  - Might think you should buy a faster X when X is utilized 100%, though response time goes to infinity as utilization goes to 100%, any new randomness sends it over the edge.
+- Most scheduling algorithms work fine in the linear portion of the load curve, fail otherwise.
+
+- Nice values for assigning priority in Unix.
+
+### Deadlock
+
+- A deadly type of starvation(threads wait indefinitely).
+- Circular waiting for resources, can't end without external intervention.
+- Deadlock with locks
+  - Keep both the lucky and unlucky case in mind.
+- Dimension ordering.
+- Threads often block waiting for resources
+  - Locks
+  - Terminals
+  - Printers
+  - CD drives
+  - Memory
+- Threads often block waiting for other threads
+  - Pipes
+  - Sockets
+- Dining lawyers problem
+
+- Requirements for deadlock
+  - Mutual exclusion
+    - Only one thread at a time can use a resource
+  - Hold and wait
+    - Thread holding at least one resource is waiting to acquire additional resources held by other threads
+  - No preemption
+    - Resources are released only voluntarily by the thread holding the resource, after thread is finished with it.
+  - Circular wait
+    - There exists a set {T1...Tn} of waiting threads, each waiting for another thread.
+
+- Deadlock detection
+  - Resource allocation graph.
+    - System Model 
+      - Threads
+      - Resource types - R1, R2, ..., Rm
+        - e.g CPU, memory pages, I/O devices
+      - Instances - each resource type R1 has W1 instances.
+        - a computer has 2 CPUs.
+      - Utilization
+        - request() -> use() -> release()
+  - *write a deadlock detection algorithm*
+  - Solutions
+    - Deadlock prevention - write code in a way the isn't prone to deadlock.
+      - Infinite resources.
+      - No sharing resources.
+      - Don't allow waiting.
+      - Make all threads request everything they'll need at the begininning
+      - Force all threads to request resources in a particular order preventing cyclic resource usage.
+    - Deadlock recovery - let it happen and figure out how to recover from it.
+      - Terminate thread, force it to give up resources.
+      - Preempt resources without killing off thread
+      - Roll back actions of deadlocked threads
+    - Deadlock avoidance - dynamically delay resource requests so deadlock doesn't happen.
+      - Safe state: system can delay resource acquisition to prevent resources.
+      - Unsafe state: Threads request resources in a pattern that unavoidably leasds to deadlock
+      - Deadlocked state: There exists a deadlock in the system
+      - Banker's algorithm for avoiding deadlock.
+        - *implement one*
+        - apply it to dining lawyers problem.
+    - Deadlock denial
+
+## Memory
+
+- The complete working state of a process and/or kernel is defined by its data in memory and registers.
+- Consequently, cannot just let different threads of control use the same memory.
+
+- Address space
+  - Set of accessible addresses and the state associated with them.
+  - 2^32 = ~4 billion bytes on a 32-bit machine
+  - How many 32-bit numbers fit in this address space?
+  - 32-bits = 4 bytes, so 2^32/4 = 2^30 = 1 billion.
+- What happens when processor reads or write to an address??
+  - Regular memory
+  - Causes i/o operation(memory-mapped i/o)
+  - Causes program to abort(segfault)
+  - IPC.
+- Memory multiplexing
+  - Protection
+    - prevent access to private memory of other processes
+  - Translation
+    - Ability to trasnalte accesses from one address space to a different one
+  - Controlled overlap
+    - Separate state of threads should not collide in physical memory, unexpected overlap causes chaos.
+- Interposing on process behaviour
+- Where does address translation take place?
+  - Compile time, Link/load time or Execution time.
+  - Addresses can be bound to final values anywhere in that path and may depend on operating system.
+- Dynamic libraries
+  - Linking postponed until execution.
+  - Small piece of code(Stub), locates appropriate memory-resident librabry routine.
+  - Stub replaces itself with the address of the routine and executes routine.
+
+- Program protection without translation
+  - Base and Bound.
+    - Fragmentation over time
+    - Missing support for sparse address space
+    - Hard to do inter-process sharing
+
+- Memory management unit
+  - segment map resides in processor.
+  - as many chunks of physical memory as entries.
+  - Observations
+    - Translation on every instruction fetch, load or store.
+    - Virtual address space has holes
+      - segmentation efficient for sparse address spaces
+    - When it is ok to address outside valid range
+      - This is how the stack and heap allowed to grow.
+      - For instance, stack takes fault, system automatically increases size of stack.
+    - Need protection mode in segment table
+    - What must be saved/restored on context switch
+      - Segment table stored in CPU, not in memory.
+      - Might store all of processes memory onto disk when switched(swapping).
+      - Highly expensive, almost a million worth of instructions.
+  - Problems
+    - Must fit variable-sized chunks into physical memory
+    - May move processes multiple time to fit everything
+    - Limited options for swapping to disk.
+    - Fragmentation: wasted space.
+      - External: free gaps between allocated chunks
+      - Internal: don't need all memory wihtin allocated chunks.
+    
+- Paging
+  - physical memory in fixed size chunks(pages)
+  - solution to fragmentation from segments.
+  - How to implement simple paging?
+    - Page Table
+      - resides in physical memory
+      - contains physical page and permission for each virtual page.
+    - Virtual address mapping
+      - Offset from virtual address copied to physical address.
+      - Virtual page # is all remaining bits.
+      - Check page table bounds and permissions
+
+- Page Table
+  - Memory divide into fixed-sized chunks of memory.
+  - Page table is a map(function) from VPN to PPN
+  - Simple page table corresponds to a very large lookup table
+  - Offset of virtual address same as physical address.
+  - Large page tables can be placed into virtual memory
+  - Map structures?
+
+- Page Table Entry
+  - What is in a PTE?
+    - Pointer to next-level page table or to actual page.
+    - Permission bits: valid, read-only, read-write, write-only
+  - I.e Intel x86 architecture PTE
+    - Address(10, 10, 12-bit offset)
+    - Intermediate page tables called 'Directories'
+    - P | W | U | PWT | PCD | A | D | PS
+  - How to use PTE
+    - Invalid PTE can imply different things
+    - Validity checked first
+    - Demand paging
+      - Keep only active pages in memory
+      - Place others on disk and mark their PTEs invalid
+    - Copy on Write
+      - Unix fork gives copy of parent address space to child.
+      - How to do it cheaply??
+    - Zero Fill On Demand
+      - Late address binding so to say
+
+- Multi-level Translation
+  - Segments + Pages
+  - Virtual address mapped to series of tables.
+  - Permit sparse population of address space.
+  - Tree of tables.
+    - could have any number of levels.
+    - what must be stored/restored on context switch.
+  - Sharing?
+  - Easy memory allocation
+  - Only need to allocate as many page table entries as we need for aplication.
+  - Easy sharing
+
+- x86 memory model with segmentation
+
+- Segment Descriptors
+  - What is a segment register
+    - A pointer to the actual segment description
+    - G/L selects between GDT andLDT tables(global vs local descriptor tables)
+    - RPL: Requestor privilege level.
+  - Two registers: GDTR/LDTR hold pointers to global/local descriptor tables in memory.
+    - Descriptor format(64 bits)
+- In legacy applications(16-bit mode)
+  - Segments provide protection for different components of user programs
+  - Separate segments for chunks of code, data, stacks
+  - Limited to 64k segments
+- In modern use(32-bit mode)
+  - Large page size modes supported as well.
+
+- Inverted Page Table
+  - Use of hash table to hold transaltion entries.
+  - Size of page table ~ size of physical memory rather than size of virtual memory
+  
+### Caches
+
+- Principle of locality
+  - Program likely to access a relatively small portion of the address space at any instant of time
+    - Temporal Locality: locality in time.
+    - Spatial Locality: locality in space.
+- Major categories of cache misses
+  - Compulsory Misses
+    - first acces to a block.
+  - Capacicty misses
+    - cache cannot contain all blocks access by the program
+  - Conflict misses
+    - Multiple memory locations mapped to the same location.
+  - Coherence misses
+- Cache Organizations
+  - Direct mapped
+    - Uppermost bits are always cache tag, lowest M bits are byte select.
+    - Faster
+  - Set associative
+    - N entries per cache index.
+    - operates in parallel.
+  - Fully associative
+    - Every block can hold any line.
+    - Slower but less misses
+
+- Write through vs Write-back
+
+- Physically-indexed cache vs Virtually-indexed cache
+  - Address handed to cache after transaltion vs Address handed to cache before translation
+  - PT holds physical addresses vs PT holds virtual addresses
+  - TLB is in critical path of lookup vs TLB not in critical path of lookup
+  - x86 processors vs high-end servers
+  
+- Translation Lookaside Buffer
+  - CPU ->TLB -> Cache -> Memory
+  - Needs to be really fast.
+  - 128-512 entries
+  - Organizex as fully-associative cache.
+  - Reduce translation time for physically-indexed caches
+  - What happens on context switch?
+
+- Block is minimum quantum of caching
+  - Data select field used to select data within block
+  - Mnay caching applications don't have data select field
+- Index used to lookup candidates in cache
+  - Index identifies the set
+- Tag used to identify actual copy
+  - If no candiddate match then declare cache miss
+  
+- Page Fault
+  - Virtual to Physical translation fails.
+  - Fundamental inversion of the h/w / s/w boundary
+  - Page fault handler.
+
+- Demand paging
+
+- 90-10 rule.
