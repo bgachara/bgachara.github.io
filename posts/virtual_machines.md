@@ -10,45 +10,116 @@ tags:
 
 `programming language virtual machines need a page of their own.`
 `Advanced design and Implementation of Virtual Machines`
+`Virtual Machines: Versatile platforms for process and systems`
 
-## Motivation
+## Introduction
 
 - What is the use and need of virtual machine?
+  - A virtual machine is an indirection engine which redirects code and data inside of the "guest" sandbox.
+  - Virtualisation differs from abstraction in that virtualization does not hide implementation details, details here being the same as in the underlying real system.
+  - A discussion on virtual machines is also a discussion on computer architectures in a broader sense.
+  - A virtual machine is implemented by adding a layer of s/w to a real machine to support the desired virtual machine architecture.
+  - Computer architecture refers to the functionality and appearance of a computer system but not the details of its implementation.
+  - It is formally described through a spec of an interface and the logical behaviour of resources manipulated via the interface.
+  - A Vm can circumvent real machine compatibility constraints and hardware resoure constraints to enable a higher degree of software portability and flexibility.
+  - A major consideration in constructing VMs is the fidelity with which a virtual machine implements architected interfaces. 
   - They help (computer) security, (application) productivity and (application) portability.
   - Necessary for safe languages: 
     - Memory safety - ensures that a certain type of data in memory follows restrictions on that type.i.e an array never out of bounds.
     - Operation safety - operations on the data follow said restrictions.
     - Control safety - flow of execution never gets stuck or run wild.
   - Provides management of code and data.
+  - Application Programming Interface
+    - key element is a standard library that an application calls to invoke various services available on the system, including those provided by the OS.
+    - enables applications written to th API to be ported easily(via recompilation) to any system that supports the same API.
+    - Specifies an abstraction of the details of implementation of services especially those involving privileged hardware.
+  - A system is a full execution environment that can simultaneously support a number of processes potentially belonging to different users.
+  - It is important to note that equivalent performance is usually not required as part of virtualization.
+  - Virtualization thus consists of two parts;
+    - Mapping of virtual resources or state i.e registers, memory, files to real resources in the underlying machine.
+    - Use of real machine instructions and/or system calls to carry out the actions specified by virtual machine instructions and/or system calls.
+  - General classifications
+    - Process Vms
+      - translates a set of OS and user-level instructions from one platform to another, forming a process vm capable of executing programs developed for a different OS and ISA.
+      - virtualizing s/w is referred to as runtime, created to support a guest process and runs ontop of an OS.
+      - multiprogramming can be thought of as virtualization, since each process is given illusion of having complete machine to itself.
+    - System Vms
+      - provides a complete system environment,support OS along with potential many user processes, providing guest OS withe access to h/w resources.
+      - placed between underlying h/w and conventional s/w, allowing execution of system software developed for different h/w.
             
 ## Types of VMs
 
 - Full Instruction Set Architecture(ISA) virtual machine.
   - provides a full computer system ISA emulation and virtualization.
+  - ISA marks division between h/w and s/w
+    - User ISA
+      - parts of the ISA visible to an application program.
+    - System ISA
+      - parts of the ISA visible to supervisor s/w.
   - OS and applications can run as on an actual machine.
+  - Most important feature is that they provide a secure way of partitioning major s/w systems that run concurrently on the same h/w platform.
+  - Also the ability to support different operating systems.
+  - Major feature provided by the VMM is platform replication, dividing a set of h/w resources among multiple guest OS environments, interecepting and implementing all guest OS actions that interact with h/w resources. 
+  - VMM is placed on bare h/w and virtual machines fit on top of it and runs in the most priviliged mode with guests running with lesser.
+  - Alternnatives include the hosted VM which is installed like regular application software, relying on OS to provide device drivers and other lower level services.
+  - Inefficient as it introduces other layers leading to loss of efficiency.
   - VirtualBox and Qemu, Xen.
 
 - Application Binary Interface(ABI) virtual machine.
+  - ABI, provides a program with access to the hardware resources and services available in a system.
+  - Has two components
+    - Set of all user instructions
+    - System call interface.
+      - provide a specific set of operations that an operating system may perform on behalf of a user program(after checking to make sure user program has rights) 
+      - implemented via an instruction that transfers control to the OS in a manner similar to a procedure or sub-routine call, except the call target address is restricted
+        to a specific address in the OS.
+      - Arguments for the system call are typically passed via registers and/or stack held in memory, following specific conventions that are part of the system call interface.
+  - A program binary compiled to a specific ABI can run unchanged only on a system with the same ISA and OS.
   - provides a guest process ABI emulation.
   - apps against that ABI can run in the process side by side with other processes of native ABI apps
+  - Most straightforward method of emulation is interpretation.
+  - Interpreter program executing target ISA fetches, decoded and emulates execution of individual source instructions, can be relatively slow.
+  - Binary translation is preferred where performance is key, blocks of source instructions are converted to target instructions that perform equivalent functions.
+  - Hence some emulators called dynamic binary trnaslators. 
+  - Interpretation and binary translation have different performance characteristics.
+    - low startup overhead vs high startup overhead.
+    - consumes significant time during emulation vs fast for each repeated instruction due to cache.
+  - Some VMs use a staged emulation strategy combined with profiling, collection of statistics regarding program's behaviour.
+  - Exist cases of VMs where instruction sets used by host and guest are the same and optimization of program binary is the primary purpose of the virtual machine, same ISA dynamic binary optimizers
   - Apple Rosetta translation layer for PowerPC emulation, Transmeta Code morphing for x86 emulation.
   
 - Virtual ISA virtual machine.
   - provides a runtime engine so that applications coded in the virtual ISA can execute on it.
   - defines a high level and limited scope of ISA semantics, so it does not need the vm to emulate a full computer system.
+  - VM contains an interpreter that takes each instruction, decodes it and then performs the required state transformations(memory and stack).
+  - I/O functions are performed via a set of standard library calls that are defined as part of the VM.
+  - May also be compiled to host machine code for direct execution.
   - Sun Microsystem JVM, Microsoft CLR.
+  - Based on bytecodes, instructions encoded as a sequence of bytes where each byte is an opcode, a single-byte operandor part of a multibyte operand.
+  - They are stack-based(to eliminate register requirements) and have an abstract data specification and memory model.
 
 - Language virtual machine.   
   - A simulated computer that runs a simple instruction set.
   - provides a runtime engine that executes programs expressed in a guest language.
+  - VM environment does not directly correspond to any real platform, rather it is designed for ease of portability and to match the features of a HLL used for application development.
+  - Similar to process VMs, however focused on minimizing h/w-specific and OS-specific features because these would compromise platfrom independence.
   - can be categorized by the implementation of its execution engine: component that expresses the application operational semantics.
   - Interpretation and Compilation.
   - presented to the vm in the guest language, engine then interprets/translates program and also fulfill certain functionalities abstracted like memory management.
+  - Advantage is that s/w is easily portable, once the VM is implemented on a target platform.
   - Runtime engines for Python, Ruby, Tcl.
   - Javascript Engines: Chrome(V8), Mozilla(SpiderMonkey), Safari(JavascriptCore), Microsoft(Chakra).
   - Android Java Vm: Dalvik(interpreter and just-in-time compiler), Android RunTime(ART)(Ahead-of-Time).
   - Apache Harmony
 
+- Codesigned VMs
+  - H/w optimization.
+  - No native ISA applications, it is as if VM s/w is in fact part of the h/w implementation.
+  - Very similar to purely h/w virtualization approach used in many high performance superscalar microprocessors
+  - S/w portion of the vm uses region of memory not visible to other application or system s/w, carved out at boot time, occupied by the VMM.
+  - Transmeta Crusoe.
+  
+  
 ## Core components
 
 - Loader and Dynamic Linker

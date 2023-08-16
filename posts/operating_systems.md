@@ -113,6 +113,7 @@ ref:
 
 - A bootloader is a small program responsible for loading the kernel of an OS.
 - BIOS started.
+- Legacy mode vs EFI mode.
 - BIOS contains routines to assist our bootloader in booting our kernel.
 - BIOS is 16bit code meaning only 16 bit code can execute in it properly.
 - Checks to see how much RAM is installed and whether basic devices are installed and responding correctly.
@@ -1479,5 +1480,86 @@ lock
   - Page fault handler.
 
 - Demand paging
+  - Average memory access time
+    - Used to compute access time probabilistically
+    - Hit Rate * Hit Time(time to get value from L1 cache) + Miss Rate * Miss Time(Hit Time + Miss Penalty(AVG Time to get value from lower level))
+  - More levels of hierarchy
+  - PTE makes demand paging implementable.
+  - Suppose user references page with invalid PTE
+    - Memory Management Unit traps to IS
+      - Resulting trap is a "page fault"
+    - What does OS do on a page fault?
+      - Choose an old page to replace
+      - If old page modified D=1, write contents abck to disk
+      - Chnage its PTE and any cached TLB to be invalid
+      - Load new page into memoryfrom disk
+      - Update page table entry, invalid TLB for new entry.
+      - Continue thread from original faulting location
+    - TLB for new page will be loaded when thread continued
+    - While pulling pages off disk for one process, OS runs another process from ready queue
+      - Suspended process sits on wait queue.
 
-- 90-10 rule.
+- Working Set Model
+  - As a program executes it transitions through a sequence of working sets consisiting of varying sized subsets of the address space.
+  - Cache behavior under WS model (Hit rate vs Cache size)
+  
+- Demand Paging Cost Model
+  - Since dp is like caching, can compute average access time(effective access time)
+  - High slowdown factor.
+  - Factors leading to misses in page cache
+    - Compulsory misses
+    - Capacity misses
+    - Conflict misses
+    - Policy misses
+      - When pages were in memory, but kicked out prematurely because of the replacement policy.
+
+- Page replacement policies
+  - Why?
+    - Replacement is an issue with any cache.
+    - For pages, cost of being wrong is high, must important pages in memory, not toss them out.
+  - FIFO(First In, First Out)
+    - Throw out oldest page.
+  - Random
+    - Pick random page for every replacement.
+  - Min
+    - Replace page that wont be used for the longest time.
+    - Porvably optimal.
+  - LRU(Least Recently Used)
+    - Replace page that hasnt been used for the longest time.
+    - Implemented as a linked list.
+      - Many instructions for each hardware access.
+    - Approximating LRU: Clock algorithm.
+      - Arrange physical pages in circle with single clock hand.
+      - Advances only on page fault
+      - Check for pages not used recently
+      - Mark pages as not used recently.
+    - Nth chance version of clock algorithm.
+      - OS keeps counter per page: # sweeps
+      - On page fault, OS checks use bit.
+      - Means that clock hand has to sweep by N times without page being used before page is replaced.
+      - How do we pick N?
+        - Why pick large N? Better approximation to LRU
+        - Why pick small N? More efficient
+      - What about modified or dirty pages?
+        - Takes extra overhead to replace a dirty page, so give dirty pages an extra chance before replacing?
+        - Clean N=1, Dirty N=2.
+    - Clock-Emulated-M
+      - emulate hardware supported modified bit using read-only bit.
+    - Clock-Emulated-Use-and-M
+      - emulate h/w supported modified use bit.
+    - Second-Chance List Algorithm(VAX/VMS)
+      - split memory in two: Active list(RW), SC list(Invalid)
+      - Access pages in active list at full speed.
+    - Free List
+      - Single clock hand, advances as needed to keep freelist full.
+      - Keep set of free pages ready for use in demand paging.
+      - Like VAX second list
+      - Faster for page fault
+    - Reverse Page Mapping(Coremap)
+      - When evicting a page frame, how to know which PTEs to invalidate?
+        - hard in presence of shared pages(forked processes, shared memory)
+      - Reverse mapping mechanism must be very fast
+        - Must hunt down all PTEs when seeinf of pages active.
+  - Desired property of adding page frames leads to better hit rates.
+  
+- 90-10 code rule.
