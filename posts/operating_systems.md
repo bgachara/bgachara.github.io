@@ -1665,5 +1665,57 @@ lock
     - some require continual monitoring while others generate interrupts when they need service.
   - Transfer mechanism: Programmed IO and DMA
 
+- Standard interfaces to devices
+  - Block Devices
+    - disk drives, tape drives, DVD-ROM.
+    - Access blocks of data
+    - Commands include open(), read(), write(), seek()
+    - Raw I/O or file-system access
+    - Memory-mapped file access possible
+  - Character Devices: keyboards, mice, serial ports, USB devices
+    - Single characters at a time
+    - Commands include get(), put()
+    - Libraries layered on top allow line editing
+  - Network Devices: Ethernet, Wireless, Bluetooth
+    - Different enough from block/character to have own interface
+    - Unix and Windows include socket interface
+      - Separates network protocol from network operation
+      - Includes select() functionality
+    - Usage: pipes, FIFOs, streams, queues, mailboxes
+
+- Deal with Timing
+  - Blocking Interface: Wait
+    - When request data(read()), put process to sleep until data is ready.
+    - When write data(write()), put process to sleep until device is ready for data.
+  - Non-blocking Interface: Don't Wait
+    - Returns quickly from read or write request with count of bytes successfully transferred.
+    - Read may return nothing, write may write nothing.
+  - Asynchronous Interface: Tell me later
+    - When request data, take pointer to user's buffer, return immediately, later kernel fills buffer and notifies user.
+    - When send data, take pointer to user's buffer, return immediately, later kernel takes data and notifies user.
+
+### Storage Devices
+
+- Magnetic disks
+  - Large capacity at low cost
+  - Slow performance for random access
+  - Better for sequential
+  - Shingled Magnetic Recording
+  - 3 stage process
+    - Seek time
+    - Rotational latency
+    - Transfer time
+  - Controller intelligence
+    - Sectors contain sophisticated error correcting codes
+    - Sector sparing
+    - Slip sparing
+    - Track skewing
+    
+- Flash memory
+  - capacity at intermediate cost.
+  - Block level random access
+  - Good performance for reads: worse for random writes.
+  - Erasure requirement in large blocks
+  - Wear patterns issue
  
 
