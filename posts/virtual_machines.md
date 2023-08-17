@@ -225,9 +225,18 @@ tags:
 
 ```
 
-## Notes
+## Emulation: Interpretation and Binary Translation
 
-- Many virtual machines designs crossing boundaries.
-- i.e A language virtual machine can employ the technique of a virtual ISA virtual machine by compiling the program into a kind of virtual ISA and then executing the code on a virtual machine of that virtual ISA.
-- They are called `Runtime Engines` because the services provided by the virtual machine are mostly available at runtime.
-- 
+- Emulation
+  - process of implementing the interface and functionality of one system or subsystem on another one having a different interface and functionality.
+- IS emulation is a key aspect of many virtual machine implementations because the virtual machine must support a program binary compiled for an instruction set that is
+  different from the one implemented by the host processor.
+- Source IS --- Target IS
+- Complete ISA consists of many parts, register set, memory architecture, instructions and trap & interrupt architecture.
+- IS emulation can be carried out using a variety of methods that require different amounts of computing resources and offer different performance and portability characteristics.
+- I.e Interpretation and Binary translation.
+- Threaded Interpretation
+- Predecoding and Direct threaded interpretation
+  - predecoding involves parsing an instruction and putting it in a form that simplifies interpretation.
+  - extracts pieces of information and places them into easily accessible fields.
+- RISC(regular instruction formats) vs CISC(wide variety of formats)

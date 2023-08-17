@@ -1563,3 +1563,107 @@ lock
   - Desired property of adding page frames leads to better hit rates.
   
 - 90-10 code rule.
+
+- Allocation of page frames
+  - How do we allocate memory among different processes?
+  - Each process needs minimum number of pages.
+    - all processes that are loaded into memory can make forward progress.
+  - Replacement scopes
+    - Global replacement - process selects replacement frame from set of all frames, one process can take a frame from another.
+    - Local replacement - each process selects from only its own set of allocated frames
+  - Fixed/Priority Allocation
+    - Equal allocation(fixed scheme)
+      - every process gets same amount of memory
+    - Proportional allocation(fixed)
+      - allocate according to the size of the process
+    - Priority allocation
+      - Proportional scheme using priorities rather than size.
+  - Adaptive schemes
+  - Page-fault frequency allocation
+    - can we reduce capacity misses by dynamically changing the number of pages/application.
+    - establish acceptable page-fault rate.
+  - Thrashing
+    - Process is busy swapping pages in and out with little or no progress.
+    - If a process does not have enough pages, the page-fault rate is very high leading to low CPU utilization and OS spending most of its time swapping to disk.
+  - Locality in a memory-reference pattern.
+    - program memory access patterns have temporal and spatial locality.
+    - not enough memory for working set = thrashing.
+    - working-set model?? (working-set window, working set of process Pi = total set of pages referenced in the most recent delta)
+
+- Linux Memory details?
+  - Memory management in Linux considerably more complex that the examples we have been discussing.
+  - Memory zones: physical memory categories
+  - Each zone has 1 freelist, 2 LRU lists
+  - Many different types of allocation
+  - Many different types of allocated memory
+  - Allocation priorities.
+  - Linux virtual memory map.
+
+- *Read up on Meltdown flaw(2018)*
+  - exploit speculative execution to observe contents of kernel memory.
+  
+
+## I/O    
+
+- I/O devices you recognize are supported by I/O controllers.
+- Processors accesses them by reading and writing IO registers as if they were memory
+  - write commands and arguments, read status and results.
+
+- What's a bus?
+  - common set of wires for communication among hardware devices plus protocols for carrying out data transfer transactions.
+    - operations: read, write
+    - control lines, address lines, data lines
+    - typically multiple devices
+  - protocol: initiator requests access, arbitration to grant, identification of recipient, handshake to convey address, length, data.
+  - Very high BW close to processor(wide, fast, inflexible), low BW with high flexibility out in I/O subsystem.
+  - Buses let us connect n devices over a single set of wires, connections and protocols.
+    - 0(n^2) r/ships with 1 set of wires
+  - Downside: Only one transaction at a time.
+    - Rest must wait.
+    - Arbitration aspect of bus protocol ensures the rest wait.
+
+- PCI Bus Evolution
+  - PCI started life out as a bus
+  - Parallel bus has many limitations
+    - Multiplexing address/data for many requests
+    - Slowest devices must be able to tell what's happening(arbitration)
+    - Bus speed is set to that of the slowest device.
+  - pci express bus
+    - no longer a parallel bus
+    - really a collection of fast serial channels or lanes
+    - devices can use as many as they need to achieve a desired bandwidth
+    - slow devices don;t have to share with fast ones.
+  - Linux ability to migrate from PCI to PCI Express an abstraction success.
+  - PCI Architecture.
+    - RAM ---memory-bus--- CPU
+    - CPU ---host-bridge---PCI #0
+    - PCI #0 ---isa-bridge---ISA controller---legacy devices.
+    - PCI #0 ---pci-bridge---PCI #1
+    - PCI #1 --- USB controller --- root hub --- webcam,mouse,keyboard
+    - PCI #1 --- SATA controller --- scanner, hard disk, dvd rom.
+    - PCI #1 --- PCI slots  
+
+- How processor talk to device?
+  - CPU interacts with a controller
+    - contains a set of registers that can be read and written
+    - may contain memory for requests queues.
+  - Processor accesses registers in two ways
+    - Port-mapped I/O: in/out instructions
+    - Memory-mapped I/O: load/store instructions
+      - Hardware maps control registers and display memory into physical address space.
+      - Simply writing to display memory(also called the frame buffer) changes image in screen.
+      - Writing graphics description to cmd queue
+      - Writing to the command register may cause on-board graphics h/w to do sth.
+      - Flexible, bit faster that port mapped.
+      - I/O accomplished with load and store instructions
+
+- Operational parameters for I/O
+  - Data granularity: Byte vs Block
+    - Keyboard(byte) vs Disks, Networks(block)
+  - Access pattern: Sequential vs Random
+    - Tape(seq) vs Disk(random)
+    - some require continual monitoring while others generate interrupts when they need service.
+  - Transfer mechanism: Programmed IO and DMA
+
+ 
+
