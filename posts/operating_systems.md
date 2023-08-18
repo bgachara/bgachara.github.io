@@ -1656,6 +1656,13 @@ lock
       - Writing to the command register may cause on-board graphics h/w to do sth.
       - Flexible, bit faster that port mapped.
       - I/O accomplished with load and store instructions
+  - Device drivers interface to I/ devices
+    - Provide clean Read/Write interface to OS above
+    - Manipulate devices through PIO,DMA and interrupt handling
+  - DMA
+    - Direct Memory Access
+    - Permit devices to directly access memory
+    - Free up processor from transferring every byte
 
 - Operational parameters for I/O
   - Data granularity: Byte vs Block
@@ -1717,5 +1724,91 @@ lock
   - Good performance for reads: worse for random writes.
   - Erasure requirement in large blocks
   - Wear patterns issue
- 
+  - SSD architecture.
 
+- Nano-Tube Memory
+  - carbon tubes
+  
+
+### Performance
+
+- Latency
+  - Time to complete a task
+  - measured in units of time
+- Response Time
+  - Time to initiate an operation and get its response.
+  - Able to issue one that depends on the result
+- Throughput or Bandwidth
+  - Rate at whcih tasks are performed
+  - Measured in units of things per unit time(op/s, GLOP/s)
+- Start-up or Overhead
+  - Time to initiate an operation
+- Most I/O operations are roughly linear in b bytes
+  - Latency(b) = Overhead + b/TransferCapacity
+- Peak bandwidth determinates?
+  - Bus Speed
+  - Device Transfer Bandwidth
+- I/O path performance
+  - User Thread ->Queue(OS paths) ->Controller ->I/O device
+  - Response Time = Queue + I/O device service time
+  - Queuing behaviour can lead to big increases in latecy as utilization increases.
+- Little's Law
+  - In any stable system, average arrival rate = average departure rate.
+  - The number of things in a system is equal to the bandwidht time the latency(on average)
+  - Can be applied to an entire system.
+    - queues. processing stages, parallelism.
+  - How does service rate vary with request rate?
+- Bottleneck Analysis
+  - Each stage has its own queue and maximum service rate.
+  - The bottleneck stage dictates the maximum service rate.
+  - Total latency = queuing time + service time(depends on the underlying operation).
+- Determinisitic vs Bursty
+  - Memoryless: likelihood of an event occuring is independent of how long we've been waiting.
+- Distributions
+  - Server spends variable time T with customers
+    - Mean
+    - Variance
+    - Squared coefficient of variance
+- Queuing Theory
+  - Queuing theory applies to long term, steady state behavior
+  - Arrivals and departures characterized by some probabilistic distribution.
+  - Average length of queue = Average arrival rate * Average time waiting.
+- Latency blows up as we approach 100% utilization dues to queue building up on each burst and very rarely getting a chance to drain.
+- Half-Power Point: load at which system delivers half of peak performance.
+  - Design and provision systems to operate roughly in this regime.
+  - Latency low and predictable, utilization good: ~50%
+- I/O Performance Optimization
+  - Make evrything faster
+  - More decoupled(parallelism)systems
+    - independent buses or controllers
+  - Optimize the bottlenect to increase service rate
+    - Use queue to optimize the service
+  - Do other useful work while waiting.
+  - Queues absorb bursts and smooth the flow.
+  - Admissions control(finite queues)
+    - Limit delays, but may introduce unfairness and livelock.
+- Disk performance highest
+  - Big sequential reads.
+  - When high workload that they can be piggy backed.
+  - OK to be inefficient when things are mostly idle.
+  - Bursts are both a threat and an opportunity.
+- Disk Scheduling
+  - Disk can do only one request at a time, what order do you choose to do queued requests?
+  - FIFO order
+    - Fair among requesters, but order of arrival may be to random spots on the disk ->very long seek
+  - SSTF
+    - Shortest seek time first.
+    - Pick the request that's closest on the disk.
+    - Include rotational delay in calculation, since rotation can be as long as seek.
+    - Highly prone to starvation.
+  - SCAN
+    - Implements an elevator algorithm, take the closest request in the direction of travel.
+    - No starvation but reatins flavor of SSTF.
+  - C-SCAN
+    - Circular-Scan
+    - Only goes in one direction
+    - Skips any requests on the way back.
+    - Fairer than SCAN,not biased towards pages in middle
+    
+  
+## Filesystem

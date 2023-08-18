@@ -34,59 +34,60 @@ Ref:
 
 ## Rust Toolchain
 
-*a toolchain is a combo of a release channel and a host and optionally also has an assoiated archive date*
+- A toolchain is a combination of a release channel and a host and optionally also has an assoiated archive date
 
-- **rustc** - is the rust compiler.
-- **rustup** 
-    - manages rust version, installs compiler, cargo, std lib and other core tools.
-    - determines toolcahin depending on the host platform.
-    - It is a tool multiplexer as it installs and manages toolchains.
-    - there are two ABIs in use in windows
-        - Msvc abi by vs, provides best interop with other Windows s/w.
-        - GNU ABI by GCC.
-        - controlled by `rustup set-default host xxxx`, `rustup toolchain install stable-gnu`
+- Rustc - is the rust compiler.
 
-- **cargo** 
-    - official build and dependency management tool during development.
-    - i.e compiles code, download and compile dependent libraries, linking libraries and building development and release binaries.
-    - Also performs incremental builds of code to reduce compilation time as programs evolve.
-    - Also guides idiomatic project structure.
-    - Integrated toolchain for creating and building projects, manage external dependencies, Debugging, Testing, Generate documentation and release management.
+- Rustup 
+  - manages rust version, installs compiler, cargo, std lib and other core tools.
+  - determines toolcahin depending on the host platform.
+  - It is a tool multiplexer as it installs and manages toolchains.
+  - there are two ABIs in use in windows
+    - Msvc abi by vs, provides best interop with other Windows s/w.
+    - GNU ABI by GCC.
+    - controlled by `rustup set-default host xxxx`, `rustup toolchain install stable-gnu`
+
+- Cargo 
+  - official build and dependency management tool during development.
+  - i.e compiles code, download and compile dependent libraries, linking libraries and building development and release binaries.
+  - Also performs incremental builds of code to reduce compilation time as programs evolve.
+  - Also guides idiomatic project structure.
+  - Integrated toolchain for creating and building projects, manage external dependencies, Debugging, Testing, Generate documentation and release management.
 
 - Binary types: standalone executables, static libraries and dynamic libraries.
 - Release channels: nightly, beta and stable channel.
 - With Cargo, projects are called packages and can consist of one or more **crates**.
 
 - Two basic projects in Rust: 
-    - Libraries(lib crate)
-        - this can either be static and dynamic.
-        - self contained code intended for use by other programs to speed up devt cycle and encourage code reuse.
-        - can be published to a public package repository such as crates.io.
-        - program execution begins in the src/lib.rs.
-    
-    - Binaries(bin crate) 
-        - standalone executable that may download and link other libraries into a single binary.
-        - program execution starts in the main() function present in the src/main.rs file.
+  - Libraries(lib crate)
+    - this can either be static and dynamic.
+    - self contained code intended for use by other programs to speed up devt cycle and encourage code reuse.
+    - can be published to a public package repository such as crates.io.
+    - program execution begins in the src/lib.rs.
+  
+  - Binaries(bin crate) 
+    - standalone executable that may download and link other libraries into a single binary.
+    - program execution starts in the main() function present in the src/main.rs file.
 
-- *cargo new project_name*
+- Cargo new project_name
 
--*Cargo.toml* 
-    - serves as the config file for our crate.
-    - also called the manifest.
-    - At minimum have the main [package] section but can have subsections
-        - specifying output targets for the package.
-            - i.e [[bin]], [[lib]], [[example]], [[test]], [[bench]] - benchmark functions compiled into separate executables.
-        - specifying the dependencies of the package.
-            - i.e [dependencies], [dev-dependencies], [build-dependencies], [target] - cross-compilation targets.
-        - specifying build profiles
-            - [dev] - optimised for compile-time speed, [release], [test], [bench].
-        - specifying the package as a workspace.
-            - unit of organization around multiple packages where they are shared dependencies, useful for disk space and compilation time. 
-    - For each of the targets, configuration can be specified
-- *--lib* flag used when creating a library.
+- Cargo.toml 
+  - serves as the config file for our crate.
+  - also called the manifest.
+  - At minimum have the main [package] section but can have subsections
+    - specifying output targets for the package.
+      - i.e [[bin]], [[lib]], [[example]], [[test]], [[bench]] - benchmark functions compiled into separate executables.
+    - specifying the dependencies of the package.
+      - i.e [dependencies], [dev-dependencies], [build-dependencies], [target] - cross-compilation targets.
+    - specifying build profiles
+      - [dev] - optimised for compile-time speed, [release], [test], [bench].
+    - specifying the package as a workspace.
+      - unit of organization around multiple packages where they are shared dependencies, useful for disk space and compilation time. 
+  - For each of the targets, configuration can be specified
+
+- `--lib` flag used when creating a library.
 
 - Allows you to build different types of binaries - standalone executables, static libraries and dynamic libraries, can have the approp scaffolding created at project beginning.
-- A toolchain is a combination of a release channel and a host, and optionally also has an associated archive date.
 
 ## Rust Project Structure
 
@@ -100,34 +101,39 @@ Ref:
 - On running cargo build, cargo looks for the crate, downloads it and its dependencies , compiles them all and updates Cargo.lock with exact versions.
 - Each dependency takes form of <crate-name> = <semantic-version-number>.
 - Semantic Version has the format X.Y.Z = Major-version-number.Minor-version.Patch version
+
 - Specifying dependencies location
-    - Crates.io registry - default.
-    - Alternate registry - has to be configured in the .cargo/config file and entry made in Cargo.toml.
-    - Git repository - git address added.
-    - Specify a local path - support path-dependencies, can be sub-crate within the main cargo package. 
-    - Multiple locations - specify both registry/ Git/ path location.
+  - Crates.io registry - default.
+  - Alternate registry - has to be configured in the .cargo/config file and entry made in Cargo.toml.
+  - Git repository - git address added.
+  - Specify a local path - support path-dependencies, can be sub-crate within the main cargo package. 
+  - Multiple locations - specify both registry/ Git/ path location.
+
 - Rust also has built-in support for writing automated tests.
-    - other functions that verify whether other non-test functions work as intended.
-    - invoke functions with specified data and assert return values are as expected.
-    - Unit and Integration tests.
-    - Idiomatic in Rust to group test functions in a test module to allow conditional compilation of test code.
-    - In integration tests, creation of tests folder in package root,with individual tests in their own files, only compiled with cargo test.
-    - Integration only available for lib crates not binary crates.
-    - Control test execution:
-        - running them by name.
-        - Ignore some tests.
-        - running them sequentially or in parallel.
+  - other functions that verify whether other non-test functions work as intended.
+  - invoke functions with specified data and assert return values are as expected.
+  - Unit and Integration tests.
+  - Idiomatic in Rust to group test functions in a test module to allow conditional compilation of test code.
+  - In integration tests, creation of tests folder in package root,with individual tests in their own files, only compiled with cargo test.
+  - Integration only available for lib crates not binary crates.
+  - Control test execution:
+    - running them by name.
+    - Ignore some tests.
+    - running them sequentially or in parallel.
+
 - Rust also ships with rustdoc, generate documentation.
-    - Important to think through WHAT to document and HOW to document it.
-        - WHAT: - short description of what library does.
-                - list of modules and public functions.
-                - traits, macros, structs, enums and typdefs.
-                - binary crates: installation instrutions, command-line parameters.
-                - examples on how to use the crate.
-                - design details of the crate(optional)
-        - HOW:  - inline documentation comments within the crate.use /// - item-level documentation and //! - crate-level documentation.
-                - separate markdown files.
-    - Rustdoc will generate HTML,CSS and JS viewed via the browser.
+  - Important to think through WHAT to document and HOW to document it.
+    - WHAT:
+      - short description of what library does.
+      - list of modules and public functions.
+      - traits, macros, structs, enums and typdefs.
+      - binary crates: installation instrutions, command-line parameters.
+      - examples on how to use the crate.
+      - design details of the crate(optional)
+    - HOW:  
+      - inline documentation comments within the crate.use /// - item-level documentation and //! - crate-level documentation.
+      - separate markdown files.
+  - Rustdoc will generate HTML,CSS and JS viewed via the browser.
         
 
 ## Naming conventions
@@ -160,6 +166,61 @@ homepage = "/url"
 ```
 - versioning has a multitude of ways to deal with complex dependency resolution.
 
+## Rust Standard Library
+
+- This is the primary interface for Rust programs into the kernel functions of an OS.
+- It uses libc internally to invoke system calls.
+- Notable features
+  - Cross-platform, provides functionality that hides differences among underlying platform architectures.
+  - Available to all crates by default via the `use` statement, i.e use::fs
+  - Includes operations on standard Rust primitives.
+  - Implements core data types, vector, string, smart pointers such as Box, Arc, Rc
+  - Provides functionality for operations such as data manipulation, memory allocation, error handling, networking, I/O, concurrency, async I/O primitives and foreign function interfaces.
+
+- Rust std is broadly organized as follows
+  - Rust language primitives
+    - Primitives implemented by compiler.
+    - std includes the primitives and build on top of them.
+    
+  - Core crate
+    - foundation the std.
+    - It acts as the link between the Rust language and standard library.
+    - It provides types, traits, constants and functions implemented on top of Rust primitives and provides foundational building blocks for all Rust code.
+    - core crate can be used independently, is not platform-specific and does not have any links to the OS libraries or other external dependencies.
+    - #![no_std] instructs compiler to compile without std, using core crate
+    
+  - Alloc crate
+    - contains types, functions and traits related to memory-allocation for heap-allocated values.
+    - Includes smart pointers such as Box<T>, RC<T>, Arc<T>.
+    - It also includes collections such as Vec and String.
+    - It does not need to be used directly when the standard library is used, as the contents of the alloc crate are re-exported and made available as part of the std library.
+    - Only in no_std, when crate is directly used to access its functionality.
+        
+  - Modules
+    - libraries that are directly part of the standard library(and not re-exported from core or alloc crates) include rich functionality for operations around concurrency,
+      I/O, file system access, networking, async I/O, errors and OS-specific functions.
+            
+- Rust std modules
+    - Syscalls-oriented
+      - modules that either manage system h/w resources directly or require the kernel for other privileged operations.
+      - Include
+        - Concurrency - env, process, sync, thread.
+        - File system - fs, path
+        - Memory management - alloc, convert, ptr, borrow, default, rc, cell, mem, clone, pin
+        - Async - future, task
+        - Networking - net
+        - IO - io
+        - OS-specific - os
+        - Time - time
+    - Computation-oriented
+      - modules that are oriented towards data representation, computation and instructions to the compiler.
+      - Include
+        - Data processing - ascii, fmt, num, cmp, hash, ops, iter
+        - Error handling - error, panic, option, result
+        - Compiler - hint, primitive, prelude
+        - Ffi - ffi
+        - Data types - string, char, array, collections, slice, vec, f32, i8, u8, usize.
+                
 ## Statement 
 
 - This is a segment of code that does not return any value.
@@ -343,12 +404,14 @@ println!("{}", number.value);
 ### Stack vs Heap
 
 - If we assign a variable to an existing variable with a stack-based type such as *i32*,it will make a computationally inexpensive copy of that value.
-- Stack: continuous area of memory for local variables.
+- Stack: 
+    - continuous area of memory for local variables.
     - values have fixed size known at compile time.
     - extremely fast: just move a stack pointer.
     - easy to manage: follows function calls.
     - Great memory locality
-- Heap: storage of values outside function calls
+- Heap: 
+    - storage of values outside function calls
     - values have dynamic sizes determined at runtime
     - slightly slower than the stack, bookeeping needed
     - No guarantee of memory locality
@@ -410,6 +473,7 @@ fn print_through(s: String) -> String {
 
 let finished = print_through(letters); /* letters have been moved into finished */
 ```
+
 ## References
 
 - This is a way of pointing to a particular piece of data within memory.
@@ -424,6 +488,7 @@ graph TD;
     B-->D;
     C-->D;
 ```
+
 ### & 
 
 - Every time we declare a value with *let*, we are creating data that is stored in memory.
@@ -605,6 +670,7 @@ fn double(num: u128) -> u128 {
 let unsigned_int: u8 = 28;
 
 ```
+
 ## Shadowing
 
 - We can assign a new value to the same variable within the same scope without altering the original statement, this is called *Shadowing*
@@ -871,6 +937,7 @@ use cake::flavors;
 println!("{}", flavors::COCONUT);
 
 ```
+
 ## Exporting Items
 
 - When the crate is a library, making an item public with pub will expose that item to users of our library.
@@ -896,9 +963,9 @@ pub(crate) fn print_lemon() -> {
 ### crate, super, self
 
 - For access of module that are not direct children of current module
-    - crate - access modules from root of our project.
-    - super - access relative parent module.
-    - self - access current module.
+  - crate - access modules from root of our project.
+  - super - access relative parent module.
+  - self - access current module.
 
 ## External crates
 
@@ -1410,6 +1477,7 @@ let large = -9787654i64
 
 - Due to their fixed size, arrays are very efficient at runtime.
 - We can initializethe values of an array from an expression rather than manually defining each value,
+
 ```rust 
 
 let integers = [10, 20, 30];
@@ -1417,6 +1485,7 @@ let integers = [10, 20, 30];
 /* define a large array of e*/
 
 let many_e = ['e'; 20];
+
 ```
 
 ## Accessing values
@@ -1426,9 +1495,11 @@ let many_e = ['e'; 20];
 - we can also utilize any expression that evaluate to type usize.
 
 ```rust
+
 fn one() -> usize { 1 }
 
 let letter_b = array[one()];
+
 ```
 - Ranges: supply a beginning and ending index separated by ...
 - Range syntax is inclusive at the beginning and exclusive at the end.
@@ -1506,6 +1577,7 @@ let explicit: &'static str = "I am not even close";
 
 let empty_string = String::new();
 let value_string = String::from("Not Sure");
+
 ```
 - String is implemented as a Vec<u8>, allowing us to utilize iterators and other methods accessible on Vec<T>.
 - Dynamically sized data types don't implement the Copy trait because data is stored on a heap. Better to use Clone 
@@ -1553,6 +1625,7 @@ pub struct imdb = (&'static str, bool, f64);
 fn get_cat() -> Cat {
     println!()
 }
+
 ```
 - Advantage of naming our tuple is that we can create methods specific to this type utilizing an impl block.
 
@@ -1635,6 +1708,7 @@ enum InnerPlanets {
 
 /* use :: to create a value*/
 let home = InnerPlanets::Earth;
+
 ```
 - Since enums can only be of a particular value, matching on an enum is a very common and useful pattern.
 - When matching on an enum all variants must be handled otherwise code will not compile.
@@ -1652,6 +1726,7 @@ match vacation_location {
     println!("Bring a coat!");
   }
 }
+
 ```
 
 ## Variant values
@@ -1669,6 +1744,7 @@ enum Meal {
         rice: bool,
     },
 }
+
 ```
 - We can access a variant's inner data via destructuring.
 
@@ -1703,6 +1779,7 @@ let some_str = Some("has a value");
 let no_str = None;
 
 ```
+
 - Since it only has two variants and we can pass along its Some(T) variant, it somehow acts as a boolean expression that is capable of passing a value with it.
 - Useful for situations where the result is unknown, can either be there or missing i.e database request.
 - use the unwrap() method to access data of a monadic result. Data for Some() and panic for None.
@@ -1748,7 +1825,7 @@ fn crib(number:i32) -> Result<bool, String>
 - ? operator used to achieve this exactly.
 - When we have a function that returns a Result, any expression within its body that also returns a Result can be appended with ? to force any Err result to be returned immediately.
 
-### Custom Erro Types
+### Custom Error Types
 
 - While we can utilize any type for defining error context, enums are a great canditate for errors.
 - To allow other errors types to be carried into their own ? operator, we must implement From<T> for the desired type.
@@ -1803,6 +1880,7 @@ struct Batter<'a, 'b> {
 fn pass_to<'a>(name: &'a str) -> String {
     format!("passing the ball to {name}")
 }
+
 ```
 - When we declare an impl block for a type that utilises lifetimes, we must also annotate it directly but they are inherently passed to all contained methods.
 - *`static* annotation defines a lifetime as being capable of living for the duration of our program. I.e declaring constants.
@@ -1810,7 +1888,9 @@ fn pass_to<'a>(name: &'a str) -> String {
 ```rust
 
 let NEW_CONST: &'static str = "This gotta stick";
+
 ```
+
 - can solve alot of lifetime issues by declaring them as 'static
 - Generics and lifetimes annotaions are located in the same place, when we have both generics and la for the same item we declare lifetimes first.
 
@@ -1833,6 +1913,7 @@ fn print_name(person: Name) {
     let name = person.0;
     println!("{}", name);
 }
+
 ```
 
 - Importing aliasing: use the `as` keyword to provide alternate names for imports.
@@ -1843,8 +1924,6 @@ fn print_name(person: Name) {
 - Defines all the methods that a trait must implement to be considered a member of that trait.
 
 ### Define shared behavior
-
-- 
 
 ```rust
 
@@ -1858,6 +1937,7 @@ trait Harmonize {
 }
 
 ```
+
 ### Implementation Traits
 
 - syntax: impl Trait for Type {}
@@ -1875,6 +1955,7 @@ impl Harmonize for Human {
 }
 
 ```
+
 - Traits are most useful when applied to multiple types
 - Trait methods are always public
 - We cannot implement a trait  from an external crate on a type from an external crate, must make an intermediary type to connect them.
@@ -1889,6 +1970,7 @@ impl Harmonize for Human {
 - This is called deriving a trait and is accomplished by placing the #[derive(Trait)] before our data structure.
 
 ```rust 
+
 #[derive(Debug)]
 struct Passerine {
     freq: Vec<u64>,
@@ -1900,6 +1982,7 @@ let bird = Passerine {
 
 /* Now it is possible to print the debug out for Passerine type */
 println!("{bird:?}")
+
 ```
 ### Scope
 
@@ -1954,6 +2037,7 @@ fn wrap_data<T>(data: T) -> Wrapper<T> {
         data,
     }
 }
+
 ```
 - When declaring generics on impl blocks, the generic type is made available to the entire block, means we forgo declaring generics on contained methods.
 
@@ -1964,7 +2048,9 @@ impl<T> Wrapper<T> {
         self.data
     }
 }
+
 ```
+
 ### Trait bounds
 
 - Trait requirements on generic types are called Trait Bounds.
@@ -2002,7 +2088,9 @@ macro_rules! make_it {
 /* parameters are referred to as metavariables and respective types are fragment-specifiers */
 /* declare them the same manner as function parameters, must start with $ and no spaces between the metavariable, its fragment specifier and : */
 /* fragment specifiers include expr, ident, stmt, ty, literals, */
+
 ```
+
 ### exporting macros
 
 - #[macro_export] attribute used.
@@ -2021,7 +2109,6 @@ macro_rules! make_it {
 - Custom derive macros: #[derive()]
 
 - P-macros are required to be in their own crate and utilize a different approach to parsing input than declarative macros.
-
 
 ## No Garbage Collection / Runtimes
 

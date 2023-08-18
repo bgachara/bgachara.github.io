@@ -137,84 +137,84 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 - Set of programming tools used to create a program is referred to as the toolchain.
 - Namely:
   - Assembler
-        - program that will read an assembly language input file and convert code into machine language binary file(object file).
-        - Comments are removed, varable names and labels are converted into addresses.
-        - Capable of creating a list file, shows line number, relative address, machine language version of the instruction and original source line.
-        - There is a one-to-one correspondence between the assembly instructions and binary machine language.
-        - Steps taken on first pass
-              - Create symbol table.
-              - Expand macros.
-              - Evaluate constant expressions.
-              - Addresses are assigned to all statements in the program.
-        - Steps taken on second pass
-              - Final generation of code.
-              - Creation of list file.
-              - Create object file.
-        - Assembly directives are instructions to assembler so not translated into instructions for the CPU.
+    - program that will read an assembly language input file and convert code into machine language binary file(object file).
+    - Comments are removed, varable names and labels are converted into addresses.
+    - Capable of creating a list file, shows line number, relative address, machine language version of the instruction and original source line.
+    - There is a one-to-one correspondence between the assembly instructions and binary machine language.
+    - Steps taken on first pass
+          - Create symbol table.
+          - Expand macros.
+          - Evaluate constant expressions.
+          - Addresses are assigned to all statements in the program.
+    - Steps taken on second pass
+          - Final generation of code.
+          - Creation of list file.
+          - Create object file.
+    - Assembly directives are instructions to assembler so not translated into instructions for the CPU.
       
   - Linker
-        - Combine one more object files into a single executable file.
-        - Any routines from user of system libraries are included
-        - -g *debugging*, -o <filename>*filename follow*
-        - extern keyword used to declare functions not in curent file.
-        - machine language code copied from each object file into a single executable.
-        - Linker must adjust the relocatable addresses as necessary.
-        - Dynamic linking - postpone the resolution of some symbols until a program is being executed. .so unix and .dll windows.
-        - Assemble/Link script.
+    - Combine one more object files into a single executable file.
+    - Any routines from user of system libraries are included
+    - -g *debugging*, -o <filename>*filename follow*
+    - extern keyword used to declare functions not in curent file.
+    - machine language code copied from each object file into a single executable.
+    - Linker must adjust the relocatable addresses as necessary.
+    - Dynamic linking - postpone the resolution of some symbols until a program is being executed. .so unix and .dll windows.
+    - Assemble/Link script.
       
   - Loader
-        - load the program from secondary storage into primary storage.
-        - loader will read a properly formatted executable file, create a new process and load the code into memory and mark as ready for execution.
-        - operating system scheduler will make a decision about which process is executed and when the process is executed.
-        - invoked by typing the program name.
+    - load the program from secondary storage into primary storage.
+    - loader will read a properly formatted executable file, create a new process and load the code into memory and mark as ready for execution.
+    - operating system scheduler will make a decision about which process is executed and when the process is executed.
+    - invoked by typing the program name.
       
   - Debugger
-        - used to control the execution of the program, examine variables, other memory(stack) and display porgram output if any.
-        - Allows for testing and debugging activities of the program.
-        - Data Display Debugger(DDD) is the frontend to the GNU Debugger(GDB)
-        - Breakpoint - Execution pause location, to pause the program at a user selected location.
-        - Code will run upto and not including the breakpoint.
-        - Next(full next instruction) vs Step(just one step i.e step into function) command.
+    - used to control the execution of the program, examine variables, other memory(stack) and display porgram output if any.
+    - Allows for testing and debugging activities of the program.
+    - Data Display Debugger(DDD) is the frontend to the GNU Debugger(GDB)
+    - Breakpoint - Execution pause location, to pause the program at a user selected location.
+    - Code will run upto and not including the breakpoint.
+    - Next(full next instruction) vs Step(just one step i.e step into function) command.
 
 ## Instruction set 
 
 - Instructions include but are not limited to:
       
   - Data movement
-        - mov <dest> <src>
-        - must be of the same size.
-        - dest not be an immediate and both cannot be memory.
-        - access memory via brackets[], omitting the brackets will instead obtain address of the item.
-        - lea also load address.
+    - mov <dest> <src>
+    - must be of the same size.
+    - dest not be an immediate and both cannot be memory.
+    - access memory via brackets[], omitting the brackets will instead obtain address of the item.
+    - lea also load address.
       
   - Conversion Instructions
-        - convert from one size to another size. i.e byte to double-word.
-        - narrowing conversion - from a larger type to a smaller type. no special instruction needed, lower portion of the memory location or register accessed directly.
-        - widening conversion - from a smaller type to a larger type. upper order must be set based on sign of the original value.
+    - convert from one size to another size. i.e byte to double-word.
+    - narrowing conversion - from a larger type to a smaller type. no special instruction needed, lower portion of the memory location or register accessed directly.
+    - widening conversion - from a smaller type to a larger type. upper order must be set based on sign of the original value.
       
   - Arithmetic Instructions
-        - addition, subtraction, multiplication, division on integer values.
-        - add <dest> <src>
-        - adc <dest> <src> = <dest> = <dest> + <src> + <carryBit>
-        - sub <dest> - <src>
-        - different instructions for unsigned instructions(mul) and signed multiplication(imul)
-        - mul <src> - must be a register or a memory location.
-        - multiply produces double sized results.
-        - imul <src>, imul <dest>,<src/imm> imul <dest> <src> <imm>
-        - <div> <idiv>
-        - division by zero will crash a program                                                
+    - addition, subtraction, multiplication, division on integer values.
+    - add <dest> <src>
+    - adc <dest> <src> = <dest> = <dest> + <src> + <carryBit>
+    - sub <dest> - <src>
+    - different instructions for unsigned instructions(mul) and signed multiplication(imul)
+    - mul <src> - must be a register or a memory location.
+    - multiply produces double sized results.
+    - imul <src>, imul <dest>,<src/imm> imul <dest> <src> <imm>
+    - <div> <idiv>
+    - division by zero will crash a program                                                
       
   - Logical Instructions
-        - and, or, xor
-        - shift ops - isolate subset of bits, mult or div by powers of 2. logical shift(left, mult by 2, right, divide by 2), arithmetic shift,
-        - rotate operations
+    - and, or, xor
+    - shift ops - isolate subset of bits, mult or div by powers of 2. logical shift(left, mult by 2, right, divide by 2), arithmetic shift,
+    - rotate operations
       
   - Control Instructions
-        - structures such as IF statements and looping.
-        - control instructions refer to conditional jumping cmp <op1> <op2> AND unconditional jumping. jmp <label>
-        - program label is target or a location to jump to. starts like varibale and terminated by :
-        - iteration: basic loop can be implemented by a counter cehcked at the bottom or top of a loop with a compare or conditional loop.
-        - loop instruction available: loop <label>
+    - structures such as IF statements and looping.
+    - control instructions refer to conditional jumping cmp <op1> <op2> AND unconditional jumping. jmp <label>
+    - program label is target or a location to jump to. starts like varibale and terminated by :
+    - iteration: basic loop can be implemented by a counter cehcked at the bottom or top of a loop with a compare or conditional loop.
+    - loop instruction available: loop <label>
 
 
 ## Addressing modes
@@ -246,17 +246,17 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 ## Program development
 
 - Main steps:
-      - Understand the problem.
-            - understand what is required esp input information and expected results or output.
-      - Create the algorithm
-            - Steps to solve problem once understood.
-      - Implement the program.
-      - Test/Debug the program.
+  - Understand the problem.
+        - understand what is required esp input information and expected results or output.
+  - Create the algorithm
+        - Steps to solve problem once understood.
+  - Implement the program.
+  - Test/Debug the program.
 
 - Error Terminology
-      - Assembler error
-      - Run-time error
-      - Logic error
+  - Assembler error
+  - Run-time error
+  - Logic error
 
 
 ## Macros
@@ -271,8 +271,8 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 
 - Functions and procedures help break-up a program into smaller parts making it easier to code,debug and maintain.
 - They involve two main actions:
-      - Linkage - since can be called from multiple places, must be able to return to the correct place it was originally called.
-      - Argument Transmission - must be able to access parameters to operate on or to return results.
+  - Linkage - since can be called from multiple places, must be able to return to the correct place it was originally called.
+  - Argument Transmission - must be able to access parameters to operate on or to return results.
 - Non-static local variables declared in a function are stack dynamic local variables by default.
 - Statically declared variables are assigned memory locations for the entire execution of the program...no runtime overhead though.
 - Function declaration:
@@ -282,35 +282,35 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
       ret
 - Standard calling convention
 - Linkage:
-      - about getting to and from a function call correctly.
-      - Two instructions: call <funcName> and ret
-      - call saves address of where to return to when function completes, placing rip onto the stack.
-      - ret pops the current top of the stack(rsp) into the rip. thus address restored.
+  - about getting to and from a function call correctly.
+  - Two instructions: call <funcName> and ret
+  - call saves address of where to return to when function completes, placing rip onto the stack.
+  - ret pops the current top of the stack(rsp) into the rip. thus address restored.
 - Argument transmission:
-      - sending info to a function and obtaining a result as appropriate for the specific function.
-      - transmission by value = call-by-value.
-      - transmission by address = call-by-reference.
-      - can either be via:
-            - placing values in register.
-            - globally defined variables.
-            - putting values and/or addresses on stack.
+  - sending info to a function and obtaining a result as appropriate for the specific function.
+  - transmission by value = call-by-value.
+  - transmission by address = call-by-reference.
+  - can either be via:
+        - placing values in register.
+        - globally defined variables.
+        - putting values and/or addresses on stack.
 - Calling convention
-      - general idea is program state(specific registers, stack) is saved, function executed then state is restored.
-      - prologue: helps save the state.
-      - epilogue: restores the state
+  - general idea is program state(specific registers, stack) is saved, function executed then state is restored.
+  - prologue: helps save the state.
+  - epilogue: restores the state
 - Parameter passing
-      - combo of registers and the stack is used to pass params to and from a function.
-      - first six in register and other via the stack.
-      - for fp args, xmm0-xmm7.
+  - combo of registers and the stack is used to pass params to and from a function.
+  - first six in register and other via the stack.
+  - for fp args, xmm0-xmm7.
 - Register usage
-      - some regs are exected to be preserved across a function call.
+  - some regs are exected to be preserved across a function call.
 - Call frame
-      - Items on the stack as part of a function call are referred to as call frame..activation record or call stack.
-      - Include; 
-            - Return address
-            - Preserved registers
-            - Passed arguments.
-            - Stack dynamic local variable
+  - Items on the stack as part of a function call are referred to as call frame..activation record or call stack.
+  - Include; 
+        - Return address
+        - Preserved registers
+        - Passed arguments.
+        - Stack dynamic local variable
 - Caller
 - Callee
 
@@ -319,21 +319,20 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 - Console output, keyboard input, file services, time/date, requesting memory...services apps need from operating services.
 - System interface is the interface between an executing process and the operating system.
 - Calling system services;
-      - logically similar to calling a function, where function code is located within the operating system.
-      - when calling system services , arguments are placed in standard argument registers.
-      - system services dont typically use stack-based arguments.
-      - system service code is placed in rax register, number assigned to specific sysserv being requested.
-      - codes can not be changed by application programs.
-      - After the system code and arguments are set, the syscall instruction is executed.
-      - The syscall instruction will pause the current process and transfer control to the operating system which will perfrom instruction in rax register.
+  - logically similar to calling a function, where function code is located within the operating system.
+  - when calling system services , arguments are placed in standard argument registers.
+  - system services dont typically use stack-based arguments.
+  - system service code is placed in rax register, number assigned to specific sysserv being requested.
+  - codes can not be changed by application programs.
+  - After the system code and arguments are set, the syscall instruction is executed.
+  - The syscall instruction will pause the current process and transfer control to the operating system which will perfrom instruction in rax register.
 - i.e Newline character, console output, console input, file open ops.
 
 /*more to be updates here*/
 
 
 ## Multiple source files
-
-- 
+ 
 
 ## Stack Buffer Overflow
 
@@ -345,8 +344,7 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 ## I/O Buffering
 
 - This is a process that improves the overall throughput and efficiency of I/O operations.
-- The general concepts regarding how and why buffering is performed apply to many different applications.
-- 
+- The general concepts regarding how and why buffering is performed apply to many different applications. 
 
 ## Command Line Arguments
 
@@ -368,28 +366,28 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 ### Interrupt classification
 
 - Interrupt Timing
-      - Asynchronous Interrupts
-      - Synchronous Interrupts
+  - Asynchronous Interrupts
+  - Synchronous Interrupts
 
 - Interrupt Categories 
-      - Hardware Interrupt
-            - Exception - term for an interrupt that is caused by the current process and needs the attention of the kernel.
-                        - i.e faults(page fault), traps(debugging), abort(division by zero, illegal instruction).
-      - Software Interrupt
+  - Hardware Interrupt
+        - Exception - term for an interrupt that is caused by the current process and needs the attention of the kernel.
+                    - i.e faults(page fault), traps(debugging), abort(division by zero, illegal instruction).
+  - Software Interrupt
 
 - Interrupt Types and Levels
-      - Types : Maskable Interrupts - can be ignored for a short period, mostly issued by i/o devices.
-                Non-maskable Interrupts - must be handled immediately, OS functions, critical functions. Handled by CPU.
-      - Levels : Level 0(full access to h/w, lowest level OS funcs) - Level 3(No direct access to h/w. Apps run on this level)
+  - Types : Maskable Interrupts - can be ignored for a short period, mostly issued by i/o devices.
+            Non-maskable Interrupts - must be handled immediately, OS functions, critical functions. Handled by CPU.
+  - Levels : Level 0(full access to h/w, lowest level OS funcs) - Level 3(No direct access to h/w. Apps run on this level)
 
 - Interrupt Processing
-      - Interrupt Service Routine(ISR)
-      - Steps:
-            - Suspension
-            - Obtaining ISR Address - stored in Interrupt Descriptor Table. contain address and additional info i.e priority and privilege info.
-            - Jump to ISR
-            - Suspension Execute ISR
-            - Resumption
+  - Interrupt Service Routine(ISR)
+  - Steps:
+        - Suspension
+        - Obtaining ISR Address - stored in Interrupt Descriptor Table. contain address and additional info i.e priority and privilege info.
+        - Jump to ISR
+        - Suspension Execute ISR
+        - Resumption
  
 
 
@@ -400,26 +398,29 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 - RISC design places greater demand on the compiler.
 - CISC in contrast relies more on h/w for instruction functionality.
 - Major design rules:
-      - Instructions
-             RISC have reduced number of instruction classes.
-             Classses provide simple operations that can execute in a single cycle.
-             Complicated operations are synthesized from simple instructions
-             Each instruction is of fixed length to allow for fetching future instructs before decoding of current one.
-             CISC instructs are often of variable size and take many cycles to execute.
-      - Pipelines
-             Processing of instructions is broken down into smaller units that can be executed in parallel by pipelines.
-             Ideally pipeline advances by one step on each cycle for maximum throughput, decoded too in one pipeline stage.
-             CISC processors use microcode to aid in decoding.
-      - Registers
-             RISC machines have a large general-purpose regiser set.
-             Any register can contain either data or an address.
-             Registers act the fast local memory store for all data processing operations
-             CISC on the other hand have dedicated registers for specific purposes.
-      - Load-store architectures
-             Processor operates on data held in registers
-             Separate load and store instructions transfer data between register bank and external memory.
-             Memory access are costly, so separating memory access from data processing provides an advantage as one can use data in register bank without going to memory
-             CISC in contrast access memory directly.
+  - Instructions
+         RISC have reduced number of instruction classes.
+         Classses provide simple operations that can execute in a single cycle.
+         Complicated operations are synthesized from simple instructions
+         Each instruction is of fixed length to allow for fetching future instructs before decoding of current one.
+         CISC instructs are often of variable size and take many cycles to execute.
+      
+  - Pipelines
+         Processing of instructions is broken down into smaller units that can be executed in parallel by pipelines.
+         Ideally pipeline advances by one step on each cycle for maximum throughput, decoded too in one pipeline stage.
+         CISC processors use microcode to aid in decoding.
+      
+  - Registers
+         RISC machines have a large general-purpose regiser set.
+         Any register can contain either data or an address.
+         Registers act the fast local memory store for all data processing operations
+         CISC on the other hand have dedicated registers for specific purposes.
+      
+  - Load-store architectures
+         Processor operates on data held in registers
+         Separate load and store instructions transfer data between register bank and external memory.
+         Memory access are costly, so separating memory access from data processing provides an advantage as one can use data in register bank without going to memory
+         CISC in contrast access memory directly.
 - These rules allow RISC to be simpler and thus core can operate at higher clock frequencies as opposed to CISC complex and operate at lowerclock frequencies.
 - RISC and CISC blurred over the years as design rules borrowed.
 
@@ -427,32 +428,31 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 ## ARM Design Philosophy
 
 - Number of physical features that have driven the ARM processor design
-      - Battery power
-      - High code density
-      - Price sensitive
-      - Area size on the processor die
-      - H/w debug technology
+  - Battery power
+  - High code density
+  - Price sensitive
+  - Area size on the processor die
+  - H/w debug technology
 - ARM is not a pure RISC technology due to the constraints of its primary application.
 - ARM differs from RISC in embedded apps specific ways
-      - Variable cycle execution for certain instructions
-      - Inline barrel shifter leading to more complex instructions
-      - Thumb 16 bit instruction set
-      - Conditional execution
-      - Enhanced instructions
+  - Variable cycle execution for certain instructions
+  - Inline barrel shifter leading to more complex instructions
+  - Thumb 16 bit instruction set
+  - Conditional execution
+  - Enhanced instructions
 - ARM bus technology
-      - bus master and bus slaves
+  - bus master and bus slaves
 - Memory width is the number of bits the memory returns on each access, this has a direct effect on overall performance and cost ratio.
 - Types: 
-      - Read Only Memory(ROM) - boot code.
-      - Flash ROM - Firmware, long term data
-      - Dynamic RAM - most common ram, cheapest cose per byte.
-      - Static RAM - Fast memory and caches. more expensive
-      - Synchronous Dynamic RAM.
+  - Read Only Memory(ROM) - boot code.
+  - Flash ROM - Firmware, long term data
+  - Dynamic RAM - most common ram, cheapest cose per byte.
+  - Static RAM - Fast memory and caches. more expensive
+  - Synchronous Dynamic RAM.
 - Memory controllers
 - Interrupt controllers
-      - Standard
-      - Vector
-- 
+  - Standard
+  - Vector
 
 ### Glossary
 
@@ -468,4 +468,3 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 - One's complement
 - Two's complement
 - Floating-point numbers: exponent, fraction(lower 23 bits of the format), sign bit, bias.
--     
