@@ -8,15 +8,14 @@ tags:
 ref:
   - Modern Operating Tanenbaum
 ---
-# Operating Systems
 
 ref:
 `Notes from Modern operating systems by Tanenbaum`
-`Windows Fundamentals Notes from Reversing - Secrets of Reverse Engineering`
-`CS162 Youtube - John Kubiatowicz`
-`Operating Systems: Three Easy Pieces`
-`Linux system programming`
-`Linux Kernel Development`
+//`Windows Fundamentals Notes from Reversing - Secrets of Reverse Engineering`
+//`CS162 Youtube - John Kubiatowicz`
+//`Operating Systems: Three Easy Pieces`
+//`Linux system programming`
+//`Linux Kernel Development`
 
 *the concepts and design patterns appear at many levels*
 *the better you understand their design and implementation, the better use you'll make of them*
@@ -44,22 +43,30 @@ ref:
 
 ## Computer Hardware
 
-- Processor - fetch, decode, execute cycle.
-            - introduction of pipelines for more work.
-            - superscalar CPU.
-            - Different register types.
-            - Moore's Law - transistor doubling every 18 months.
-            - Multithreading/ Hyperthreading - each thread appears to the CPU as a separate CPU.
-            - Multicore chips.
+- Processor 
+  - fetch, decode, execute cycle.
+  - introduction of pipelines for more work.
+  - superscalar CPU.
+  - Different register types.
+  - Moore's Law - transistor doubling every 18 months.
+  - Multithreading/ Hyperthreading - each thread appears to the CPU as a separate CPU.
+  - Multicore chips.
 
-- Memory - should ideally be faster than the CPU so no memory access times.
-         - constructed as a hierarchy of layers.
-         - register -> cache -> main memory -> magnetic disk
-         - questions to every cache situation:
-            - when to put new item in cache.
-            - which cache line to put new item in.
-            - which item to remove from cache
-            - where to put newly evicted item in main memory
+- Memory 
+  - Design constraints on computer memory can be summed up by 3 questions
+    - How much? 
+    - How fast?
+    - How expensive?
+  - To achieve great performance, the memory must be able to keep up with the processor.
+  - There is a trade-off among the 3 key characteristics of memory namely: capacity, access time, cost.
+  - constructed as a hierarchy of layers, to overcome design dilemna across the characteristics.
+  - register -> cache -> main memory -> magnetic disk
+  - locality of reference
+  - questions to every cache situation:
+    - when to put new item in cache.
+    - which cache line to put new item in.
+    - which item to remove from cache
+    - where to put newly evicted item in main memory
 
 - I/O Devices 
   - consist of the controller and the device itself.
@@ -103,10 +110,11 @@ ref:
       - Interrupts.
       - Direct Memory Access.
 
-- Buses - As processors and memories got faster, ability of one bus became strained and thus more were added.
-        - i.e : cache, local, memory, PCI, USB, IDE, SCSI and ISA.
-        - Bask Input Output System (BIOS)
-        - contains low-level i/o software i.e read keyboard, write to screen, disk i/o.
+- Buses 
+  - As processors and memories got faster, ability of one bus became strained and thus more were added.
+  - i.e : cache, local, memory, PCI, USB, IDE, SCSI and ISA.
+  - Bask Input Output System (BIOS)
+  - contains low-level i/o software i.e read keyboard, write to screen, disk i/o.
         
 
 ### Booting up computer

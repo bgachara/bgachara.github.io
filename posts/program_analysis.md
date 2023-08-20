@@ -48,6 +48,7 @@ tags:
     - Try to discover information about a program without running it.
     - Cost is proportional to program's size.
     - Is less effective as it may report spurious errors, false positives
+
 - Dynamic Analysis:
     - Runs the program and collect information about events that took place at runtime.
     - Cost is proportional to program's run time.
@@ -139,9 +140,11 @@ tags:
         - enables to specify which operations are valid in each state and how operations affect the state.
         - also called temporal safety properties.
         - i.e acquire locks, file read after open, root privileges.
+  
   - Liveness properties
     - program will eventually reach a good state
     - program termination, starvation freedom
+  
   - Pre and Post conditions
     - A pre-condition is a predicate
       - assumed to hold before a function executes.
@@ -171,6 +174,7 @@ tags:
   - how do we know that our test suite is good??
     - too few tests: may miss bugs
     - too many tests: costly to run, bloat and redundancy, harder to maintain
+  
   - Approaches
     - Code coverage metrics
       - metric to quantify the extent to which a program's code is tested by a given test suite.
@@ -185,6 +189,7 @@ tags:
         - Condition coverage
         - Basic block coverage
         - Path coverage
+    
     - Mutation Analysis
       - founded on competent programmer assumption, program is close to correct to begin with
       - Key idea

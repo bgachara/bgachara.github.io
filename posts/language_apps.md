@@ -8,8 +8,8 @@ tags:
   - parsers
   - interpreters
 ---
-`Notes from Language Implementation Patterns: Create your own DSL and General Programming Languages`
 
+`Notes from Language Implementation Patterns: Create your own DSL and General Programming Languages`
 
 *This is any program that processes, analyzes or translates an input file*
 *Implementing a language means building an application that executes or performs tasks according to sentences in that language*
@@ -97,4 +97,3 @@ A.N Whitehead
   that tells you what the final stage before the generator computes,
   then figure what that stage needs all the way back to the reader.
 
-- 

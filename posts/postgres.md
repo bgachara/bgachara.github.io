@@ -9,8 +9,6 @@ tags:
 
 ---
 
-## Init
-
 ### Configuration Files.
 
 - postgresql.conf
@@ -35,7 +33,9 @@ After postgresql install, you should log in as postgres and create other roles.
 
 create role le login password 'king' createdb;
 create role le login password 'king' superuser;
+
 ```
+
 - Settings with user or superuser context can be set for a specific database, user, session and function level.
 - Important Network settings to watch(change requires a server restart):
     - listen_addresses
@@ -86,11 +86,13 @@ create role le login password 'king' superuser;
     - server process(postgres): manages the db files, accepts connections, perform db actions.
     - client process: app that wants to perform db actions.
 - They can be on different hosts and communicate over a tcp/ip network. 
+
 ```sql
 
 create database db_name;
 
 ```
+
 - Existence of template databases that act as skeleton for new databases.
 - You can use any database as a template, useful when you want to make replicas.
 - You can make a db as a template after which it is no lonegr editable and deletable.
@@ -113,7 +115,6 @@ update pg_database set datistemplate = true where datname = 'db_name';
 - Types:
     - Select, Insert, Update, Alter, Execute, Delete and Truncate.
 - Most privileges must have a context.
-- 
 
 ## Getting Started
 
@@ -131,6 +132,7 @@ create role new_role login password 'new_pass';
 ```sql
 
 create database mydb with owner = new_role;
+
 ```
 
 - GRANT command is the primary means to assign privileges.

@@ -89,7 +89,6 @@ tags:
   - Allows one to change execution order based on events external to the program itself.
   - Execution suspended, Registers saved and CPU executes corresponding handling routine.
   - i.e signal from external device, zero division, invalid instruction, privilege instruction in non-privileged environment.
-  
 
 - **Protection rings**:
   - Mechanism designed to limit the applications capabilities for security and robustness reasons.
@@ -98,7 +97,6 @@ tags:
   - Each instruction type is linked with one or more privilege levels and is not executable on others.
   - A CPU is always in a state corresponding to one of the so-called protection rings.
   - Each defines a set of allowed instructions.
-  - 
 
 - **Virtual Memory**:
   - This is an abstraction over physical memory, which helps distribute it between programs in a safe and effective way.

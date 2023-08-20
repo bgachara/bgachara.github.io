@@ -7,10 +7,10 @@ tags:
   - OS
 ---
 
-`Notes on Virtual Memory`
 `Any problem in computer science can be solved using indirection`
 
-**Machine Register** - High speed memory cells that hold data for arithmetic and logic computations.
+**Machine Register** 
+  - High speed memory cells that hold data for arithmetic and logic computations.
 
 ## Problems for VM
 
@@ -53,7 +53,6 @@ tags:
 ## Memory Protection
 
 - Linux uses random offsets to separate programs in the address space, enhance security.
-
 - To make VM fast we add a special Page Table cache, the Translation Lookaside Buffer(TLB)
 - Separate TLBs, one for instructions(iTLB) and another for data(dTLB)
 

@@ -220,7 +220,12 @@ homepage = "/url"
         - Compiler - hint, primitive, prelude
         - Ffi - ffi
         - Data types - string, char, array, collections, slice, vec, f32, i8, u8, usize.
-                
+```rust
+
+use std::prelude::v1::*              
+
+```
+              
 ## Statement 
 
 - This is a segment of code that does not return any value.
