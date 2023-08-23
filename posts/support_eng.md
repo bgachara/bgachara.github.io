@@ -17,30 +17,35 @@ tags:
 - Good documentation and an easy-to-understand operational model.
 - Takes up the role of both customer service and technical support, this is listens to the customer with empathy, focuses on friendliness and experience while also
   listening so a problem can be solved and focusing on resolving technical issues.
+
 - Main duties
   - Troubleshoot technical issues
-  - Setting up accpunts
+  - Setting up accounts
   - Repairing and replacing
   - Training and assisting.
   - Logging and tracking issues
   - Documenting and maintaining processes.
+
 - Why is it needed?
   - Companies provide solutions to customers
   - Positive experiences lead to increase in business.
   - Companies with good support are regarded as more trustworthy leading to higher customer retention rates.
   - Support also help troubleshoot their own products contributing to product improvement which further leads to more desirable products.
+
 - Learn techniques for diagnosing and resolving problems.
 - Develop procedures for reoccuring problems.
 - Communicating with clients on updates and resolutions.
 - Learn everything related to the product/domain you are supporting.
 - Online/Live support.
+
 - Roles of technical support
   - Valuable help to clients and teammates
   - Good customer service skills
   - Strong critical thinking skills
-  - Intereest in new and developing technology
+  - Interest in new and developing technology
   - Ability to get to the root of the problems quickly.
   - Patience to help customers through a series of actions to resolve a problem.
+
 - Soft skills are positive behaviors and attitudes that are used to effectively communicate, collaborate and manage conflict.
 - Include customer service mindset, communicating, being organized, leading, solving problems and being flexible and adaptable.
 - Always learn how to improve soft skills.
@@ -48,12 +53,14 @@ tags:
 - Technical skills are abilities and aptittudes that are needed for professionals to successfully work in a technical environment and may include familiarity with programming,
   operating system basics, application logs, servers, support ticket workflow, knowledge bases and more.
 - Additional skills include familiarity with virtual machines, VPNs, network security, enterprise h/w and monitoring s/w.
+
 - Analyze application logs
   - View information about events that have occured in an application.
   - Read and analyze application logs
   - Track information about the application
   - Includes timestamps for tracking issues.
   - Logs levels of issues with labels.
+
 - Server knowledge
   - Understand servers
   - Setting up and configuring servers
@@ -61,11 +68,13 @@ tags:
   - Monitoring and maintaining servers
   - Maximizing uptime.
   - Managing virtual servers.
+
 - Support ticket workflow
   - Create a ticket
   - Start ticket issue, with all relevant information and details.
   - Resolve issue.
   - Close ticket.
+
 - Using a knowledge base
   - Collection of a group's knowledge.
   - Search via it.
@@ -185,10 +194,10 @@ tags:
     - Multiple - combination of both.
   - Priority levels
     - Impact vs Urgency
-      1 - Business stops
-      2 - Disrupts business.
-      3 - Inconvenience
-      4 - Routine service.
+      - 1 - Business stops
+      - 2 - Disrupts business.
+      - 3 - Inconvenience
+      - 4 - Routine service.
     - Response SLAs vs Resolution SLAs
       - Priority levels
       - Impact to business

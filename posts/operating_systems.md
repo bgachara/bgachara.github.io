@@ -517,6 +517,7 @@ ref:
 
 - These are function invocations made from user space into kernel in order to request some service or resource from the operating system.
 - applications are able trap into the kernel through this well defined mechanism and execute only code that the kernel allows it to execute.
+- Kernel is the part of the OS that is always resident in memory.
 - Mechanics of issuing them are highly machine dependent and are often expressed in assembly language
 - Procedure library provided to aid in this regard.
 - Programs always check results of a system call to see if an error occurred.
@@ -1820,3 +1821,299 @@ lock
     
   
 ## Filesystem
+
+- Variable-size buffer(Memory Address) -> Block(Logical Index, typically 4KB) -> Sector(512B or 4KB)
+- Layer of OS that transforms block interface of disks(or other block devices) into files, directories, etc.
+- Take unlimited h/w interface(array of blocks) and provide a more convenient/useful interface with:
+  - Naming - file files by name not block numbers.
+  - Organization - map files to blocks
+  - Protection - enforce access restrictions
+  - Reliability - keep files intact despite crashes
+- User's view vs System view vs  Os view.
+- User -> File(bytes) -> File system ->Disk
+
+- Disk management
+  - Linear array of sectors
+  - Entities on a disk
+    - File: user-visible group of blcoks arranged sequentially in logical spacce
+    - Directory: user-visisble mapping names to files.
+  - Identify sectors
+    - Physical position
+    - Logical Block Addressing
+  - File system tasks
+    - Track free disk blocks
+    - Track which blocks contain data for which files
+    - Track files in a directory
+    - Track metadata on filesystem.
+
+- Data structures on disk
+  - Different thatn data structures in memory.
+  - Access a block at a time.
+  - Durability
+
+- File system design
+  - Hard disks performance
+    - Maximize sequential access, minimize seeks.
+  - Open before read/write.
+    - can perform protection checks and look up where actual file resource are.
+  - Size is determined as they are used
+    - start samll and grow.
+  - Organized into directories
+    - What data structure on disk for that?
+  - Need to carefully allocate/free blocks
+    - Access remains efficient
+
+- Components of a file system
+  - File path
+  - Directory structure
+  - File number(inumber)
+  - inode(file header structure)
+  - Data blocks
+  - Sectors per block
+- Open performs name resolution, translating path name into a file number.
+- Read and Write operate on the file number. use file number as an index to locate the blocks.
+
+- A directory is a file containing file_name: file_number mappings, each mapping is called a directory entry, dentry.
+- A process isn't allowed to read the raw bytes of a directory, see `readdir`
+- System calls to access directories. 
+- How many disk accesses to resolve a directory?
+
+- Open syscall
+  - find inode on disk from pathname
+  - create "in-memory inode" in system-wide open file table
+  - one entry in this table no matter how many instances of the file are open.
+- read/write syscalls look up in-memory indoe using the file handle.
+- ref: A five-year study of file system metadata.
+
+
+### FAT(file allocation table)
+
+- why so prevelant?
+
+
+### Berkeley Fast File System
+
+
+### Fast File System
+
+- a fast file system for Unix, update of the preceding one.
+
+
+### Ext 2/3 Linux
+
+- disk divided into block groups.
+
+- Hard links
+  - mapping from name to file number in the directory structure
+  - first hard link to a file is made when file created
+  - create extra hard links to a file with the link() system call
+  - remove links with unlink() system call
+- When can file contents be delted
+  - When there are no more hard links to the file
+  - Inode maintains reference count for this purpose.
+  
+- Soft links
+  - symbolic links
+  - directory entry contains the path and name of the file
+  - map one name to another name.
+  - OS looks up destination file name each time program accesses source file name.
+  - <file name, dest. file name>
+  
+### Windows New Technology File System(NTFS)
+
+- Default on modern windows systems.
+- Use Master File Table instead of FAT or inode array.
+- Variable length extents
+- Each entry in MFT contains metadata, files data directly(small), list of extents for file's data, pointers to other MFT entries with more extent lists(big).
+
+- Memory mapped files.
+  - This is where we map the file directly into an empty region of our address space.
+  - mmap() map a specific region or let the system find one for you, used for both manipulating files and sharing between processes.
+  - `write a sample mmap()`
+
+- Buffer Cache
+  - Kernel must copy disk blocks to main memory to access their contents and write them back if modified. data blocks, inodes, directory contents. freemap.
+  - IDEA: Exploit locality by caching disk data in memory. name translations, disk blocks.
+  - Memory used to cache kernel resources including disk blocks and name translations. 
+  - Implemented entirely in OS software.
+  - Blocks go through transitional states between free and in-use.
+  - Blocks are used for a variety of purposes.
+  - Replacement policy
+  - How to determine cache size?
+  - Prefetching, fetch blocks early.
+  - Writeback cache to avoid loss of information, linux does it every 10secs.
+  - Compare it against Demand paging.
+
+- Availability - probability that the system can accept and process requests.
+- Durability - ability of a system to recover data despite faults.
+- Reliability - ability of a sytem or component to perform its required functions under stated conditions for a specified period of time.
+
+- Replicate, different failure mode prefferably.
+
+- RAID 1: disk mirroring/shadowing
+  - each disk is fully duplicated onto its shadow.
+  - most expensive as its 100% capacity overhead.
+  - bandwidth sacrificed on write.
+  - reads may be optimized.
+  - use hot spare for recovery.
+
+- RAID 5: High I/O Rate parity.
+  - data stripped across multiple disks.
+  - parity block constructed by XORing data blocks in stripe.
+  - Incase of failure, reconstruction by XOR
+
+- Erasure codes, must have ability to know which disks are bad.
+  - Reed-Solomon error correcting codes.
+  - Used also for geographic replication.
+  
+### Transactions
+
+- Use it for atomic operations.
+- They extend concept of atomic update from memory to stable storage, automatically update multiple persistent data structures.
+- Ad-hoc approaches to transactions i.e in FFS, use of sequence of updates, temporary files and rename.
+- A transaction is an atomic sequence of reads and writes that takes the system from one consistent state to another.
+- They extend the concept of atomic updates from memory to persistent storage.
+
+- Transactional File Systems
+  - Better reliability through use of log.
+  - Log structured vs Journaled.
+
+- Journaling File Systems
+  - Don't modify data structures on disk directly.
+  - Write each update as tranasction recorded in a log.
+  - Once changes are in the log, they can be safely applied to file system.
+  - One a change is applied, remove its entry from the log, garbage collection.
+  - Difference between ext2 and ext3 is that journal was added.
+  - Users: NTFS, Apple HFS+, Linux XFS, JFS, ext4.
+
+- Creating a File
+  - Find free data blocks
+  - Find free inode entry.
+  - Find dentry insertion point.
+  // log starts here. 
+  - Write map(i.e mark used)
+  - Write inode entry to point to block(s)
+  - Write dentry to point to inode.
+  // after commit, discard.
+
+- Log Structured File System
+  - Log is the storage.
+  - One continuous sequence of blocks that wrap around whole disk, inodes put into log when changed and point to new data in the log.
+  - `ref: Sprite LFS`
+  - File system operations logically replay log to get result.
+  - Create data structures to make this fast.
+  - On recovery, replay the log.
+  - Index(inodes) and directories are written into the log too.
+  - Large, important portion of the log is cached in memory, relies on buffer cache to make reading fast.
+  - Do everything in bulk, log is collection of large segments.
+  - Each segment contains a summary of all the operations within the segment, fast to determine if segment is relevant or not.
+  - Free space is approached as continual cleaning process of segments.
+
+- Flash filesystems
+  - trap electrons in floating gate.
+  - program/erase wear, as wordline is raised over time.
+  - higher energy state stored hence a bit heavier -10 power 8.
+  - flash translation layer 
+    - translate between logical block addresses(OS level) and physical flash page addresses.
+    - manages wear and erasure state of blocks and pages.
+    - tracks which blocks are garbage but not erased.
+  - Firmware 
+    - keep freelist full, manage mapping
+    - track wear state of pages.
+    - copy good pages out of mostly empty blocks before erasure.
+  - Ex. F2FS: A FLASH FILE SYSTEM
+    - used on many mobile devices.
+    - latest version supports block-encryption for security.
+    - has been mainstream in linux for several years.
+    - assumes standard SSD interface, built-in flash translation layer, random reads as fast as sequential reads, random writes bad for flash storage.
+    - minimize writes/updates and otherwise keep writes sequential, start with log-structured file system/copy-on-write file systems
+    - `ref: F2FS: A New File System for Flash Storage`
+    
+## Distributed Systems
+
+- Centralized vs distributed systems.
+- Why do we need them?
+  - cheaper and easier to build lots of simple computers.
+  - easier to add power incrementally.
+  - user can have complete control over some components.
+  - collaboration
+- Promise
+  - Higher availability
+  - Better durability
+  - More security
+- Realist is often disappointing.
+- Coordination is more difficult.
+- Transparency is the ability of the system to mask its complexity behind a simple interface.
+  - Location, cant tell where resources are located.
+  - Migration, resources may move without user knowing.
+  - Replication, can't tell how many copies of resource exist.
+  - Concurrency, can't tell how many users there are.
+  - Parallelism, system may speed up large jobs by splitting them into smaller pieces.
+  - Fault tolerance, system hides various things that go wrong.
+- Transparency and collaboration require some way for processors to communicate with one another.
+
+- Protocols
+  - A protocol is an agreement on how to communicate, syntax, semantics
+  - Describes formally by a state machine, often represented as a message transaction diagram.
+
+- Reliable communication channels on which to build distributed applications, introduce intermediate layers that provide set of abstractions for various network functionality
+  and technologies.
+
+- Drawbacks of layering
+  - Layer N may duplicate layer N-1 functionality
+  - Layers may need same information.
+  - Layering can hurt performance.
+  - Some layers are not always cleanly separated.
+  - Headers start to get really big.
+
+- `ref: End-to-End arguments in system design`
+  - Alot of interpretations
+
+- Messaging
+  - no receiver gets portion of a message and two receivers cannot get same message.
+  - mailbox, temporary holding area for messages
+  - send(message, mbox), send messages to remote mailbox identified by mbox.
+  - receive(buffer,mbox), wait until mbox has message, copy into buffer and return.
+  - send/receive behaviour??
+  
+- Messaging for producer/consumer style.
+- Messaging for request/response communication.
+
+- Distributed consensus making
+  - all nodes propose a value.
+  - some nodes might crash and stop responding.
+  - eventually all remianing nodes decide on the same value from a set of proposed values.
+  - make decisions durable, not forgotten.
+  - general's paradox.
+  - Two-phase commit
+
+- Two-Phase Commit Protocol.
+  - Persistent stable log on each machine, keep track of whether commit has happened.
+    - on crash recovery, check its log to recover state of world at time of crash.
+  - Prepare Phase
+    - global coordinator requests that all participants will promise to commit or rollback the transaction.
+    - record promise in log, the ACK.
+    - If anyone votes to abort, coordinator writes it and tells everyone to abort.
+  - Commit Phase
+    - After all participants respons that they are prepared, coordinator writes commit to its log.
+    - Then asks all nodes to commit, they respond with ACK.
+    - Logs commit after.
+  - Failure mode, failstop.
+  - Fault tolerance.
+  - Undesirable feature is blocking.
+
+- Three-phase commit.
+
+- PAXOS
+  - does not have 2PC blocking problem
+
+- RAFT
+  - Paxos alternative.
+  - Simpler to describe complete protocol.
+
+- Byzantine General Problem.
+  - unsolvable for n=3.
+  - for f faults, n > 3f to solve problem.
+  - BFT algorithm?
+
+
