@@ -7,12 +7,19 @@ tags:
   - ecmascript
 ---
 `Colt Steele: Modern Javascript` `Javascript tips from all over`
+`Javascript - The good parts`
+`How Javascript works`
 
-# Introduction
+An important goal of programming language design is to produce a clean, logical language that composes well and is free of weird corner cases,
+Javascript came nowehere close to meeting that goal. - Douglas Crockford.
 
-- ECMAScript, TC39
-- Specification not implementation
-- Browser compatibility - "Can I use" website
+True mastery is shown by writing good programs that are readable, maintable and free of error - Same guy as quote above.
+
+If a language feature is sometimes useful and sometimes dangerous and if there is a better option then always use the better option - still the same guy.
+
+ECMAScript, TC39
+Specification not implementation
+Browser compatibility - "Can I use" website
 
 
 ## Primitive Types

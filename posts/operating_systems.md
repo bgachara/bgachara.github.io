@@ -16,9 +16,33 @@ ref:
 //`Operating Systems: Three Easy Pieces`
 //`Linux system programming`
 //`Linux Kernel Development`
+//`OS Dev Wiki`
+//`Operating Systems From 0 to 1`
 
 *the concepts and design patterns appear at many levels*
 *the better you understand their design and implementation, the better use you'll make of them*
+
+## Preliminaries
+
+- A problem domain is the part of the world where the computer is to produce effects, together with the means available to produce them, directly or indirectly.
+- Requirements are the effects that the machine is to exert in the problem domain by virtue of its programming.
+- Software engineer must select the right programming techniques that apply to the problem domain he is trying to solve because many techniques that are effective in one
+  domain might not be in another, i.e application nature vs user/company constraints.
+- At a minimum, a software engineer should be knowledgable enough to understand the documents prepared by hardware engineers for using their devices.
+- Documents are essential for learning a problem domain since information can be passed down in a reliable way.
+- Most important for software engineers
+  - Software requirement document
+    - Includes list of requirements(i.e from customer) and a description of the problem domain.
+    - It should not be a high level description of the implementation, rather of the problem domain.
+    - A good way to test it's quality is to provide it to a domain expert for proofreading.
+  - Software specification
+    - It states rules relating desired behaviour of the output devices to all possible behaviour of input devices, as well as any rules that other parts of the problem domain must obey.
+    - Interface design with constraints for the problem domain to follow.
+    - Careful to ensure implementation details do not leak in.
+
+## Computational Structures
+
+- see reference computational structures.md
 
 ## Introduction
 
@@ -160,10 +184,14 @@ ref:
 
 ### Process
 
-- a program in execution, object code in execution
-- associated with each process is its address space, a list of memory locations  from 0 to some maximum which can read and write to.
+- A program in execution, object code in execution
+- Associated with each process is its address space, a list of memory locations  from 0 to some maximum which can read and write to.
 - Address space contains executable program, program's data, and its stack.
-- also with each process is some resources, registers(program counter and stack pointer), open files, outstanding alarms, related processes and any other info needed to run program
+- Also with each process is some resources, registers(program counter and stack pointer), open files, outstanding alarms, related processes and any other info needed to run program
+- Encapsulate one or more threads sharing resources.
+- Fundamental tradeoff between protection and efficiency
+  - communication easier within a process.
+  - communication harder between processes.
 - A process is thus a container with all information needed to run a program.
 - Process starts life as an executable object code, which is a machine-runnable code in executable format that the kernel understands(ELF)
   - most important sections are the text section, bss section and data section.
@@ -251,12 +279,30 @@ ref:
 ### Address spaces
 
 - Holds executing program.
-- On many computers addresses are 32 or 64 bits, giving address space of 2^64 bytes.
+- The set of accessible addresses + state asscoiated with them.
+     - For a 32-bit processor: 2^32 = 4 billion(10^9) addresses.
+     - For a 64-bit processor: 2^64 = 18 quadrillion(10^18) addresses.
+- What happens when you read or write to an address??
+- Simple multiplexing has no protection, so OS must protect itself from user programs.
+  - Reliability
+  - Security
+  - Privacy
+  - Fairness
+- Simple protection
+  - Base and bound: user registers to constrict operating area of a program, isolating program.
+  - Simple address transaltion with base and bound, use of a base address for on-the-fly translation.
+  - Segments and stacks.
+   - Address space translation
+     - program operates in an address space that is distinct from the physical memory space of the machine.
+   - Paged virtual address.
+     - instructions operate on virtual addresses
+     - translated to a ohysical address via a page table by the hardware.
+     - any page of address space can be in any page sized frame in memory.
 - Virtual memory augments processes where their address space is larger than what is available.
 
 ### Files
 
-- most basic and fundamental abstraction in Linux.
+- Most basic and fundamental abstraction in Linux.
 - System calls needed to create files, remove files, read files and write files.
 - Directory used to group files together.
 - Before file manipulation, it must be opened, at which time permissions are checked, if permitted, file descriptor returned else error code.
@@ -291,6 +337,38 @@ ref:
   - Symbolic links
     - allow links to span filesystems as hard links are meaningless outside its inode's own filesystem
     - incur more overhead than hard links because resolving a symbolic link effectively involves resolving two files: symbolic link and the linked-to-file.
+
+- Special file
+   - kernel objects that are represented as files
+ - Include
+   - block device files
+     - accessed as an array of bytes, and can be accessed in any order
+     - generally storage devices
+   - character device files
+     - accessed via a linear queue of bytes
+     - i.e keyboard
+   - named pipes
+     - are an IPC mechanism that provides a communication channel over a fd.
+    - unix domain sockets
+      - advanced form of IPC that work even on two different machines.
+  - special files are a way to let certain abstractions fit into the filesystem.
+
+- Filesystems and namespaces
+  - Linux provides a global and unified namespace of files and directories.
+  - A filesystem is a collection of files and directories in a formal and valid hierarchy.
+  - Mounting and unmounting refers to the adding and removing of filesystems from the global namespace
+  - Linux also supports virtual and network filesystems.
+  - The smallest addressable unit of a block device is a sector, physical attribute of the device.
+  - sectors come in powers of 2, block device cannot transfer or access data smaller than a sector and all I/O must occur interms of one or two sectors.
+  - Likewise the smallest addressable unit on a filesystem is the block, which is an abstraction of the filesystem.
+    - A block is usually power-of-two multiple of sector size.
+  - Blocks are larger than sector but they must be smaller than the page size.(smallest addressable unit by memory management unit)
+    - common block sizes are 512 bytes, 1KB and 4KB.
+  - Linux supports per-process namespace as opposed to the global unified namespace preffered by Unix, allowing each process to have a unique view of system file and directory hierarchy.
+  - By default each process inherits namespace of its parent, but a process may elect to create its own namespace with its own set of mount points and a unique root directory
+- Mounted file system concept.
+- Special files are provided in order to make i/o devices look like files.
+- Pipe is pseudofile used to connect two processes
 
 - FUSE
   - Filesystems in Userspace
@@ -413,6 +491,26 @@ ref:
 - consist of 3 3-bit field, owner, group members, everyone.
 - every bit has a field for read, write and execute access.
 - rwxrwxrwx
+
+### Dual Mode Operation
+        
+- Hardware providea at least two modes
+  - Kernel Mode
+  - User Mode
+- Certain Ops are prohibited when running in user mode.
+- Careful controlled transitions between user mode and kernel mode.
+  - syscalls
+    - process requests a system service, e.g exit
+    - like a function call but outside the process
+    - does not have the address of the system function to call.
+    - marshall the syscall id and args in registers and exec syscall.
+  - interrupts
+    - external asynch event triggers content switch.
+    - independent of user process.
+    - e.g timer, i/o device
+  - exceptions
+    - internal synch event in process triggers context switch.
+    - protection violation(seg fault). divide by zero
 
 ### Signals
 
@@ -2037,6 +2135,9 @@ lock
   - easier to add power incrementally.
   - user can have complete control over some components.
   - collaboration
+  - To solve bigger problems, more data than can fit on one machine.
+  - To increase reliability.
+  - For better performance.
 - Promise
   - Higher availability
   - Better durability
@@ -2116,4 +2217,23 @@ lock
   - for f faults, n > 3f to solve problem.
   - BFT algorithm?
 
+
+## Network Protocols
+
+- Broadcast Network Details
+  - Media Access Control(MAC) Address
+    - 48-bit physical address for h/w interface.
+  - Delivery
+    - All receive packets, ignore.
+- Point-to-point networks
+  - a network where every physical wire is connected to only two computers.
+  - switch transforms a shared-bus config into a point-to-point network.
+  - router is a device that acts as a junction between physical networks to transfer data packets among them.
+- InterneT Protocol
+  - best-effort packet delivery.
+  - IP address, 32-bit integer.
+  - NAT gateway
+  - Subnet, connect host with related IP addresses, 32-bit, mask.
+  - IPv4 packet format.
+  - Domain Name Services
 
