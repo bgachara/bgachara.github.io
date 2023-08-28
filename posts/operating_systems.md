@@ -39,10 +39,17 @@ ref:
     - It states rules relating desired behaviour of the output devices to all possible behaviour of input devices, as well as any rules that other parts of the problem domain must obey.
     - Interface design with constraints for the problem domain to follow.
     - Careful to ensure implementation details do not leak in.
+- Abstraction is a technique for hiding complexity that is irrelevant to the problem in context.
+  - A lower layer has a recurring pattern, this pattern is taken out and built a language on top of it.
+  - A higher layer strips away layer-specific(non-recurring) details to focus on the recurring details.
+  - The recurring details are given a new and simpler language than the languages of the lower layers.
+  - Every layer is just a more convenient language to describe the lower layer.
 
 ## Computational Structures
 
 - see reference computational structures.md
+- High-level programming languages help focus on problem domains that are not related to hardware at all ans where programmer performance is more important than computer performance while
+  low-level languages helps to focus on the inner workings of a machine thus best suited for problem domains that are related to control hardware.
 
 ## Introduction
 
@@ -62,7 +69,8 @@ ref:
 - Spooling(Simultaneous Peripheral Operation On Line)
 - Multics(Multiplexed Information and Computing Service)
 - Unix
-- Posix - standard of Unix that defines a minimum system call interface that conformant Unix systems must support.
+- Posix 
+  - standard of Unix that defines a minimum system call interface that conformant Unix systems must support.
 
 
 ## Computer Hardware
@@ -135,11 +143,45 @@ ref:
       - Direct Memory Access.
 
 - Buses 
+  - This is a subsytem that transfers data between computer components or betweeen computers.
+  - Physically, just electrical wires that connect all components together and each wire transfer a single big chunk of data.
+  - Total number of wires is called the **bus width**, and is dependent on the number of wires a CPU can support, i.e 16-bit equals 16 wires.
   - As processors and memories got faster, ability of one bus became strained and thus more were added.
   - i.e : cache, local, memory, PCI, USB, IDE, SCSI and ISA.
   - Bask Input Output System (BIOS)
   - contains low-level i/o software i.e read keyboard, write to screen, disk i/o.
         
+### x86 Architecture
+
+- A chipset is a chip with multiple functions.
+- In some computers, various h/w devices are connected to each other via a PCB called a motherboard.
+- Each CPU needs a compatible motherboard that can host it.
+- Each motherboard is defined by its chipset model that determines the environment a CPU can control.
+- Environment consists of 
+  - A slot or more for CPU.
+  - Slots for memory sticks.
+  - A slot or more for graphic cards.
+  - Generic slots for other devices, network card, sound card.
+  - A chipset of two chips which are Northbridge and Southbridge chips
+    - Northbridge ->high-performance communication between CPU, main memory and graphic cards.
+    - Southbridge ->communication with I/O devices and other devices that are not perfomance sensitive.
+  - Ports for I/O devices.
+- Execution environment, is an environment that provides the facility to make code executable.
+  - What are the supported operations, data transfer, arithmetic, control, floating-point.
+  - Where are operands stored? registers, memory, stack, accumulator.
+  - How many explicit operands are there for each instruction? 1, 2, 3, 4, 5
+  - How is the operand location specified? register, immediate, indirect
+  - What type and size of operands are supported? byte, int, float, double, string, vector,
+
+- Objdump
+  - Programs that displays information about object files
+  - -d option only displays assembled contents of executable sections.
+  - section is a block of memory that either contains program code or data.
+  - -D displays assembly contents of all sections.
+  - default syntax is the AT&T, can change it to Intel.
+  - format
+    - instruction address:: assembly instruction in raw hex:: assembly instruction:: comment(appears when there is a reference to an address)
+
 
 ### Booting up computer
 
@@ -2236,4 +2278,13 @@ lock
   - Subnet, connect host with related IP addresses, 32-bit, mask.
   - IPv4 packet format.
   - Domain Name Services
-
+- Network Layering
+  - building complex services from simpler ones.
+  - each layer provides services needed by higher layers by utilizing services provided by lower layers.
+  - Physical/Link layer is pretty limited, packets are of limited size(Maximum Transfer Unit), 200-1500 bytes in size.
+  - Packets in envelops.
+- UDP - IP protocol 17
+- TCP - IP protocol 6
+- DCCP - IP 33
+- RDP - IP 26
+- SCTP - IP 132

@@ -37,10 +37,10 @@ Ref:
   - Assembly - *relocatable tag. object file not executable.
   - Linking
   
-> Relocatable files don't rely on being placed at any particular address in memory rather moved around at will without breaking assumptions in code.
+Relocatable files don't rely on being placed at any particular address in memory rather moved around at will without breaking assumptions in code.
 
-> Object files are compiled independently from each other, so assembler has no way of knowing memory address of other object files when assembling an object file...
-  hence need for them to be relocatable, link them together in any order to form a complete binary executable.
+Object files are compiled independently from each other, so assembler has no way of knowing memory address of other object files when assembling an object file...
+hence need for them to be relocatable, link them together in any order to form a complete binary executable.
 
 - Symbols and Stripped binaries
 
@@ -70,14 +70,16 @@ strip the executable and try to identify the functions again.
     - e_entry - entry point.
     - e_phoff and e_shoff - program and section headers.
     - e_flags, e_ehsize
+  
   - Optional program headers
     - Segment view of the binary,used by the operating system and dynamic linker when loading an ELF into a process to locate relevant code and data and decide what to load in virtual memory
-    - 
+  
   - Sections
     - .init and .fini, constructor and destructor code.
     - .text, main code resides
     - .bss, .data and .rodata, uninitialized variables(block started by symbol), initialized variables, 
     - lazy binding and the .plt, .got, .got.plt(procedure linkable table, global offset table)
+  
   - Optional section headers
     - code and data in an ELF binary are logically divided into contiguous nonoverlapping chunks called sections.
     - each section described by a section header, which denotes properties of the section and allows you to locate bytes belonging to the section.
@@ -99,5 +101,4 @@ strip the executable and try to identify the functions again.
 
 ### Binary-loading Interface
 
-: implement a binary loader in Rust.
-- 
+Implement a binary loader in Rust.

@@ -51,7 +51,7 @@ tags:
 - Ics in Dual in-line package
 - Resistor-Transistor Logic circuits, Diode-Transistor Logic, Transistor-transistor Logic
 - Pinout diagram.
--  
+
 
 ### Von Neumann Arch Extensions
 

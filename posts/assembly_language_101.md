@@ -463,7 +463,7 @@ ref: `Notes from Introduction to 64bit Intel Assembly Language Processing for Li
 - Thumb - new, compressed instruction set to increase performance in embedded systems.
 - ASIC - application specific integrated circuits
 - Cortex-A, Cortex-R, Cortex-M
-- FPGA - 
+- FPGA - Field Programmable Gate Array. 
 - Sign magnitude
 - One's complement
 - Two's complement

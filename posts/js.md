@@ -6,8 +6,8 @@ tags:
   - js
   - ecmascript
 ---
-`Colt Steele: Modern Javascript` `Javascript tips from all over`
-`Javascript - The good parts`
+`Colt Steele: Modern Javascript` `Javascript tips from all over`, 
+`Javascript - The good parts`, 
 `How Javascript works`
 
 An important goal of programming language design is to produce a clean, logical language that composes well and is free of weird corner cases,
