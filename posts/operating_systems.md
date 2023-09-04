@@ -10,14 +10,15 @@ ref:
 ---
 
 ref:
-`Notes from Modern operating systems by Tanenbaum`
-//`Windows Fundamentals Notes from Reversing - Secrets of Reverse Engineering`
-//`CS162 Youtube - John Kubiatowicz`
-//`Operating Systems: Three Easy Pieces`
-//`Linux system programming`
-//`Linux Kernel Development`
-//`OS Dev Wiki`
-//`Operating Systems From 0 to 1`
+`Notes from Modern operating systems by Tanenbaum`, 
+`Windows Fundamentals Notes from Reversing - Secrets of Reverse Engineering`, 
+`CS162 Youtube - John Kubiatowicz`, 
+`Operating Systems: Three Easy Pieces`, 
+`Linux system programming`, 
+`Linux Kernel Development`, 
+`OS Dev Wiki`, 
+`Operating Systems From 0 to 1`, 
+`Practical File System Design`
 
 *the concepts and design patterns appear at many levels*
 *the better you understand their design and implementation, the better use you'll make of them*
@@ -188,14 +189,20 @@ ref:
 - A bootloader is a small program responsible for loading the kernel of an OS.
 - BIOS started.
 - Legacy mode vs EFI mode.
-- BIOS contains routines to assist our bootloader in booting our kernel.
+- BIOS contains routines to assist our bootloader in booting our kernel, they are generic and standard
+- BIOS generally loads itself into RAM then continues execution from RAM.
+- When computer first boots, it is in a compatibility mode called **real mode**, which only gives us 1MB ram and only runs 16-bit code.
+- Bootloader then switches it to 32-bit protected mode.
 - BIOS is 16bit code meaning only 16 bit code can execute in it properly.
 - Checks to see how much RAM is installed and whether basic devices are installed and responding correctly.
 - Starts by scanning ISA and PCI buses to detect devices attached to them.
 - If new devices from last boot, new devices are configured.
 - Determines boot device by checking list of devices stored on CMOS.
 - User can change this list by entering new device into list.
-- First secto from boot device is read into memory and executed.
+- First sector from boot device is read into memory and executed.
+- BIOS looks for a bootloader to boot by searching all storage mediums for the boot signature "0x55AA".
+- If the signature exists then the device is a bootable medium.
+- BIOS loads bootloader into RAM at absolute address 0x7c00.
 - Examines partition table at the end of boot sector to determine which partition is active.
 - Secondary boot loader is read in from that partition.
 - Reads in the OS from active partition and start it.
@@ -1962,8 +1969,10 @@ lock
   
 ## Filesystem
 
+- The main purpose of computers is to create, manipulate, store and retrieve data, a file system provides the machinery to support these tasks.
+- At the highest level, a file system is a way to organize, store, retrieve and manage information on a permanent storage medium such as a disk.
 - Variable-size buffer(Memory Address) -> Block(Logical Index, typically 4KB) -> Sector(512B or 4KB)
-- Layer of OS that transforms block interface of disks(or other block devices) into files, directories, etc.
+- A Layer of OS that transforms block interface of disks(or other block devices) into files, directories, etc.
 - Take unlimited h/w interface(array of blocks) and provide a more convenient/useful interface with:
   - Naming - file files by name not block numbers.
   - Organization - map files to blocks
