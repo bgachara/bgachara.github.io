@@ -39,4 +39,4 @@ jobs:
         
         # build_dir: _site
         env:
-          GITHUB_TOKEN: ${{ secrets.BOT_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAGE_SECRET }}
