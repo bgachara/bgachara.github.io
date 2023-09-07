@@ -146,4 +146,16 @@ GRANT some_privilege to some_role;
 
 ## Extensions
 
+- Every decade brings new workloads for databases.
 - add-ons that you can install to extend functionality beyond base offerings.
+- They allow you to leverage the database eco-systemand grow with it.
+- Areas that are extensible.
+  - Type system and operators
+  - User defined functions and aggregates.
+  - Storage system and indexes.
+  - Write ahead logging and replication.
+  - Transaction engine.
+  - Background worker processes.
+  - Query planner and query executer.
+  - Configuration and database metadata.
+- Type systems and UDF can be done in SQL, everything else needs to be done low level language like C.

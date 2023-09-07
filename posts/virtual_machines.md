@@ -6,46 +6,45 @@ tags:
   - virtual machines
   - languages
 ---
-# Notes on Virtual Machine.
-
-`programming language virtual machines need a page of their own.`
+`Programming language virtual machines need a page of their own.`
 `Advanced design and Implementation of Virtual Machines`
 `Virtual Machines: Versatile platforms for process and systems`
 
 ## Introduction
 
-- What is the use and need of virtual machine?
-  - A virtual machine is an indirection engine which redirects code and data inside of the "guest" sandbox.
-  - Virtualisation differs from abstraction in that virtualization does not hide implementation details, details here being the same as in the underlying real system.
-  - A discussion on virtual machines is also a discussion on computer architectures in a broader sense.
-  - A virtual machine is implemented by adding a layer of s/w to a real machine to support the desired virtual machine architecture.
-  - Computer architecture refers to the functionality and appearance of a computer system but not the details of its implementation.
-  - It is formally described through a spec of an interface and the logical behaviour of resources manipulated via the interface.
-  - A Vm can circumvent real machine compatibility constraints and hardware resoure constraints to enable a higher degree of software portability and flexibility.
-  - A major consideration in constructing VMs is the fidelity with which a virtual machine implements architected interfaces. 
-  - They help (computer) security, (application) productivity and (application) portability.
-  - Necessary for safe languages: 
-    - Memory safety - ensures that a certain type of data in memory follows restrictions on that type.i.e an array never out of bounds.
-    - Operation safety - operations on the data follow said restrictions.
-    - Control safety - flow of execution never gets stuck or run wild.
-  - Provides management of code and data.
-  - Application Programming Interface
-    - key element is a standard library that an application calls to invoke various services available on the system, including those provided by the OS.
-    - enables applications written to th API to be ported easily(via recompilation) to any system that supports the same API.
-    - Specifies an abstraction of the details of implementation of services especially those involving privileged hardware.
-  - A system is a full execution environment that can simultaneously support a number of processes potentially belonging to different users.
-  - It is important to note that equivalent performance is usually not required as part of virtualization.
-  - Virtualization thus consists of two parts;
-    - Mapping of virtual resources or state i.e registers, memory, files to real resources in the underlying machine.
-    - Use of real machine instructions and/or system calls to carry out the actions specified by virtual machine instructions and/or system calls.
-  - General classifications
-    - Process Vms
-      - translates a set of OS and user-level instructions from one platform to another, forming a process vm capable of executing programs developed for a different OS and ISA.
-      - virtualizing s/w is referred to as runtime, created to support a guest process and runs ontop of an OS.
-      - multiprogramming can be thought of as virtualization, since each process is given illusion of having complete machine to itself.
-    - System Vms
-      - provides a complete system environment,support OS along with potential many user processes, providing guest OS withe access to h/w resources.
-      - placed between underlying h/w and conventional s/w, allowing execution of system software developed for different h/w.
+- A virtual machine is an indirection engine which redirects code and data inside of the "guest" sandbox.
+- Virtualisation differs from abstraction in that virtualization does not hide implementation details, details here being the same as in the underlying real system.
+- VM technologies have been developed in a number of contexts, OS, PL, Compilers and Computer Architecture, to enable new capabilities and solve a variety of problems
+  in interfacing major computer system components.
+- A discussion on virtual machines is also a discussion on computer architectures in a broader sense.
+- A virtual machine is implemented by adding a layer of s/w to a real machine to support the desired virtual machine architecture.
+- Computer architecture refers to the functionality and appearance of a computer system but not the details of its implementation.
+- It is formally described through a spec of an interface and the logical behaviour of resources manipulated via the interface.
+- A Vm can circumvent real machine compatibility constraints and hardware resoure constraints to enable a higher degree of software portability and flexibility.
+- A major consideration in constructing VMs is the fidelity with which a virtual machine implements architected interfaces. 
+- They help (computer) security, (application) productivity and (application) portability.
+- Necessary for safe languages: 
+- Memory safety - ensures that a certain type of data in memory follows restrictions on that type.i.e an array never out of bounds.
+- Operation safety - operations on the data follow said restrictions.
+- Control safety - flow of execution never gets stuck or run wild.
+- Provides management of code and data.
+- Application Programming Interface
+- key element is a standard library that an application calls to invoke various services available on the system, including those provided by the OS.
+- enables applications written to th API to be ported easily(via recompilation) to any system that supports the same API.
+- Specifies an abstraction of the details of implementation of services especially those involving privileged hardware.
+- A system is a full execution environment that can simultaneously support a number of processes potentially belonging to different users.
+- It is important to note that equivalent performance is usually not required as part of virtualization.
+- Virtualization thus consists of two parts;
+- Mapping of virtual resources or state i.e registers, memory, files to real resources in the underlying machine.
+- Use of real machine instructions and/or system calls to carry out the actions specified by virtual machine instructions and/or system calls.
+- General classifications
+- Process Vms
+  - translates a set of OS and user-level instructions from one platform to another, forming a process vm capable of executing programs developed for a different OS and ISA.
+  - virtualizing s/w is referred to as runtime, created to support a guest process and runs ontop of an OS.
+  - multiprogramming can be thought of as virtualization, since each process is given illusion of having complete machine to itself.
+- System Vms
+  - provides a complete system environment,support OS along with potential many user processes, providing guest OS withe access to h/w resources.
+  - placed between underlying h/w and conventional s/w, allowing execution of system software developed for different h/w.
             
 ## Types of VMs
 

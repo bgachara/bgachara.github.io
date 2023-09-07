@@ -22,6 +22,7 @@ ref:
 
 *the concepts and design patterns appear at many levels*
 *the better you understand their design and implementation, the better use you'll make of them*
+*Information hiding is a useful productivity enhancement technique after one understands what is going on, but until then, it gets in the way of understanding*
 
 ## Preliminaries
 
@@ -31,6 +32,7 @@ ref:
   domain might not be in another, i.e application nature vs user/company constraints.
 - At a minimum, a software engineer should be knowledgable enough to understand the documents prepared by hardware engineers for using their devices.
 - Documents are essential for learning a problem domain since information can be passed down in a reliable way.
+
 - Most important for software engineers
   - Software requirement document
     - Includes list of requirements(i.e from customer) and a description of the problem domain.
@@ -40,6 +42,7 @@ ref:
     - It states rules relating desired behaviour of the output devices to all possible behaviour of input devices, as well as any rules that other parts of the problem domain must obey.
     - Interface design with constraints for the problem domain to follow.
     - Careful to ensure implementation details do not leak in.
+``
 - Abstraction is a technique for hiding complexity that is irrelevant to the problem in context.
   - A lower layer has a recurring pattern, this pattern is taken out and built a language on top of it.
   - A higher layer strips away layer-specific(non-recurring) details to focus on the recurring details.
@@ -183,26 +186,62 @@ ref:
   - format
     - instruction address:: assembly instruction in raw hex:: assembly instruction:: comment(appears when there is a reference to an address)
 
-
+- Linux file structure
+  - /home -> user home directories
+  - /root -> root user's home directory.
+  - /boot -> boot loader, kernel files.
+  - /etc -> text config files.
+  - /opt -> add-on software packages, third party
+  - /media -> removable media mount location.
+  - /mnt -> temp mounted filesystems
+  - /tmp -> temp files, usually deleted on reboot.
+  - /var -> files that r/w a lot, logs, emails
+  - /var/tmp -> temp files not deleted during reboot.
+  - /sbin -> essential system binaries,avalaible in single user mode.
+  - /bin -> essential binaries
+  - /lib -> libraries for /bin and /sbin.
+  - /dev -> hardware represented as files.
+  - /proc - generated on the fly, process and kernel info
+  - /sys -> info about devices, drivers, kernel
+  - /usr -> things not needed for single user mode.
+  - /usr/bin -> most command binaries
+  - /usr/lib -> libraries for most commands
+  - /usr/local -> stuff specific to this computer.
+  - /usr/local/bin -> binaries for this comp
+  
+  
 ### Booting up computer
 
 - A bootloader is a small program responsible for loading the kernel of an OS.
 - BIOS started.
-- Legacy mode vs EFI mode.
+- Legacy(BIOS) mode vs EFI(Extensible Firmware Interface) mode.
 - BIOS contains routines to assist our bootloader in booting our kernel, they are generic and standard
-- BIOS generally loads itself into RAM then continues execution from RAM.
-- When computer first boots, it is in a compatibility mode called **real mode**, which only gives us 1MB ram and only runs 16-bit code.
-- Bootloader then switches it to 32-bit protected mode.
 - BIOS is 16bit code meaning only 16 bit code can execute in it properly.
-- Checks to see how much RAM is installed and whether basic devices are installed and responding correctly.
-- Starts by scanning ISA and PCI buses to detect devices attached to them.
-- If new devices from last boot, new devices are configured.
 - Determines boot device by checking list of devices stored on CMOS.
 - User can change this list by entering new device into list.
 - First sector from boot device is read into memory and executed.
 - BIOS looks for a bootloader to boot by searching all storage mediums for the boot signature "0x55AA".
 - If the signature exists then the device is a bootable medium.
 - BIOS loads bootloader into RAM at absolute address 0x7c00.
+- BIOS generally loads itself into RAM then continues execution from RAM.
+- When computer first boots, it is in a compatibility mode called **real mode**, which only gives us 1MB ram and only runs 16-bit code, this is based on the original x86 design.
+- In this mode memory access is done through the segmentation model.(use of segments and offsets).
+- Use of code, stack, data and extra segment registers.
+- Address gotten from taking segment register multiplying it by 16 and adding offset.
+- Different instructions use different segment registers.
+- Programs can then be loaded into different areas of memory and run without problems
+- When in real mode we have the same limitations as the older processors from many years ago.
+- Real mode provides no memory security, no hardware security making OS highly vulnerable.
+- When in real mode, only access the 8 bit and 16 bit registers directly.
+- We also can only request memory address offsets of upto 65535 for our given segments.
+- Bootloader then switches it to 32-bit protected mode.
+- Protected mode is a processor state in x86 architectures which gives access to memory and hardware protection, different memory schemes, 4GB address space and much more.
+- Ring 0 - kernel, Ring 1, Ring 2 - not used, Ring 3 - applications.
+- Segment memory becomes selector memory scheme, pointing to data structures that describe memory ranges and permissions required to access them.
+- Paging, memory is virtual, memory protection is easier to control.
+- Checks to see how much RAM is installed and whether basic devices are installed and responding correctly.
+- Starts by scanning ISA and PCI buses to detect devices attached to them.
+- If new devices from last boot, new devices are configured.
 - Examines partition table at the end of boot sector to determine which partition is active.
 - Secondary boot loader is read in from that partition.
 - Reads in the OS from active partition and start it.
@@ -211,6 +250,27 @@ ref:
 - Loads them into kernel once it has all of them.
 - Initializes the tables, creates necessary background processes and starts login program.
 
+
+### GRUB
+
+- One of the boot sources.
+
+### Storage concepts
+
+- File
+- Block
+  - Big chunks of data.
+  - Fast
+  - No metadata.
+  - Filesystems built on top of it.
+- Object
+  - Entire object has UUID.
+  - Slower but cheap.
+
+### Partition types
+
+- GPT, GUID PARTITION TABLE.
+- MBR, MASTER BOOT RECORD
 
 ## Operating system ZOO
 
@@ -505,19 +565,6 @@ ref:
       - advanced form of IPC that work even on two different machines.
   - special files are a way to let certain abstractions fit into the filesystem.
 
-- Filesystems and namespaces
-  - Linux provides a global and unified namespace of files and directories.
-  - A filesystem is a collection of files and directories in a formal and valid hierarchy.
-  - Mounting and unmounting refers to the adding and removing of filesystems from the global namespace
-  - Linux also supports virtual and network filesystems.
-  - The smallest addressable unit of a block device is a sector, physical attribute of the device.
-  - sectors come in powers of 2, block device cannot transfer or access data smaller than a sector and all I/O must occur interms of one or two sectors.
-  - Likewise the smallest addressable unit on a filesystem is the block, which is an abstraction of the filesystem.
-    - A block is usually power-of-two multiple of sector size.
-  - Blocks are larger than sector but they must be smaller than the page size.(smallest addressable unit by memory management unit)
-    - common block sizes are 512 bytes, 1KB and 4KB.
-  - Linux supports per-process namespace as opposed to the global unified namespace preffered by Unix, allowing each process to have a unique view of system file and directory hierarchy.
-  - By default each process inherits namespace of its parent, but a process may elect to create its own namespace with its own set of mount points and a unique root directory
 
 - Mounted file system concept.
 - Special files are provided in order to make i/o devices look like files.
@@ -555,6 +602,9 @@ ref:
     - marshall the syscall id and args in registers and exec syscall.
   - interrupts
     - external asynch event triggers content switch.
+    - They are like subroutines, but you don't need to know memory address to invoke them.
+    - (16 bit)Interrupt Vector Table is a table describing where in memory the interrupts are, each entry is 4 bytes(offset:segment).
+    - 256 interrupt handlers.
     - independent of user process.
     - e.g timer, i/o device
   - exceptions
@@ -714,12 +764,6 @@ ref:
    hiding completely the details of how the device works
 - User activities are performed by means of a set of standardized calls that are independent of the specific driver,
   mapping those calls to device-specific operations that act on real hardware is then the role of the device driver.
-- 
-
-## Process Deep Dive
-
-
-## Windows Fundamentals
 
 ## Performance
 
@@ -930,84 +974,84 @@ ref:
   }
 
 ```
-  - This is an infinite loop.
-    - One could argue that this is all that the OS does.
-    
-  - `Design document and intuitions behind your design, thought through the tradeoffs well enough`
-  - Running a thread
-    - Load its state(registers, PC, stack pointer) into CPU.
-    - Load environment(virtual memory space)
-    - Jump to the PC
+- This is an infinite loop.
+  - One could argue that this is all that the OS does.
   
-  - How does the dispatcher get control back?
-    - Internal events:
-      - thread returns control voluntarily.
-      - Blocking on I/O.
-        - requesting I/O implicity yields the CPU.
-      - Waiting on a signla from other thread
-        - thread asks to wait and thus yields the CPU.
-      - Thread executes a yield()
-        - thread volunteers to yield cpu.
-        
-    - External events: thread gets preempted.
-      - Interrupts
-        - signals from h/w or s/w that stop the running code and jump to kernel.
-        - Interrupt is a hardware-invoked context switch
-          - no separate step to choose what to run next
-          - always run the intrrrupt handler immediately
-      - Timers
-        - like an alaram clock that goes off every some milliseconds.
-    
-    - Interrupt Controller
-      - Interrupt invoked with interrupt lines from devices.
-      - Interrupt controller chooses interrupt request to honor.
-        - Interrupt identity specified with ID line.
-        - Mask enables/disables interrupts
-        - Priority encoder picks highest enabled interrupt
-        - Software interrupt set/cleared by s/w
-      - CPU can disable all interrupts with internal flag
-      - Non-maskable Interrupt line (NMI) cant be disabled.
+- `Design document and intuitions behind your design, thought through the tradeoffs well enough`
+- Running a thread
+  - Load its state(registers, PC, stack pointer) into CPU.
+  - Load environment(virtual memory space)
+  - Jump to the PC
+
+- How does the dispatcher get control back?
+  - Internal events:
+    - thread returns control voluntarily.
+    - Blocking on I/O.
+      - requesting I/O implicity yields the CPU.
+    - Waiting on a signla from other thread
+      - thread asks to wait and thus yields the CPU.
+    - Thread executes a yield()
+      - thread volunteers to yield cpu.
+      
+  - External events: thread gets preempted.
+    - Interrupts
+      - signals from h/w or s/w that stop the running code and jump to kernel.
+      - Interrupt is a hardware-invoked context switch
+        - no separate step to choose what to run next
+        - always run the intrrrupt handler immediately
+    - Timers
+      - like an alaram clock that goes off every some milliseconds.
   
-  - How does dispatcher switch to a new thread?
-    - Save anything next thread may thrash: PC, regs, stack pointer.
-    - Maintain isolation for each thread.
-    - TCB+stacks(user/kernel) contains complete restartable state of thread
-      - can put it on queue for later revival
-    - Cheaper than switching processes
-      - no need to change address space.
-    - Some number from Linux
-      - Freq of context switch: 10-100ms.
-      - Switching between processes: 3-4microsecs
-      - Switching between threads: 100ns
-    - Kernel thread / User thread(stacks available across the environments)
-      - simple one-to-one threading model.
-      - many-to-one.
-      - many-to-many
-  
-  - Processes vs Threads
-    - Switch overhead.
-      - same: low
-      - different: high
-    - Protection
-      - same: low
-      - different: high
-    - Sharing overhead
-      - same: low
-      - different proc, simultaneous core: medium
-      - different proc, offloaded core: high
-    - Parallelism:yes
-  
-  - Hyperthreading / Multithreading.
-    - duplicates register state to make a second thread allowing more instructions to run.
-    - Traditional implementation strategy
-      - One PCB (process struct) per process
-      - Each PCB constains (or stores pointers to) each thread's TCB.
-  
-  - What happends when thread blocks on I/O?
-  - How do we initialize TCB and Stacks?
-  
-  - Threads yield overlapped I/O and computation without deconstructing code into non-blocking fragments.
-    - One thread per request.
+  - Interrupt Controller
+    - Interrupt invoked with interrupt lines from devices.
+    - Interrupt controller chooses interrupt request to honor.
+      - Interrupt identity specified with ID line.
+      - Mask enables/disables interrupts
+      - Priority encoder picks highest enabled interrupt
+      - Software interrupt set/cleared by s/w
+    - CPU can disable all interrupts with internal flag
+    - Non-maskable Interrupt line (NMI) cant be disabled.
+
+- How does dispatcher switch to a new thread?
+  - Save anything next thread may thrash: PC, regs, stack pointer.
+  - Maintain isolation for each thread.
+  - TCB+stacks(user/kernel) contains complete restartable state of thread
+    - can put it on queue for later revival
+  - Cheaper than switching processes
+    - no need to change address space.
+  - Some number from Linux
+    - Freq of context switch: 10-100ms.
+    - Switching between processes: 3-4microsecs
+    - Switching between threads: 100ns
+  - Kernel thread / User thread(stacks available across the environments)
+    - simple one-to-one threading model.
+    - many-to-one.
+    - many-to-many
+
+- Processes vs Threads
+  - Switch overhead.
+    - same: low
+    - different: high
+  - Protection
+    - same: low
+    - different: high
+  - Sharing overhead
+    - same: low
+    - different proc, simultaneous core: medium
+    - different proc, offloaded core: high
+  - Parallelism:yes
+
+- Hyperthreading / Multithreading.
+  - duplicates register state to make a second thread allowing more instructions to run.
+  - Traditional implementation strategy
+    - One PCB (process struct) per process
+    - Each PCB constains (or stores pointers to) each thread's TCB.
+
+- What happends when thread blocks on I/O?
+- How do we initialize TCB and Stacks?
+
+- Threads yield overlapped I/O and computation without deconstructing code into non-blocking fragments.
+  - One thread per request.
 
 - Atomic Operations
   - To understand a concurrent program, we need to know what the underlying indivisible operations are
@@ -1112,25 +1156,27 @@ lock
   
   unlock
 ```
-      - Basic Readers/Writers
-        - Is using a single lock on the database sufficient. 
-        - what are the correctness constraints??
-        - Basic solution
-          - Reader()
-            - Wait until no writers
-            - Access data base
-            - Check out - wake up a waiting writer
-          - Writer()
-            - Wait until no active readers or writers
-            - Access database
-            - Check out - wake up waiting readers or writer
-          - State variables
-            - AR, active readers; =0
-            - WR, waiting readers; = 0
-            - AW, active writers, = 0
-            - WW, waiting writers; = 0
-            - condition okToRead = 0
-            - condition okToWrite = 0
+
+- Basic Readers/Writers
+  - Is using a single lock on the database sufficient. 
+  - what are the correctness constraints??
+  - Basic solution
+    - Reader()
+      - Wait until no writers
+      - Access data base
+      - Check out - wake up a waiting writer
+    - Writer()
+      - Wait until no active readers or writers
+      - Access database
+      - Check out - wake up waiting readers or writer
+    - State variables
+      - AR, active readers; =0
+      - WR, waiting readers; = 0
+      - AW, active writers, = 0
+      - WW, waiting writers; = 0
+      - condition okToRead = 0
+      - condition okToWrite = 0
+
 ```c
  Reader() {
   //first check self into system
@@ -1566,7 +1612,8 @@ lock
 - Segment Descriptors
   - What is a segment register
     - A pointer to the actual segment description
-    - G/L selects between GDT andLDT tables(global vs local descriptor tables)
+    - GDT contains entries telling the CPU about memory segments.
+    - G/L selects between GDT and LDT tables(global vs local descriptor tables)
     - RPL: Requestor privilege level.
   - Two registers: GDTR/LDTR hold pointers to global/local descriptor tables in memory.
     - Descriptor format(64 bits)
@@ -1971,6 +2018,7 @@ lock
 
 - The main purpose of computers is to create, manipulate, store and retrieve data, a file system provides the machinery to support these tasks.
 - At the highest level, a file system is a way to organize, store, retrieve and manage information on a permanent storage medium such as a disk.
+- The problem of storing, retrieving and manipulating information on a computer is of a general enough nature that there are many solutions to the problems.
 - Variable-size buffer(Memory Address) -> Block(Logical Index, typically 4KB) -> Sector(512B or 4KB)
 - A Layer of OS that transforms block interface of disks(or other block devices) into files, directories, etc.
 - Take unlimited h/w interface(array of blocks) and provide a more convenient/useful interface with:
@@ -1988,7 +2036,9 @@ lock
     - Directory: user-visisble mapping names to files.
   - Identify sectors
     - Physical position
-    - Logical Block Addressing
+    - Logical Block Address(LBA)
+      - Rather than specify head track and sector we just specify a number that starts from zero. 
+      - It allows us to read from the disk as if we are reading blocks from a very large file.
   - File system tasks
     - Track free disk blocks
     - Track which blocks contain data for which files
