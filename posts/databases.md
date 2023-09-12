@@ -54,42 +54,43 @@ tags:
 
 - Data models is a collection of concepts for describing the data in a database.
 - A schema is a description of a particular collection of data using a given data model.
+
 - Types:
-  - Relational
-    - Defines a database abstraction based on relations to avoid maintenance overhead.
-      - Store database in simple data structures(relations)
-      - Physical storage left up to the DBMS implementation.
-      - Access data through high-level language, DBMS figures out best execution strategy
-    - Key aspects
-      - Structure: definition of the database realtions and their contents.
-      - Integrity: Ensure the database contents satisfy constraints.
-      - Manipulation: Programming interface for accessing and modifying database contents.
-    - A relation is an unordered set that contain the r/ship of attributes that represent entities.
-    - A tuple is a set of attribute values(domain) in the relation.
-      - Values are normally atomic/scalar
-      - Special value NULL is a member of every domain.
-    - A relations `primary key` uniquely indentifies a single tuple.
-      - some DBMS automatically create an internal primary key if table does not define one via `identity column`.
-      - e.g IDENTITY(sql standard), SEQUENCE(postgres/oracle), AUTO_INCREMENT(mysql)
-    - A `foreign key` specifies that an attribute from one relation has to map to a tuple in another relation.
-      - create a secondary foreign key table relation handler.
-    - Constraints
-      - User-defined conditions that must hold for any instance of the database.
-      - Can validate data within a single tuple or across entire relations.
-      - DBMS prevents modifications that violate any constraint.
-      - Unique key and referential constraints are the most common.
-    - Relational Algebra 
-      - defines the high level steps of how to compute a query
-      - fundamental operations to retrieve and manipulate tuples in a relation.
-  - Key/Value
-  - Graph
-  - Document/ Object
-    - A collection of record documents containing a hierarchy of named field/value pairs.
-    - A field's value can either be a scalar type, an array of values or another document.
-    - Modern implementations use JSON, older ones use XML or custom object representations.
-    - Goal was to avoid relational-object impedance mismatch by tightly coupling objects and database.
-  - Wide Column
-  - Array/ Matrix/ Vector
+- Relational
+  - Defines a database abstraction based on relations to avoid maintenance overhead.
+    - Store database in simple data structures(relations)
+    - Physical storage left up to the DBMS implementation.
+    - Access data through high-level language, DBMS figures out best execution strategy
+  - Key aspects
+    - Structure: definition of the database realtions and their contents.
+    - Integrity: Ensure the database contents satisfy constraints.
+    - Manipulation: Programming interface for accessing and modifying database contents.
+  - A relation is an unordered set that contain the r/ship of attributes that represent entities.
+  - A tuple is a set of attribute values(domain) in the relation.
+    - Values are normally atomic/scalar
+    - Special value NULL is a member of every domain.
+  - A relations `primary key` uniquely indentifies a single tuple.
+    - some DBMS automatically create an internal primary key if table does not define one via `identity column`.
+    - e.g IDENTITY(sql standard), SEQUENCE(postgres/oracle), AUTO_INCREMENT(mysql)
+  - A `foreign key` specifies that an attribute from one relation has to map to a tuple in another relation.
+    - create a secondary foreign key table relation handler.
+  - Constraints
+    - User-defined conditions that must hold for any instance of the database.
+    - Can validate data within a single tuple or across entire relations.
+    - DBMS prevents modifications that violate any constraint.
+    - Unique key and referential constraints are the most common.
+  - Relational Algebra 
+    - defines the high level steps of how to compute a query
+    - fundamental operations to retrieve and manipulate tuples in a relation.
+- Key/Value
+- Graph
+- Document/ Object
+  - A collection of record documents containing a hierarchy of named field/value pairs.
+  - A field's value can either be a scalar type, an array of values or another document.
+  - Modern implementations use JSON, older ones use XML or custom object representations.
+  - Goal was to avoid relational-object impedance mismatch by tightly coupling objects and database.
+- Wide Column
+- Array/ Matrix/ Vector
   
 ### Vector
 
@@ -289,57 +290,58 @@ tags:
 
 - Choose smallest data type for your data.
 - Schema should be honest and represent your data.
-  - Integers
-    - TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT.
-    - Stored in increasing 1 byte apart from BIGINT which is 8 bytes.
-    - Should also specify signed or unsigned.
-    - Number in bracket does nothing to size.
+  
+- Integers
+  - TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT.
+  - Stored in increasing 1 byte apart from BIGINT which is 8 bytes.
+  - Should also specify signed or unsigned.
+  - Number in bracket does nothing to size.
 
-  - Decimals
-    - Store numbers with decimal parts
-    - DECIMAL(exact), FLOAT(approximation)
-    - decimal(10,4)
-    - double is bigger than float, 8 to 4 bytes.
-    - exact types are implemented in the db.
-  
-  - Strings
-    - CHAR, VARCHAR, BINARY, VARBINARY, BLOB, TEXT, ENUM, SET.
-    - CHAR(fixed length), VARCHAR(variable length)
-    - keep eye on collations when choosing character sets.
-    - BINARY mainly used to store hashes.
-    - TEXT, BLOB - large amount of data in character or binary format.
-    - Only select them when you need them.
-  
-  - Enums
-    - range of values a column can take.
-    - sorts by enum position integer starting at 1.
+- Decimals
+  - Store numbers with decimal parts
+  - DECIMAL(exact), FLOAT(approximation)
+  - decimal(10,4)
+  - double is bigger than float, 8 to 4 bytes.
+  - exact types are implemented in the db.
+
+- Strings
+  - CHAR, VARCHAR, BINARY, VARBINARY, BLOB, TEXT, ENUM, SET.
+  - CHAR(fixed length), VARCHAR(variable length)
+  - keep eye on collations when choosing character sets.
+  - BINARY mainly used to store hashes.
+  - TEXT, BLOB - large amount of data in character or binary format.
+  - Only select them when you need them.
+
+- Enums
+  - range of values a column can take.
+  - sorts by enum position integer starting at 1.
     
-  - Dates
-    - DATE(3), DATETIME(8), TIMESTAMP(4), YEAR(1), TIME(3).
-    - TIMESTAMP - (1970 - 2038-01-19)
-    - set session timezone.
-    - TIMESTAMP preffered when it comes to storing and retrieving timezone sensitive data.
-    - CURRENT_TIMESTAMP attribute on column, on update too.
-  
-  - JSON
-    - Mysql validates json.
-    - Special functions for working with json.
-    - can't index on entire json document.
-  
-  - Unexpected types
-    - Booleans sameas tinyint
-    - Zip codes char(10)
-    - IpAddress - function to work with ip-addresses. check them out.
-  
-  - Gnerated columns
-    - use AS(function to obtain value form another column)
-    - better than relying on application code to handle this
-    - read more on this.
-    - has to be deterministic.
-    - Stored vs Virtual.
-  
-  - Schema migrations
-    - maintanable, sharable chnage to schema
+- Dates
+  - DATE(3), DATETIME(8), TIMESTAMP(4), YEAR(1), TIME(3).
+  - TIMESTAMP - (1970 - 2038-01-19)
+  - set session timezone.
+  - TIMESTAMP preffered when it comes to storing and retrieving timezone sensitive data.
+  - CURRENT_TIMESTAMP attribute on column, on update too.
+
+- JSON
+  - Mysql validates json.
+  - Special functions for working with json.
+  - can't index on entire json document.
+
+- Unexpected types
+  - Booleans sameas tinyint
+  - Zip codes char(10)
+  - IpAddress - function to work with ip-addresses. check them out.
+
+- Gnerated columns
+  - use AS(function to obtain value form another column)
+  - better than relying on application code to handle this
+  - read more on this.
+  - has to be deterministic.
+  - Stored vs Virtual.
+
+- Schema migrations
+  - maintanable, sharable chnage to schema
     
 ```sql
 
@@ -357,124 +359,124 @@ BIGINT     - 8  - -2^63
 - Create as many as you need but as few as you can get away with.
 - Queries should drive the number and kind of indexes you need.
 
-  - B+ Tree
-    - most common index ds.
+- B+ Tree
+  - most common index ds.
+
+- Primary Keys
+  - Indexes are automatically created for primary keys.
+  - Always no nullable.
+  - Unsigned, Auto_increment.
+  - One per table.
+  - determine how table is stored on disk, is the table.
+  - clustered index.
+
+- Secondary keys
+  - Any index that is not the primary key.
+  - Secondary index has pointer to the primary index.
+
+- Primary Key data types
+  - have room to grow.
+  - keep an eye on size of index.
+  - unsigned bigints
   
-  - Primary Keys
-    - Indexes are automatically created for primary keys.
-    - Always no nullable.
-    - Unsigned, Auto_increment.
-    - One per table.
-    - determine how table is stored on disk, is the table.
-    - clustered index.
+- Where to add indexes
+  - Effective indexes for each query.
+  - EXPLAIN keyword to get a glimpse into how query is run.
+  - use EXPLAIN to see which indexes are used per query.
+  - order, group, ranges, bounded ranges
+
+- Index selectivity
+  - cardinality, 
+  - column with few distinct values not perfect candidate for indexes.
+
+- Prefix indexes
+  - possible to create an index on only a portion of a column.
+  - use selectivity off the full index to determine how close you can get to original index selectivity by just indexing part of column.
+  - can't be used to sort
+
+- Composite index
+  - indexes on multiple columns
+  - order of definiton crucial to query performance.
+  - access is left-to-right, no skipping, stops at first range
+  - key-len column on index table.
+  - access patterns crucial to consider when defining ci.
+
+- Covering Indexes
+  - is a regular index in a special situation.
+  - when an index supplies all a given query requires.
+
+- Functional Indexes
+  - Index on a function, index something you can't quite reach.
+  - when you wrap a column in a function, MYSQL has no idea what's in there, blackbox essentially.
+  - case of index obsufication.
+  - *case sensitive collation* works well for comparison.
+  - `alter table users add index m((month(birthday)))`
+  - Mysql: 8 and beyond, 5 : use generated column index
   
-  - Secondary keys
-    - Any index that is not the primary key.
-    - Secondary index has pointer to the primary index.
+- Indexing JSON columns
+  - No way to index an entire JSON column in MySQL
+  - `json ->> '$.email'` generated column, unquoting operator
+  - Careful with collation here even after CAST.
   
-  - Primary Key data types
-    - have room to grow.
-    - keep an eye on size of index.
-    - unsigned bigints
-    
-  - Where to add indexes
-    - Effective indexes for each query.
-    - EXPLAIN keyword to get a glimpse into how query is run.
-    - use EXPLAIN to see which indexes are used per query.
-    - order, group, ranges, bounded ranges
+- Indexing for wildcard searches
+  - when searching for substring in a column, indexes can still be used but only unitl the first wildcard.
+
+- Fulltext Indexes
+  - Mysql supports Fulltext searching although not as good as purpose built FTS tools.
+  - add fulltext keyword
+  - syntax match(a,b,c) against (expression)
+  - BOOLEAN mode and NORMAL LANGUAGE mode
+  - relevancy score
   
-  - Index selectivity
-    - cardinality, 
-    - column with few distinct values not perfect candidate for indexes.
+- Invisible indexes
+  - Before you drop an index, you cna make an index invisible to test effects of removing it.
+
+- Duplicate indexes
+  - Because of the way composite indexes work, you may have duplicate and redundant indexes defined.
   
-  - Prefix indexes
-    - possible to create an index on only a portion of a column.
-    - use selectivity off the full index to determine how close you can get to original index selectivity by just indexing part of column.
-    - can't be used to sort
-  
-  - Composite index
-    - indexes on multiple columns
-    - order of definiton crucial to query performance.
-    - access is left-to-right, no skipping, stops at first range
-    - key-len column on index table.
-    - access patterns crucial to consider when defining ci.
-  
-  - Covering Indexes
-    - is a regular index in a special situation.
-    - when an index supplies all a given query requires.
-  
-  - Functional Indexes
-    - Index on a function, index something you can't quite reach.
-    - when you wrap a column in a function, MYSQL has no idea what's in there, blackbox essentially.
-    - case of index obsufication.
-    - *case sensitive collation* works well for comparison.
-    - `alter table users add index m((month(birthday)))`
-    - Mysql: 8 and beyond, 5 : use generated column index
-    
-  - Indexing JSON columns
-    - No way to index an entire JSON column in MySQL
-    - `json ->> '$.email'` generated column, unquoting operator
-    - Careful with collation here even after CAST.
-    
-  - Indexing for wildcard searches
-    - when searching for substring in a column, indexes can still be used but only unitl the first wildcard.
-    - 
-  
-  - Fulltext Indexes
-    - Mysql supports Fulltext searching although not as good as purpose built FTS tools.
-    - add fulltext keyword
-    - syntax match(a,b,c) against (expression)
-    - BOOLEAN mode and NORMAL LANGUAGE mode
-    - relevancy score
-    
-  - Invisible indexes
-    - Before you drop an index, you cna make an index invisible to test effects of removing it.
-  
-  - Duplicate indexes
-    - Because of the way composite indexes work, you may have duplicate and redundant indexes defined.
-    
-  - Foreign Keys
-    - Not the same as foreign key constraints
-    - Allows one to reference data in another table.
-    - Constraints check for referential integrity
-    - column types have to be the same type.
-    - on delete cascade/set null, on update cascade/set null.
-    - constraint in application code.
+- Foreign Keys
+  - Not the same as foreign key constraints
+  - Allows one to reference data in another table.
+  - Constraints check for referential integrity
+  - column types have to be the same type.
+  - on delete cascade/set null, on update cascade/set null.
+  - constraint in application code.
     
 
 ### QUERIES
     
-  - EXPLAIN
-    - Learn to read and interpret the EXPLAIN statement.
-    - Keyword meanings
-      - cost to get first row, cost to get all rows.
-      - rows: number of rows.
-      - width: average width of a row in bytes.
-      - loops: number of loops in each row
-      - Buffers: blocks read and write, in cache(hit/read) and outside(write), measured in blocks
-      - Filter:
-      - Rows removed by Filter:
-    - Major scan modes
-      - Sequential scan
-        - read all the tables in sequential order
-      - Index scan
-        - read the index to filter on the WHERE clause and table to filter invsible rows.
-      - Bitmap Index scan
-        - same, but read fully the index and then the table, much quicker for a bigger number of rows.
-      - Index only scan
-        - for covering indexes
-    - Join types
-      - Hash join
-        - only equality join
-        - really quick with enough memory
-        - but slow start
-      - Merge join
-        - sort, then merge.
-        - slow start with no index
-        - quickest on big data sets
-      - Nested loop
-        - for small tables
-        - easy to start, hard to quit. 
+- EXPLAIN
+  - Learn to read and interpret the EXPLAIN statement.
+  - Keyword meanings
+    - cost to get first row, cost to get all rows.
+    - rows: number of rows.
+    - width: average width of a row in bytes.
+    - loops: number of loops in each row
+    - Buffers: blocks read and write, in cache(hit/read) and outside(write), measured in blocks
+    - Filter:
+    - Rows removed by Filter:
+  - Major scan modes
+    - Sequential scan
+      - read all the tables in sequential order
+    - Index scan
+      - read the index to filter on the WHERE clause and table to filter invsible rows.
+    - Bitmap Index scan
+      - same, but read fully the index and then the table, much quicker for a bigger number of rows.
+    - Index only scan
+      - for covering indexes
+  - Join types
+    - Hash join
+      - only equality join
+      - really quick with enough memory
+      - but slow start
+    - Merge join
+      - sort, then merge.
+      - slow start with no index
+      - quickest on big data sets
+    - Nested loop
+      - for small tables
+      - easy to start, hard to quit. 
+
 ```sql
 
 EXPLAIN SELECT * FROM foo;
@@ -501,178 +503,175 @@ Seq scan on foo () Buffers: shared read=8334
 
 ```
   
-  - Explain access type
-    - Const - unique look up
-    - Ref - index use
-    - range - equality
-    - index - scan entire index
-    - all - scan entire table.
-    - look them up in documentation.
+- Explain access type
+  - Const - unique look up
+  - Ref - index use
+  - range - equality
+  - index - scan entire index
+  - all - scan entire table.
+  - look them up in documentation.
+
+- Explain Analyze
+  - gives more detail to work with as compared to traditional EXPLAIN output.
+  - can change format i.e format=tree, format=json
+  - explain analyze runs the query
+
+- Index Obfuscation
+  - happens when you wrap a column with a function.
+  - always work on the right side of the query to avoid this, leave column alone.
+
+- Redundant and Approximate conditions
+  - Impossible to index a condition correctly.
+  - Use a redundant condition to help narrow down records quickly.
+  - should be logically correct.
   
-  - Explain Analyze
-    - gives more detail to work with as compared to traditional EXPLAIN output.
-    - can change format i.e format=tree, format=json
-    - explain analyze runs the query
+- Select only what you need.
+  - especially for large data format fields.
+  - check ActiveRecord model for hrams of this.
+  - invisible keyword to exclude from default SELECT * unless explicitly called.
+
+- Limiting rows
+  - onyl return rows to remain performant.
+  - look for calculations or operations that can be done in the DB.
+  - slect count(*) and select *
+  - accompany your LIMIT with ORDER BY.
   
-  - Index Obfuscation
-    - happens when you wrap a column with a function.
-    - always work on the right side of the query to avoid this, leave column alone.
-  
-  - Redundant and Approximate conditions
-    - Impossible to index a condition correctly.
-    - Use a redundant condition to help narrow down records quickly.
-    - should be logically correct.
-    
-  - Select only what you need.
-    - especially for large data format fields.
-    - check ActiveRecord model for hrams of this.
-    - invisible keyword to exclude from default SELECT * unless explicitly called.
- 
-  - Limiting rows
-    - onyl return rows to remain performant.
-    - look for calculations or operations that can be done in the DB.
-    - slect count(*) and select *
-    - accompany your LIMIT with ORDER BY.
-    
-  - Joins
-    - `select * from users(left table) join locations(right table) on users.id=locations.manager_id;`
-    - default is inner join(left matches right and has results on both)
-    - left join(all results on left table)
-    - right join(all results on right table)
-  
-  - Indexing Joins
-    - combining joins efficiently.
-    - *relook at this
+- Joins
+  - `select * from users(left table) join locations(right table) on users.id=locations.manager_id;`
+  - default is inner join(left matches right and has results on both)
+  - left join(all results on left table)
+  - right join(all results on right table)
+
+- Indexing Joins
+  - combining joins efficiently.
+  - *relook at this
 
 *chapter 8 of MySql documentation on optimization*
 
-  - Subqueries
-    - can be used in place of joins.
-    - used to either include or remove results of a query based on another query,
-    - semi-join, anti-join
-    - where exists, where not in,
-    
-  - Common Table Expressions(CTEs)
-    - powerful way to refactor complicated queries into more readbale versions.
-    - with table_name as (insert query)
-    - run only once.
+- Subqueries
+  - can be used in place of joins.
+  - used to either include or remove results of a query based on another query,
+  - semi-join, anti-join
+  - where exists, where not in,
   
-  - Recursive CTEs
-    - CTE that references itself 
-    - can be used to generate new data or work with existing data.
-    - use recursive keyword.
+- Common Table Expressions(CTEs)
+  - powerful way to refactor complicated queries into more readbale versions.
+  - with table_name as (insert query)
+  - run only once.
+
+- Recursive CTEs
+  - CTE that references itself 
+  - can be used to generate new data or work with existing data.
+  - use recursive keyword.
+
+- Unions
+  - puts the results one on top of the other as opposed to joins which match them.
+  - union all ignores duplicates
+
+- Window Functions
+  - Allow you to work on a subset of rows related to the current row while query is being processed.
+  - row_number() over()
+  - produce ranked lists, 
+  - named windows
+  - maintains individual rows even after processing
+
+- Sorting and Limiting
+  - order by....default asc
+  - limit ... not deterministic.
+
+- Sorting with indexes
+  - don't sort your rows if you dont need them sorted.
+  - either via index or after results have been returned(filesort).
+  - can create a desc index.
   
-  - Unions
-    - puts the results one on top of the other as opposed to joins which match them.
-    - union all ignores duplicates
-    - 
+- Sorting with composite indexes
+  - order remains ad definition.
+  - index and query have to be the same.
+
+- Counting results
+  - count(*) - count as fast as you can.
+  - include a function inside count function
   
-  - Window Functions
-    - Allow you to work on a subset of rows related to the current row while query is being processed.
-    - row_number() over()
-    - produce ranked lists, 
-    - named windows
-    - maintains individual rows even after processing
-  
-  - Sorting and Limiting
-    - order by....default asc
-    - limit ... not deterministic.
-  
-  - Sorting with indexes
-    - don't sort your rows if you dont need them sorted.
-    - either via index or after results have been returned(filesort).
-    - can create a desc index.
-    
-  - Sorting with composite indexes
-    - order remains ad definition.
-    - index and query have to be the same.
-  
-  - Counting results
-    - count(*) - count as fast as you can.
-    - include a function inside count function
-    
-  - Dealing with NULL
-    - use <=> operator to get NULL out of column.
-    - also called null safety operator.
-    - ifnull(), coalesce(preffered, default, fallback)
+- Dealing with NULL
+  - use <=> operator to get NULL out of column.
+  - also called null safety operator.
+  - ifnull(), coalesce(preffered, default, fallback)
 
 ### MISC EXAMPLES
 
-  - MD5 Hash
-    - create a very fast lookup on very large values.
-    - can work on multiple columns
-    - GENERATED ALWAYS AS()
-    - good for strcit equality and constraint esp on logical units across columns
+- MD5 Hash
+  - create a very fast lookup on very large values.
+  - can work on multiple columns
+  - GENERATED ALWAYS AS()
+  - good for strcit equality and constraint esp on logical units across columns
+
+- Bitwise Operations
+  - use the 8 bits to represent different states i.e flags
+  - implementation side vs interface side.
+  - *very cool stuff*
+
+- Timestamps versus booleans
+  - when storing a boolean it is sometimes desirable to know when it was turned on/off.
+  - timestamp null
+  - *look more*
   
-  - Bitwise Operations
-    - use the 8 bits to represent different states i.e flags
-    - implementation side vs interface side.
-    - *very cool stuff*
+- Claiming rows
+  - application needs to claim rows for processing.
+  - set owner
   
-  - Timestamps versus booleans
-    - when storing a boolean it is sometimes desirable to know when it was turned on/off.
-    - timestamp null
-    - *look more*
-    
-  - Claiming rows
-    - application needs to claim rows for processing.
-    - set owner
-    
-  - Summary table
-    - also known as rollup table.
-    - (*)
-    
-  - Meta Tables
-    - wide tables with many columns can be expensive to query and maintain.
-    - makes sense to put them in a secondary table.
-    - blob, json ,text columns for example.
-    
-  - Offset limit pagination
-    - has to be deterministic.
-    - 
-    - Offset/limit method most common.
-    - pages may drift as they are looking at them.
-    - formula = page * offset.
-    - to show pages have to know how many they are.
-    - next button reliant on whether an extra record exists.
+- Summary table
+  - also known as rollup table.
+  - (*)
   
-  - Cursor pagination
-    - keep track of some record of state...i.e id, token.
-    - can't directly address a page
-    - great for infinite scroll.
-    - anything you order by should be in cursor
+- Meta Tables
+  - wide tables with many columns can be expensive to query and maintain.
+  - makes sense to put them in a secondary table.
+  - blob, json ,text columns for example.
   
-  - Deferred Joins
-    - offset/limit performant as you reach deeper pages.
-    - 
+- Offset limit pagination
+  - has to be deterministic.
+  - Offset/limit method most common.
+  - pages may drift as they are looking at them.
+  - formula = page * offset.
+  - to show pages have to know how many they are.
+  - next button reliant on whether an extra record exists.
+
+- Cursor pagination
+  - keep track of some record of state...i.e id, token.
+  - can't directly address a page
+  - great for infinite scroll.
+  - anything you order by should be in cursor
+
+- Deferred Joins
+  - offset/limit performant as you reach deeper pages.
+
+- Geographic searches
+  - ST_DISTANCE_SPHERE function
+  - bouding box of a point.
   
-  - Geographic searches
-    - ST_DISTANCE_SPHERE function
-    - bouding box of a point.
-    
 
 ### ENGINES
   
-  - Divided by core functionality
-    - Supported field and data types.
-    - Locking types.
-    - Indexing
-    - Transactions.
-  
-  - Include:
-    - MyISAM
-      - read heavy.
-      - lacks transactions capabilities.
-    - Merge
-    - Memory
-    - Federated
-    - Archive
-    - Csv
-    - Blackhole
-    - Berkeley DB
-    - InnoDB
-      - Full transaction functionality support
-      - Row level locking     
+- Divided by core functionality
+  - Supported field and data types.
+  - Locking types.
+  - Indexing
+  - Transactions.
+
+- Include:
+  - MyISAM
+    - read heavy.
+    - lacks transactions capabilities.
+  - Merge
+  - Memory
+  - Federated
+  - Archive
+  - Csv
+  - Blackhole
+  - Berkeley DB
+  - InnoDB
+    - Full transaction functionality support
+    - Row level locking     
       
 ## Evaluation Criteria
 
@@ -746,6 +745,38 @@ Seq scan on foo () Buffers: shared read=8334
 - Query results.
 
 
+### Query Engine
+
+- How to build one
+- The first step in building a query engine is to choose a type system to represent the different types of data that the query engine will process.
+  - One option is to invent a proprietary type system specific to the query engine.
+  - Another option is to use the type system of the data source that the query engine is designed to qiery from.
+- Row-based or columnar
+  - see `Volcano Query Planner`
+- Create an interface that the query engine can use to interact with data sources.
+  - files, databases, in-memory objects.
+- Logical plans and expressions.
+  - each logical plan can have zero or more logical plans as inputs.
+  - printing logical plans.
+  - serialization
+  - Logical expressions
+  - Column expressions
+  - Literal expressions
+  - Binary expressions, comparison, boolean, math.
+  - Scan
+  - Projection
+  - Filter
+  - Aggregate
+- Dataframe API
+  - build logical query plans in a much more user-friendly way.
+- Physical plans and expressions.
+- Query planning
+- Query optimizations.
+- Query execution.
+- Parallel query execution
+- Distributed query execution.
+ 
+
 ## MySQL structure
 
 - SQL Interface
@@ -784,6 +815,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 
 **Query Planning -> Operator Execution -> Access Methods -> Buffer Pool Manager -> Disk Manager**.
 
+
 ## Storage
 
 ### Disk based Architecture 
@@ -809,86 +841,109 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Specialized prefetching.
   - Buffer replacement policy.
   - Thread/process scheduling.
-- Problems: 
-  - transaction safety.
-  - i/o stalls
-  - error handling.
-  - performance issues.
+
+- Memory-mapped I/O Problems
+  - Transaction safetY.
+    - OS can flush dirty pages at any time.
+  - I/O Stalls
+    - DBMS does not know which pages are in memory, this will stall a thread on page fault.
+  - Error Handling.
+    - It's difficult to validate pages, any access can cause a SIGBUS that the DBMS must handle.
+  - Performance Issues.
+    - OS data structure contention, TLB shootdowns.
+  
+- Solutions to the above problems
+  - `madvise` - Tell the OS how you expect to read certain pages.
+  - `mlock` - Tell the OS that memory ranges cannot be paged out.
+  - `msync` - Tell the OS to flush memory ranges out to disk.
+  
 - Main Questions of database storage
   - How the DBMS represents the database in files on disk?
   - How the DBMS manages its memory and moves data back-and-forth from disk?
 
 ### File Storage
 
-- stores a db as one or more files on disk typically in a proprietary format to the db.
+- Stores a db as one or more files on disk typically in a proprietary format to the db.
 - OS doesn't know anything about the contents of these files.
 
 ### Storage Manager
 
-- responsible for maintaining a database files.
-- some do their own scheduling for reads and writes to improve spatial and temporal locality of pages.
-- organizes the files as a collection of pages, tracks data read/written to pages and tracks available space.
+- It is responsible for maintaining a database files.
+  - Some do their own scheduling for reads and writes to improve spatial and temporal locality of pages.
+- It organizes the files as a collection of pages, tracks data read/written to pages and tracks available space.
+- A DBMS typically does not maintain multiple copies of a page on disk.
 
 ### Database pages
 
-- Page is a fixed-size block of data.
-- can contain tuples, meta-data, indexes and long records but not together, page types not mixed.
-- page may be self contained.
-- each page is given a unique identifier, indirection layer to map page IDs to physical locations.
-- Largest block of data that storage can guarantee failsafe writes. atomicity unit.
-- 512B - 16KB
-- H/w page - 4kb
-- OS page - 4kb too.
+- A page is a fixed-size block of data.
+- It can contain tuples, meta-data, indexes and long records but not together, page types not mixed, 
+- Some systems require a page to be self contained, containing all data and metadata relating to it is in the page.
+- Each page is given a unique identifier, the DBMS uses an indirection layer to map page IDs to physical locations.
+- A hardware page is the largest block of data that storage can guarantee failsafe writes. atomicity unit.
+
+- Notions of pages
+  - H/w page - 4KB
+  - OS page - 4KB too.
+  - DB page - 512B-32KB
+- Larger pages ideal to maximise sequential access to data, writes then become more expensive.
 
 ### Page storage Architecture
 
+- The different DBMSs manage pages in files on disk in different ways, not ideally knowing anything about what is inside of the pages.
 - Heap File Organisation
-  - unordered collection of pages with tuples that are stored in random order.
-  - support create/ get/ write/ delete page also iteration over pages.
-  - maintains special pages that tracks the location of data pages in the database file: page directory.
+  - This is an unordered collection of pages with tuples that are stored in random order.
+  - Support create/ get/ write/ delete page also iteration over pages.
+  - Page directory
+    - The DBMS maintains special pages that tracks the location of data pages in the database file, making sure directory pages are in sync with the data pages. 
+    - It also records meta-data about the available space: free-slots per page, free/empty pages
 - Tree File Organisation
 - Sequential / Sorted File organisation
 - Hashing File Organisation
 
 ### Page Structure
 
-- Page header
-  - contains metadata about the pages content
-  - page size
-  - checksum
-  - dbms version
-  - transaction visibility
-  - compression information
-  - some systems require pages to self-contained(Oracle).
+- Every pages contains a header with metadata about the pages contents.
+  - Page size
+  - Checksum
+  - Dbms version
+  - Transaction visibility
+  - Compression / Encoding meta-data.
+  - Schema Information.
+  - Data summary / sketches.
+  - Some systems require pages to self-contained(Oracle).
 
-- Page Layout
-  
-  - Tuple oriented
-    - slotted pages.
-    - header keeps track of used slots and offset from the starting location of the last slot used.
-    - record ids 
-      - keep track of individual tuples
-      - each tuple is assigned a unique record identifier, page_id + offset/slot.
-      - e.g ctid in postres, file:page:slot in mysql
-      - can run Vacuum in postgres to clean tuple pages.
-    - Tuple layout
-      - sequence of bytes, job of DBMS to interpret those bytes into attribute types and values.
-      - prefixed with a header that contain meta-data and attribute data.
-      - dont need to store meta-data about the schema.
-      - DBMS can physically denormalize related tuples and store them together in the same page. reduce i/o but make updates expensive.
-    - Insert a new Tuple
-      - check page directory to find a page with a free slot.
-      - retrieve the page from disk
-      - check slot array to find empty space in page that will fit.
-    - Update an existing tuple using record id.
-      - check page directory to find location of page.
-      - retrieve page from disk.
-      - find offset in page using slot array.
-      - overwrite existing data(if new data fits)
-    - Problems
-      - fragmentation
-      - useless disk i/o
-      - random disk i/o
+
+### Page Layout
+
+- Page storage architectures need to decide how data is organized inside the page.
+- Tuple oriented
+  - The most common layout scheme is called slotted pages.
+  - The slot array maps slots to the tuples' starting position offsets.
+  - The header keeps track of number used slots and offset from the starting location of the last slot used.
+  - DBMS assigns each logical tuple a unique `record identifier` that represents its physical location in the database. 
+    - page_id + offset/slot.
+    - e.g ctid in postres(6 bytes), file:page:slot in mysql
+    - SQLite uses ROWID(8 bytes) as the true primary key and stores them as a hidden attribute. 
+    - You can run Vacuum in postgres to clean tuple pages, i.e `VACCUM FULL table_name`
+    - Applications should never rely on these IDs to mean anything, as they can be affected by compaction, vacuuming or garbage collection.
+  - Tuple layout
+    - A tuple is a sequence of bytes, it's job of the DBMS to interpret those bytes into attribute types and values.
+    - Each tuple is prefixed with a header that contain meta-data and attribute data, i.e visibility info(concurrency control), Bitmap for NULL values.
+    - We don't need to store meta-data about the schema.
+    - DBMS can physically denormalize related tuples and store them together in the same page. reduce i/o but make updates expensive.
+  - Insert a new Tuple
+    - check page directory to find a page with a free slot.
+    - retrieve the page from disk
+    - check slot array to find empty space in page that will fit.
+  - Update an existing tuple using record id.
+    - check page directory to find location of page.
+    - retrieve page from disk.
+    - find offset in page using slot array.
+    - overwrite existing data(if new data fits)
+  - Problems
+    - fragmentation
+    - useless disk i/o
+    - random disk i/o
   
   - Log-structured Storage
     - stores log records that contain changes to tuples(put, delete).
@@ -992,7 +1047,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 
 ### Hybrid storage model.
 
-- use separate execution engones that are optimized for either NSM or DSM databases.
+- Use separate execution engones that are optimized for either NSM or DSM databases.
   - store new data in NSM for fast OLTP.
   - Migrate data to DSM for more efficient OLAP.
   - Combine query results from both engines to appear as a single logical database to the application
@@ -1041,6 +1096,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
             - Whether an attribute has all unique values or contain repeated values
           - Clustering/Sorting
             - Whether the table is pre-sorted on the attributes accessed in a query's predicates.
+        
         - Zone Maps
           - ref paper:`small materialized aggregates: a lightweight index structure for data warehousing`
           - pre-computed aggregates for the attribute values in a block of tuples.
@@ -1050,6 +1106,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
           - Zone Maps are only useful when the target attribute's position and values are correlated.
             - if scope is too large, then the zone maps will be useless.
             - if scope is too small, DBMS will spend too much time checking zone maps.
+        
         - BitMap Indexes
           - ref paper:`model 204 architecture and performance`
           - store a separate Bitmap for each unique value for an attribute where an offset in the vector corresponds to a tuple.
@@ -1084,9 +1141,11 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
                         - Row-oriented storage at the bit-level.
                       - Vertical 
                         - Column-oriented storage at the bit-level.
+          
           - Column Imprints
             - ref paper:`column imprints: a secondary index structure.`
             - Store a bitmap that indicated whether there is a bit set at a bit-slice of cache-line values.
+          
           - Column Sketches
             - ref paper:`column sketches: a scan accelration for rapid and robust predicate evaluation`
             - a variation of range-encoded bitmaps that uses a smaller sketch cdes to indicate that a tuple's value exists in a range.
@@ -1243,8 +1302,8 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 
 ### Buffer replacement policies
 
-- when DBMS needs to free up a frame to make room for a new page, it must decide which page to evict from buffer pool.
-- goals:
+- When DBMS needs to free up a frame to make room for a new page, it must decide which page to evict from buffer pool.
+- Goals:
   - correctness
   - accuracy
   - speed
@@ -1324,180 +1383,182 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - uses a hash function to compute an offset into this array for a given key, from which the desired value can be found.
   - space complexity o(n), Time complexity: average O(1), worst O(n)
   
-  - Static Hash Table:
-    - allocate a giant array that has one slot for every element you need to store.
-    - to find an entry, mod the key by the number of elements to find offset in the array.
-    - Assumptions:
-      - number of elements is known ahead of time and fixed.
-      - each key is unique
-      - perfect hash function
+- Static Hash Table:
+  - allocate a giant array that has one slot for every element you need to store.
+  - to find an entry, mod the key by the number of elements to find offset in the array.
+  - Assumptions:
+    - number of elements is known ahead of time and fixed.
+    - each key is unique
+    - perfect hash function
+
+- Design Decisions:
+  - Hash Function
+    - how to map a large key space into a smaller domain
+    - trade-off between being fast vs collision rate.
+  - Hashing Scheme
+    - how to handle key collisions after hashing
+    - trade-off between allocating a large hash table vs additional instructions to get/put keys.
   
-  - Design Decisions:
-    - Hash Function
-      - how to map a large key space into a smaller domain
-      - trade-off between being fast vs collision rate.
-    - Hashing Scheme
-      - how to handle key collisions after hashing
-      - trade-off between allocating a large hash table vs additional instructions to get/put keys.
-  
-  - Hash Functions
-    - For any input key, return an integer representation of that key.
-    - We dont want to use a cryptograhic hash function for DBMS hash tables
-    - desire fast and low collision rates
-    - Namely:
-      - CRC-64 (1975) - used in networking for error detections
-      - MurmurHash (2008) - fast, general purpose hash function
-      - Google CityHash (2011) - faster for shorter keys
-      - *FB XXHash (2012) - creator of zstd compression
-      - Google FarmHash (2014) - newer version of CityHash with better collision rates
+- Hash Functions
+  - For any input key, return an integer representation of that key.
+  - We dont want to use a cryptograhic hash function for DBMS hash tables
+  - desire fast and low collision rates
+  - Namely:
+    - CRC-64 (1975) - used in networking for error detections
+    - MurmurHash (2008) - fast, general purpose hash function
+    - Google CityHash (2011) - faster for shorter keys
+    - *FB XXHash (2012) - creator of zstd compression
+    - Google FarmHash (2014) - newer version of CityHash with better collision rates
       
-  - Static Hashing Schemes
-    - *Linear Probe Hashing
-      - also known as open addressing
-      - single giant table of slots
-      - resolve collisions by linealry searching for the next free slot in the table.
-      - inserts and deletions are generalizations of lookups.
-      - Non-unique Keys
-        - Separate Linked List
-        - Redundant Keys
+- Static Hashing Schemes
+  - Linear Probe Hashing
+    - also known as open addressing
+    - single giant table of slots
+    - resolve collisions by linealry searching for the next free slot in the table.
+    - inserts and deletions are generalizations of lookups.
+    - Non-unique Keys
+      - Separate Linked List
+      - Redundant Keys
         
-    - Robin Hood Hashing
-      - Variant of linear probe hashing that steals slots from rich keys and give them to poor keys.
-      - difference from initial position and move the rest to equidistant position.
-    
-    - Cuckoo Hashing
-      - use multiple hash tables awith different hash function seeds.
-      - one insert, check every table and pick anyone that has a free slot, if no table has a free slot, evict element from one of them and re-hash it to find a new location.
-      - look-ups and deletions are always because only one location per hash table is checked.
+  - Robin Hood Hashing
+    - Variant of linear probe hashing that steals slots from rich keys and give them to poor keys.
+    - difference from initial position and move the rest to equidistant position.
+  
+  - Cuckoo Hashing
+    - use multiple hash tables awith different hash function seeds.
+    - one insert, check every table and pick anyone that has a free slot, if no table has a free slot, evict element from one of them and re-hash it to find a new location.
+    - look-ups and deletions are always because only one location per hash table is checked.
     
 - *above hash tables require the DBMS to know the number of elements it wants to store, otherwise needs to rebuild the table if it needs to grow.shrink in size*.
   
-  - Dynamic Hashing Schemes
-    - Chained Hashing
-      - maintain a linked list of buckets for each slot in the hash table.
-      - resolve collisions by placing all elements with the same hash key into the same bucket.
-    - Extendible Hashing 
-      - multiple slot locations can point to the same bucket chain
-      - reshuffle bucket entries on split and increase the number of bits to examine.
-    - Linear Hashing
-      - maintains a pointer that tracks the next bucket to split
-        - when bucket overflows, split the bucket at the pointer location
-      - use multiple hashes to find the right bucket for a given key.
-      - can use different overflow criterion
-        - space utilization.
-        - average lenght of overflow chains.
-      - splitting buckets based on the split pointer will eventually get to all overflowed buckets. 
+- Dynamic Hashing Schemes
+  - Chained Hashing
+    - maintain a linked list of buckets for each slot in the hash table.
+    - resolve collisions by placing all elements with the same hash key into the same bucket.
+  - Extendible Hashing 
+    - multiple slot locations can point to the same bucket chain
+    - reshuffle bucket entries on split and increase the number of bits to examine.
+  - Linear Hashing
+    - maintains a pointer that tracks the next bucket to split
+      - when bucket overflows, split the bucket at the pointer location
+    - use multiple hashes to find the right bucket for a given key.
+    - can use different overflow criterion
+      - space utilization.
+      - average lenght of overflow chains.
+    - splitting buckets based on the split pointer will eventually get to all overflowed buckets. 
   
-  - B+ Trees
+- B+ Trees
+  
+- This is a self-balancing tree data structure that keeps data sorted and allows searches, sequential access, insertions and deletions always in 0(log n)
+- Generalization of a binary search tree, since a node can have more than two children.
+- optimized for systems that read and write large blocks of data.
+- mostly used for table indexes
+- A tableindex is a replica of a subset of a table's attributes that are organised and/or sorted for efficient access using those attributes.
+- DBMS ensure that contents of the table and the index are logically synchronized.
+- It's the DBMS job to figure out the best indexes to use to execute each query.
+- There is a trade-off regarding the number of indexes to creaeper database
+  - storage overhead
+  - maintenance overhead
+- *the ubiquitous b-tree*, *efficient locking for concurrent ops on b-trees*
+  
+- Properties: 
+  - M-way search tree.
+  - its perfectly balanced, every leaf node is at the same depth in the tree.
+  - every node other than the root is at least half-full.(M/2-1 < #keys < M-1)
+  - every inner node with k keys has k+1 non-null children
+
+- Structure
+  - comprised of an array of key/value pairs
+  - keys are derived from the attributes that index is based on
+  - values will differ based on whether the node is classified as an inner node or a leaf node.
+  - arrays are kept in sorted key order, usually.
+  - leaf node values
+    - record IDs
+      - a pointer to the location of the tuple to which the index entry corresponds
+    - tuple data
+      - leaf nodes store the actual contents of the tuple
+      - secondary indexes must store the record ID as their values.
+  - original b-tree stored jeys and values in all nodes in the tree
+  - b+ tree only stores values in leaf nodes, inner nodes only guide search.
+  - consistent with implementation
+  - duplicate keys
+    - Append record ID.
+    - Overflow leaf nodes  
     
-    - This is a self-balancing tree data structure that keeps data sorted and allows searches, sequential access, insertions and deletions always in 0(log n)
-    - Generalization of a binary search tree, since a node can have more than two children.
-    - optimized for systems that read and write large blocks of data.
-    - mostly used for table indexes
-    - A tableindex is a replica of a subset of a table's attributes that are organised and/or sorted for efficient access using those attributes.
-    - DBMS ensure that contents of the table and the index are logically synchronized.
-    - It's the DBMS job to figure out the best indexes to use to execute each query.
-    - There is a trade-off regarding the number of indexes to creaeper database
-      - storage overhead
-      - maintenance overhead
-    - *the ubiquitous b-tree*, *efficient locking for concurrent ops on b-trees*
+  - Clustered Indexes
+    - table is stored in sort order specified by the primary key.
+    - can either heap or index organized storage.
+    - some DBMS always use a clustered index.
+      - if a table doesnt contain primary key, DBMS will automatically make a hidden primary key.
+    - other DBMS cannot use them at all.
+    - clustered B+ tree
+  
+  - Index scan page sorting
+    - retrieving tuples in the order the appear in a non-clustered index due to redundant reads
+    - the DBMS can first figure out all the tuples that it needs and then sort them based on the page ID.
     
-    - Properties: 
-      - M-way search tree.
-      - its perfectly balanced, every leaf node is at the same depth in the tree.
-      - every node other than the root is at least half-full.(M/2-1 < #keys < M-1)
-      - every inner node with k keys has k+1 non-null children
+  - Covering Indexes
+  
+- Design Choices
+  - Node size 
+    - the slower the storage device the larger the optimal node size of a B+ tree.
+    - optimal sizes can vary depending on the workload.
+    - leaf node scans vs root-to-leaf traversals
+  - Merge Threshold
+  - Variable-length keys
+    - Pointer
+    - Varibale lenght nodes
+    - Padding
+    - Key Map /Indirection 
+  - Intra-node search
+    - Linear
+      - use SIMD to vectorize comparisons
+    - Binary
+      - jump to middle, pivot left/right depending on comparison
+    - Interpolation
+      - approx location of desired key based on known distribution of keys.
     
-    - Structure
-      - comprised of an array of key/value pairs
-      - keys are derived from the attributes that index is based on
-      - values will differ based on whether the node is classified as an inner node or a leaf node.
-      - arrays are kept in sorted key order, usually.
-      - leaf node values
-        - record IDs
-          - a pointer to the location of the tuple to which the index entry corresponds
-        - tuple data
-          - leaf nodes store the actual contents of the tuple
-          - secondary indexes must store the record ID as their values.
-      - original b-tree stored jeys and values in all nodes in the tree
-      - b+ tree only stores values in leaf nodes, inner nodes only guide search.
-      - consistent with implementation
-      - duplicate keys
-        - Append record ID.
-        - Overflow leaf nodes  
-      
-      - Clustered Indexes
-        - table is stored in sort order specified by the primary key.
-        - can either heap or index organized storage.
-        - some DBMS always use a clustered index.
-          - if a table doesnt contain primary key, DBMS will automatically make a hidden primary key.
-        - other DBMS cannot use them at all.
-        - clustered B+ tree
-      
-      - Index scan page sorting
-        - retrieving tuples in the order the appear in a non-clustered index due to redundant reads
-        - the DBMS can first figure out all the tuples that it needs and then sort them based on the page ID.
-        
-      - Covering Indexes
+- Optimizations
+  - Prefix compression
+  - Deduplication
+  - Suffix Truncation
+  - Pointer Swizzling
+  - Bulk Insert
+  - Buffer Updates
     
-    - Design Choices
-      - Node size 
-        - the slower the storage device the larger the optimal node size of a B+ tree.
-        - optimal sizes can vary depending on the workload.
-        - leaf node scans vs root-to-leaf traversals
-      - Merge Threshold
-      - Variable-length keys
-        - Pointer
-        - Varibale lenght nodes
-        - Padding
-        - Key Map /Indirection 
-      - Intra-node search
-        - Linear
-          - use SIMD to vectorize comparisons
-        - Binary
-          - jump to middle, pivot left/right depending on comparison
-        - Interpolation
-          - approx location of desired key based on known distribution of keys.
-      
-      - Optimizations
-        - Prefix compression
-        - Deduplication
-        - Suffix Truncation
-        - Pointer Swizzling
-        - Bulk Insert
-        - Buffer Updates
-    
-  ## Concurrent Control
+
+## Concurrent Control
    
-  - Assumption has been all DS that we've discussed so far are single-threaded, but a DBMS needs to allow multiple threads to safely access DS to take advantage of CPU core and hide I/O disk stalls.
-  - Concurrency control protocol is the mehtod that DBMS uses to ensure correct results for concurrent operations on a shared object
-  - Protocol correctness criteria can vary:
-    - Logical correctness: can thread see data it is not supposed to see.
-    - *Physical correctness: is IR of the object sound
-  - Locks vs Latches
+- Assumption has been all DS that we've discussed so far are single-threaded, but a DBMS needs to allow multiple threads to safely access DS to take advantage of CPU core and hide I/O disk stalls.
+- Concurrency control protocol is the mehtod that DBMS uses to ensure correct results for concurrent operations on a shared object
+- Protocol correctness criteria can vary:
+  - Logical correctness: can thread see data it is not supposed to see.
+  - Physical correctness: is IR of the object sound
+- Locks vs Latches
+
+- Latch Modes
+  - Read Mode
+  - Write Mode  
+
+- Latch Implementations
+  - Blocking OS mutex.
+  - Reader-writer latches
+
+ - Hash Table Latching
+  - Page Latches
+  - Slot Latches  
   
-  - Latch Modes
-    - Read Mode
-    - Write Mode  
-  
-  - Latch Implementations
-    - Blocking OS mutex.
-    - Reader-writer latches
-  
-   - Hash Table Latching
-    - Page Latches
-    - Slot Latches  
-    
-  - B+ Tree concurrency control
-    - multiple threads to read and update the b+ tree.
-    - Latch crabbing/coupling
-      - allow access/modify
-      - latch parent, latch child, release if parent is safe.
-      - a safe node is one that will not split or merge on update
-      - fifo release style.
-      - better latching algorithm
-    - Leaf noe scanning concurrency
-    - Latches do not support deadlock detection or avoidance, only via coding discipline
+- B+ Tree concurrency control
+  - multiple threads to read and update the b+ tree.
+  - Latch crabbing/coupling
+    - allow access/modify
+    - latch parent, latch child, release if parent is safe.
+    - a safe node is one that will not split or merge on update
+    - fifo release style.
+    - better latching algorithm
+  - Leaf noe scanning concurrency
+  - Latches do not support deadlock detection or avoidance, only via coding discipline
+
 *Making a data structure thread-safe is notoriously difficult in practice*
 
 > OPERATOR EXECUTION
@@ -1588,81 +1649,82 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - DBMS engineering is an orchestration of a bunch of optimizations that seek to make full use of hardware.
 - There is not a single technique that is more important than others.
  
-  - Optimization goals
-    - Reduce Instruction Count
-      - use fewer instructions to do the same amount of work.
-    - Reduce cycles per instruction
-      - execute more CPU instructions in fewer cycles.
-    - Paralleliza execution
-      - use multiple threads to compute each query in parallel.
-      
-  - Processing Models
-    - defines how the system executes a query plan
-    - different trade-offs for different workloads
+- Optimization goals
+  - Reduce Instruction Count
+    - use fewer instructions to do the same amount of work.
+  - Reduce cycles per instruction
+    - execute more CPU instructions in fewer cycles.
+  - Paralleliza execution
+    - use multiple threads to compute each query in parallel.
     
-    - Approaches:
-      - Iterator Model
-        - also known as volcano or pipeline model.
-        - each query olan operator implements a Next() function.
-        - used in almost every DBMS, allows for tuple pipelining.
-        - some operators must block until their children emit all their tuples, joins, subqueries, order by.
-      - Materialization Model
-        - Each operator processes its input all at once and then emits its output all at once.
-        - Better for OLTP workloads because queries only access a small number of tuples at a time. 
-        - Not good for OLAP with large intermediate results.
-        - The output can be either whole tuples (NSM) or subsets of columns(DSM).
-      - Vectorized / Batch Model
-        - each operator emits a batch of tuples instead of a single tuple
-        - ideal for OLAP / data warehouses because it greatly reduces the number of invocations per operator.
-        - allows for opearators to more easily use SIMD to process batches of tuples.
+- Processing Models
+  - defines how the system executes a query plan
+  - different trade-offs for different workloads
   
-  - Plan Processing Direction
-    - ref paper:`push vs pull-based loop fusion in query engines`
-    - Top-to-Bottom
-      - start with the root and pull data up from its children
-      - tuples are always passed with function calls.
-    - Bottom-to-Top
-      - start with lead nodes and push data to their parents
-      - allows for tighter control of caches/registers in pipelines.
+  - Approaches:
+    - Iterator Model
+      - also known as volcano or pipeline model.
+      - each query olan operator implements a Next() function.
+      - used in almost every DBMS, allows for tuple pipelining.
+      - some operators must block until their children emit all their tuples, joins, subqueries, order by.
+    - Materialization Model
+      - Each operator processes its input all at once and then emits its output all at once.
+      - Better for OLTP workloads because queries only access a small number of tuples at a time. 
+      - Not good for OLAP with large intermediate results.
+      - The output can be either whole tuples (NSM) or subsets of columns(DSM).
+    - Vectorized / Batch Model
+      - each operator emits a batch of tuples instead of a single tuple
+      - ideal for OLAP / data warehouses because it greatly reduces the number of invocations per operator.
+      - allows for opearators to more easily use SIMD to process batches of tuples.
   
-  - Access Methods
-    - This is the way DBMS access the data stored in a table
-    - Approaches
-      - Sequential
-        - Optimizations
-          - Prefetching
-          - Buffer Pool Bypass
-          - Parallelization
-          - Heap Clustering
-          - Late Materialization
-          - Data Skipping
-            - Approximate Queries (Lossy)
-              - execute queries on a sampled subset of the entire table to produce approxiate results
-            - Zone Maps (Loseless)
-              - pre-computed aggregates for the attribute values in a page. DBMS checks zone map first to decide whether it wants to access the page
-      - Index Scan
-        - DBMS picks an index to find the tuples that the query needs.
-        - Depends on:
-          - What attributes the index contains
-          - What attributes the query references
-          - Attribute's value domains
-          - Predicate composition
-          - Whether the index has unique or non-unique keys
-      - Multi-Index Scan
-        - multiple indexes that the DBMS can use for a query.
-  - Modification Queries
-    - operators that modify the database(INSERT, UPDATE, DELETE) are responsible for modifying the target table and its indexes.
-      - constraint checks can either happen immediately inside of operator or deferred until later in query/transaction.
-    - Halloween problem
-      - anomaly where an update operations chages the physical location of a tuple which causes a scan operator to visit the tuple multiple times.
-      - track modified record ids per query.
-      
-  - Expression Evaluation
-    - represents a WHERE clause as an expression tree.
-    - nodes in the tree represent different expression types
-      - comparisons, conjuction, arithmetic operators, constant values, tuple attribute references.
-  
-  - JIT compilation can potentially speed times up.
+- Plan Processing Direction
+  - ref paper:`push vs pull-based loop fusion in query engines`
+  - Top-to-Bottom
+    - start with the root and pull data up from its children
+    - tuples are always passed with function calls.
+  - Bottom-to-Top
+    - start with lead nodes and push data to their parents
+    - allows for tighter control of caches/registers in pipelines.
+
+- Access Methods
+  - This is the way DBMS access the data stored in a table
+  - Approaches
+    - Sequential
+      - Optimizations
+        - Prefetching
+        - Buffer Pool Bypass
+        - Parallelization
+        - Heap Clustering
+        - Late Materialization
+        - Data Skipping
+          - Approximate Queries (Lossy)
+            - execute queries on a sampled subset of the entire table to produce approxiate results
+          - Zone Maps (Loseless)
+            - pre-computed aggregates for the attribute values in a page. DBMS checks zone map first to decide whether it wants to access the page
+    - Index Scan
+      - DBMS picks an index to find the tuples that the query needs.
+      - Depends on:
+        - What attributes the index contains
+        - What attributes the query references
+        - Attribute's value domains
+        - Predicate composition
+        - Whether the index has unique or non-unique keys
+    - Multi-Index Scan
+      - multiple indexes that the DBMS can use for a query.
+
+- Modification Queries
+  - operators that modify the database(INSERT, UPDATE, DELETE) are responsible for modifying the target table and its indexes.
+    - constraint checks can either happen immediately inside of operator or deferred until later in query/transaction.
+  - Halloween problem
+    - anomaly where an update operations chages the physical location of a tuple which causes a scan operator to visit the tuple multiple times.
+    - track modified record ids per query.
+    
+- Expression Evaluation
+  - represents a WHERE clause as an expression tree.
+  - nodes in the tree represent different expression types
+    - comparisons, conjuction, arithmetic operators, constant values, tuple attribute references.
+
+- JIT compilation can potentially speed times up.
   
 ## Parallel Query Execution
 
@@ -1679,173 +1741,176 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - resources close vs far from each other
   - resources communicate fast vs slow.
   - comminication cheap and reliable vs very opposite.
+
 - Process Models
   - how system is architectured to support concurrent requests ftom a multi-user application
   - worker is the DBMS component that is responsible for executing tasks on behalf of the client and returnin the results.
-  - Approach:
-    - Process per DBMS worker
-      - each process is a separate OS process.
-      - relies on OS scheduler.
-      - uses hared memory for gloabl data structures.
-    - Thread per DBMS worker
-      - single process with multiple worker threads.
-      - DBMS manages its own scheduling
-      - may or not use a dispatcher thread.
-      - thread crash may kill the entire system.
-      - Query Scheduling
-        - How many tasks should it use?
-        - How many CPU cores should it use.
-        - What CPU core should the tasks eecute on
-        - Where should a task store its output
-      - DBMS always knows more than the OS.
-      - Scheduling Goals
-         - Throughput
-          - maximise the number of completed queries.
-         - Fairness
-          - Ensure that no query is starved for resources.
-         - Query Responsiveness
-          - Minimize tail latencies(especially for short queries)
-         - Low Overhead
-          - Workers should spend most of their time executing not figuring out what task to run next.
-      - Worker Allocation
-        - Approach: 
-          - One worker per core
-            - each core is assigned one thread that is pinned to that core in the OS.
-            - sched_setaffinity
-          - Multiple workers per core
-            - Use a pool of workers per core or per socket.
-            - Allows CPU cores to be fully utilized in case one worker at a core blocks.
-      - Task Assignment
+  
+- Approach:
+  - Process per DBMS worker
+    - each process is a separate OS process.
+    - relies on OS scheduler.
+    - uses hared memory for gloabl data structures.
+  - Thread per DBMS worker
+    - single process with multiple worker threads.
+    - DBMS manages its own scheduling
+    - may or not use a dispatcher thread.
+    - thread crash may kill the entire system.
+    - Query Scheduling
+      - How many tasks should it use?
+      - How many CPU cores should it use.
+      - What CPU core should the tasks eecute on
+      - Where should a task store its output
+    - DBMS always knows more than the OS.
+    - Scheduling Goals
+       - Throughput
+        - maximise the number of completed queries.
+       - Fairness
+        - Ensure that no query is starved for resources.
+       - Query Responsiveness
+        - Minimize tail latencies(especially for short queries)
+       - Low Overhead
+        - Workers should spend most of their time executing not figuring out what task to run next.
+    - Worker Allocation
+      - Approach: 
+        - One worker per core
+          - each core is assigned one thread that is pinned to that core in the OS.
+          - sched_setaffinity
+        - Multiple workers per core
+          - Use a pool of workers per core or per socket.
+          - Allows CPU cores to be fully utilized in case one worker at a core blocks.
+    - Task Assignment
+      - Approach:
+        - Push
+          - A centralized dispatcher assigns taks to workers and monitors their progress.
+          - When the worker notifies the dispatcher that it is finished, it is given a new task.
+        - Pull
+          - Workers pull the next task form a queue, process it and then return to get the next task.
+    - The DBMS scheduler must be aware of its hardware memory layout
+      - Uniform vs Non-Uniform Memory Access.
+    - Data Placement
+      - DBMS can partition memory for a database and assign each partition to a CPU.
+      - By controlling and tracking the location of partitions, it can schedule operators to execute on workers at the closest CPU core.
+      - Linux move_pages and numactl
+    - Memory Allocation
+      - What happens when the DBMS calls malloc?
+        - Assume that the allocator doesnt already have a chunk of memory that is an give out.
+        - Almost nothing!
+          - The allocator will extend the process data segment
+          - But this new virtual memory is not immediately backed by physical memory
+          - OS allocates physical memory when there is a page fault on access.
+        - After a page fault, where does theOS allocate physical memory in a NUMA system.
+      - Memory Allocation Location
         - Approach:
-          - Push
-            - A centralized dispatcher assigns taks to workers and monitors their progress.
-            - When the worker notifies the dispatcher that it is finished, it is given a new task.
-          - Pull
-            - Workers pull the next task form a queue, process it and then return to get the next task.
-      - The DBMS scheduler must be aware of its hardware memory layout
-        - Uniform vs Non-Uniform Memory Access.
-      - Data Placement
-        - DBMS can partition memory for a database and assign each partition to a CPU.
-        - By controlling and tracking the location of partitions, it can schedule operators to execute on workers at the closest CPU core.
-        - Linux move_pages and numactl
-      - Memory Allocation
-        - What happens when the DBMS calls malloc?
-          - Assume that the allocator doesnt already have a chunk of memory that is an give out.
-          - Almost nothing!
-            - The allocator will extend the process data segment
-            - But this new virtual memory is not immediately backed by physical memory
-            - OS allocates physical memory when there is a page fault on access.
-          - After a page fault, where does theOS allocate physical memory in a NUMA system.
-        - Memory Allocation Location
-          - Approach:
-            - Interleaving
-              - Distribute allocated memory uniformly across CPUs
-            - First Touch
-              - at the CPU of the thread that access the memory location that caused the page fault.
-          - OS can try to move memory to another NUMA region from observed access patterns.
-      - Partitionin vs Placement
-        - A partitioning scheme is used to split the database based on some policy
-          - Round-robin
-          - Attribute Ranges
-          - Hashing
-          - Partial/Full Replication
-        - A placement scheme then tell the DBMS where to put those partitions
-          - Round-robin
-          - Interleave across cores
-      - How do we decide how to create a set of tasks from a logical query plan?
-        - Static scheduling
-          - DBMS decided how many threads to use to execute the query when it generates the plan.
-          - It does not change while the query executes
-            - Easiest approach is to just use the same # of tasks as the # of cores.
-            - Can still assing tasks to threads based on data location to maximize local data processing.
-        - Morsel-driven scheduling
-          - ref paper: `morsel-driven parallelism: numa-aware query evaluation framewrok for the many-core age`
-          - Dynamic scheduling of tasks that operate over horizontal partitions called morsels distributed across cores
-            - One worker per core.
-            - One morseld per task.
-            - Pull-based task assignment.
-            - Round-robin data placement
-          - Supports parallel, NUMA-aware operator implementations.
-          - Because there is only one worker per core and oe morsel per task, HyPer must use work stealing because otherwise threads could sit idle waiting for stragglers
-          - DBMS uses a lock-free has table to maintain the global work queues.
-          - Tasks can have different execution costs per tuple
-            - Simple selection vs string matching
-          - HyPer has no notion of execution priorities...
-            - Short-running queries get blocked behind long-running queries
-            - All query tasks are executed with same priority
-          - Umbra - Morsel scheduling 2.0
-            - ref paper:`self-tuning query scheduling for analytical workloads`
-            - taks are not created statically at runtime.
-            - each task may contain multiple morsels.
-            - implementation of stride scheduling
-              - each worker maintains its own thread-local meta-data about the available tasks to execute.
-                - active slots - which entries in the global slot arrat have active task sets available.
-                - change mask - indicates when a new task set is added to the global slot array.
-                - return mask - indicates when a worker completes a task set.
-              - workers perform CaS updates to TLS meta-data to broadcasr changes
-            - priority decay - query arrival times.
-        - SAP HANA - NUMA-AWARE SCHEDULER
-          - ref paper: `scaling up concurrent main-memory column store scans:towards adaptive numa-aware data and task placement`
-          - pull-based scheduling with multiple worker threads that are organized into groups
-            - each CPU can have multiple groups
-            - each group has a soft and hard priority queue
-          - uses a separate "watchdog" thread to check whether groups are saturated and can reassingn tasks dynamically.
-          - DBMS maintains soft and hard priority task queues for each thread group.
-            - threads can steal tasks from other groups soft queue
-          - Four different pools of thread per group
-            - Working: actively executing a task.
-            - Inactive: blocked inside of the kernel due to a latch
-            - Free: Sleeps for a little, wake up to see whether there is a new task to execute.
-            - Parked: Waiting for a task(free thread) but blocked in the kernel until the watchdog thread wakes it up.
-          - Dynamically adjust thread pinning based on whether a task is CPU or memory bound.
-      - *SQLOS* 
-        - user-level OS layer that runs inside the DBMS and manages provisioned hardware resources.
-          - determines which taks are schedules onto which threads.
-          - Also manages I/O scheduling and higher-level concepts like logical database locks.
-          - ref: `Ms sql server 2012 interals`
-        - Non-preemptive thread scheduling through instrumented DBMS code.
-      - If requests arrive at the DBMS faster than it can execute them, then the system becomes overloaded.
-        - The OS cannot help us here bacause it does not know what threads are doing
-          - CPU bound: do nothing
-          - memory bound:oom
-        - Easiest DBMS solution: Crash
-        - Approach:
-          - Admission control
-            - abort new requests whwn the system believes that it will not have enough resources to execute that request.
-          - Throttling
-            - delay responses ro clients to increase amount of time between requests
-            - assumes a synchronous submission scheme.
-    - Embedded worker
-      - runs inside the same address space as the application
-      - application is responsible for threads and scheduling
-      - application may support outside connections, BerkeleyDB, SQLite, RocksDB, LevelDB.
-    - Process models
-      - adavantages of multi-thread
-        - less overhead per context switch
-        - do not have to manage shread memory.
-        - thread per worker does not mean that DBMS supports intra-query parallelism
-    - Inter vs Intra Query Parallelism
-      - Inter: 
-        - Execute multiple disparate queries simultaneously
-        - increases throughput and reduces latency
-        - if read-ony then this requires almost no explicit co-ord between queries.
-        - hard if updating tables.
-        - OLAP queries have parallelizable and non-parallelizable phases, goal is to keep all cores active.
-      - Intra: 
-        - Execute the operations of a single query in parallel
-        - improve the performance of a single query by executing its operators in parallel.
-        - there are parallel versions of every operator.
-        - decreases latency for long-running queries esp for OLAP queries.
-        - Approaches
-          - Intra-operator(Horizontal)
-            - inserts an exchange operator into the query plan to coalesce/split results from multiple parent/child.
-            - types: Gather, Distribute, Repartition
-          - Inter-operator(Vertical)
-            - also called pipeline parallelism.
-          - Bushy
-            - Hybrid of Intra and Inter
+          - Interleaving
+            - Distribute allocated memory uniformly across CPUs
+          - First Touch
+            - at the CPU of the thread that access the memory location that caused the page fault.
+        - OS can try to move memory to another NUMA region from observed access patterns.
+    - Partitioning vs Placement
+      - A partitioning scheme is used to split the database based on some policy
+        - Round-robin
+        - Attribute Ranges
+        - Hashing
+        - Partial/Full Replication
+      - A placement scheme then tell the DBMS where to put those partitions
+        - Round-robin
+        - Interleave across cores
+    - How do we decide how to create a set of tasks from a logical query plan?
+      - Static scheduling
+        - DBMS decided how many threads to use to execute the query when it generates the plan.
+        - It does not change while the query executes
+          - Easiest approach is to just use the same # of tasks as the # of cores.
+          - Can still assing tasks to threads based on data location to maximize local data processing.
+      - Morsel-driven scheduling
+        - ref paper: `morsel-driven parallelism: numa-aware query evaluation framewrok for the many-core age`
+        - Dynamic scheduling of tasks that operate over horizontal partitions called morsels distributed across cores
+          - One worker per core.
+          - One morseld per task.
+          - Pull-based task assignment.
+          - Round-robin data placement
+        - Supports parallel, NUMA-aware operator implementations.
+        - Because there is only one worker per core and oe morsel per task, HyPer must use work stealing because otherwise threads could sit idle waiting for stragglers
+        - DBMS uses a lock-free has table to maintain the global work queues.
+        - Tasks can have different execution costs per tuple
+          - Simple selection vs string matching
+        - HyPer has no notion of execution priorities...
+          - Short-running queries get blocked behind long-running queries
+          - All query tasks are executed with same priority
+        - Umbra - Morsel scheduling 2.0
+          - ref paper:`self-tuning query scheduling for analytical workloads`
+          - taks are not created statically at runtime.
+          - each task may contain multiple morsels.
+          - implementation of stride scheduling
+            - each worker maintains its own thread-local meta-data about the available tasks to execute.
+              - active slots - which entries in the global slot arrat have active task sets available.
+              - change mask - indicates when a new task set is added to the global slot array.
+              - return mask - indicates when a worker completes a task set.
+            - workers perform CaS updates to TLS meta-data to broadcasr changes
+          - priority decay - query arrival times.
+      - SAP HANA - NUMA-AWARE SCHEDULER
+        - ref paper: `scaling up concurrent main-memory column store scans:towards adaptive numa-aware data and task placement`
+        - pull-based scheduling with multiple worker threads that are organized into groups
+          - each CPU can have multiple groups
+          - each group has a soft and hard priority queue
+        - uses a separate "watchdog" thread to check whether groups are saturated and can reassingn tasks dynamically.
+        - DBMS maintains soft and hard priority task queues for each thread group.
+          - threads can steal tasks from other groups soft queue
+        - Four different pools of thread per group
+          - Working: actively executing a task.
+          - Inactive: blocked inside of the kernel due to a latch
+          - Free: Sleeps for a little, wake up to see whether there is a new task to execute.
+          - Parked: Waiting for a task(free thread) but blocked in the kernel until the watchdog thread wakes it up.
+        - Dynamically adjust thread pinning based on whether a task is CPU or memory bound.
+    - SQLOS 
+      - user-level OS layer that runs inside the DBMS and manages provisioned hardware resources.
+        - determines which taks are schedules onto which threads.
+        - Also manages I/O scheduling and higher-level concepts like logical database locks.
+        - ref: `Ms sql server 2012 interals`
+      - Non-preemptive thread scheduling through instrumented DBMS code.
+    - If requests arrive at the DBMS faster than it can execute them, then the system becomes overloaded.
+      - The OS cannot help us here bacause it does not know what threads are doing
+        - CPU bound: do nothing
+        - memory bound:oom
+      - Easiest DBMS solution: Crash
+      - Approach:
+        - Admission control
+          - abort new requests whwn the system believes that it will not have enough resources to execute that request.
+        - Throttling
+          - delay responses ro clients to increase amount of time between requests
+          - assumes a synchronous submission scheme.
+  - Embedded worker
+    - runs inside the same address space as the application
+    - application is responsible for threads and scheduling
+    - application may support outside connections, BerkeleyDB, SQLite, RocksDB, LevelDB.
+  - Process models
+    - adavantages of multi-thread
+      - less overhead per context switch
+      - do not have to manage shread memory.
+      - thread per worker does not mean that DBMS supports intra-query parallelism
+  - Inter vs Intra Query Parallelism
+    - Inter: 
+      - Execute multiple disparate queries simultaneously
+      - increases throughput and reduces latency
+      - if read-ony then this requires almost no explicit co-ord between queries.
+      - hard if updating tables.
+      - OLAP queries have parallelizable and non-parallelizable phases, goal is to keep all cores active.
+    - Intra: 
+      - Execute the operations of a single query in parallel
+      - improve the performance of a single query by executing its operators in parallel.
+      - there are parallel versions of every operator.
+      - decreases latency for long-running queries esp for OLAP queries.
+      - Approaches
+        - Intra-operator(Horizontal)
+          - inserts an exchange operator into the query plan to coalesce/split results from multiple parent/child.
+          - types: Gather, Distribute, Repartition
+        - Inter-operator(Vertical)
+          - also called pipeline parallelism.
+        - Bushy
+          - Hybrid of Intra and Inter
             
-    - Using additional processes/threads to execute queries in parallel wont help if the disk is always the main bottleneck.
+  - Using additional processes/threads to execute queries in parallel wont help if the disk is always the main bottleneck.
+
 - Execution Parallelism
 - I/O Parallelism
   - split the DBMS across multiple storage devices to improve disk bandwidth latency.
@@ -1855,6 +1920,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - one relation per disk.
     - split relation across multiple disks
   - some dbms support this natively, others require admin to configure outside of DBMS.
+
 - Database Partitioning
   - some DBMS allow you to specify the disk location of each individual database.
   - *discussed further below*
@@ -1864,116 +1930,122 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Concurrency Issues
   - Resource Contention.
 
+
 ## Vectorised Query Execution
   
-  - The process of converting an algorithm's scalar implementation that processes a single pair of operands at a time, to a vector implementation that processes one 
-    operation on multiple pairs of operands at once.
-  - Why this matters
-    - say we can parallelize our algorithms over 32 cores, assume each core has a 4-wide SIMD registers, speed-up 32x * 4x = 128x.
-  - Single Instruction, Multiple Data
-    - a class of CPU instructions that allow the processor to perform the same operation on multiple data points simultaneously.
-    - all major ISAs have microarchitecture support SIMD operations
-      - x86: mmx, sse, sse2, sse3, sse4, avx, avx2, avx512
-      - PowerPC: Altivec
-      - ARM: Neon, SVE
-      - RISC-V: RVV.
-  - Approaches
-    - Horizontal
-      - Perform operation on all elements together within a single vector.
-    - Verical
-      - Perform operation in an elementwise manner on elements of each vector.
-  - SIMD Instructions
-    - Data movement
-      - move data in and out of vector registers
-    - Arithmetic Operations
-      - apply operation on multiple data items.
-      - ADD, MUL, SUB, DIV, MAX, MIN.
-    - Logical Instructions
-      - logical operations on multiple data items.
-      - AND, OR, XOR, ANDN, ANDPS, ANDNPS.
-    - Comparison Instructions
-      - Compare multiple data items
-    - Shuffle Instructions
-      - move data between SIMD registers
-    - Miscellaneous
-      - Conversion: Transform data between x86 and SIMD registers.
-      - Cache Control: move data directly from SIMD registers to memory(bypass CPU cache)
-    - ref video:`james reinders`
-  - SIMD Trade-offs
-    - Advantages
-      - Significant performance gains and resource utilization if an algorithm can be vectorized.
-    - Disadvantage
-      - Implement an algorithm using SIMD is still mostly a manual process.
-      - SIMD may have restrictions on data alignment
-      - Gathering data into SIMD registers and scattering it to the correct locations is tricky and/or inefficient.(no longer true in avx-512f)
-      - *read more on avx-512*
-  - SIMD Implementations
-    - Automatic Vectorization
-      - compiler can identify when instructions inside of a loop can be rewritten as a vectorized operations.
-      - works for simple loops only and is rare in database operators. Require h/w support for SIMD instructions.
-    - Compiler Hints
-      - provide the compiler with additional information about the code to let it know that its safe to vectorize.
-      - Approaches:
-        - Give explicit information about memory locations
-        - Tell the compiler to ignore vector dependencies.
-        - *check languages support for such directives*
-    - Explicit Vectorization
-      - Use CPU intrinsics to manually marshal data between SIMD registers and execute vectorized instructions
-        - not portable across CPUs(ISAs / versions)
-      - There are libraries that hide the underlying calls to SIMD intrinsics.
-        - Google Highway
-        - simd
-        - Expressive Vector Engine
-        - std::simd
-  - There are fundamental SIMD operations that the DBMS will use to build more complex functionality
-    - Masking
-      - Almost all avx-512 operations support predication variants whereby the CPU only performs operations on lanes specified by an input bitmask.
-    - Permute
-      - for each lane, copy values in the input vector specified by the offset in the index vector into the destination vector.
-      - prior to avx-512, DBMS had to write data from the SIMD register to memory then back to the SIMD register.
-    - Selective Load/Store
-    - Compress/Expand
-    - Selective Gather/Scatter
-    - ref paper:`make the most out of your smid investments: counter control flow divergence in compiled query pipelines`
-  - Vectorized DBMS algorithms
-    - ref paper:`rethinking simd vectorization for in-memory databases`
-    - principles for efficient vectorization by using fundamental vector operations to construct more advanced functionality.
-      - favor vertical vectorization by processing different input data per lane.
-      - maximize lane utilization by executing unique data items per lane subset(no useless computations)
-    - vectorized operators
-      - Selection Scans
-        - branchless.
-        - key - mask - offset.
-        - bitmasks replace if-clauses.
-        - relaxed operator fusion
-          - ref paper:`relaxed operator fusion for in-memory databases: making compilation, vectorization and prefetching work together at last`
-          - vectorized processing model designed for query compilation execution engines.
-          - decompose pipelines into stages that operate on vectors of tuples
-            - each stage may contain multiple operators
-            - communicate through cache-resident buffers
-            - stages are granularity of vectorization + fusion.
-          - dbms can tell the CPU to grab the next vector while it works on the current batch.
-            - prefetch enabled operators define start of new stage
-            - hides the cache miss latency
-          - any prefetching technique is suitable
-            - group prefetching, s/w pipelining, AMAC.
-            - Group prefetching works and is simple to implement.
-      - Hash Tables
-        - expand linear probing hash table
-        - converge on cache size degradation
-      - Partitioning / Histograms.
-        - use scatter and gathers to increment counts
-        - replicate the histogram to handle collisions.
-  - Caveat Emptor
-    - AVX-512 is not always faster than AVX2
-    - Some CPUs downgrade their clockspeed when switching to AVX-512 mode
-      - compilers will prefer 256-bit SIMD operations
-    - If only a small portion of the process uses AVX-512, then it is not worth the downclock penalty.
-  - Vecrozation is essential for OLAP queries
-  - We can combine all the intra-query parallelism optimizations we've talked about in a DBMS
-    - Multiple threads processinf the same query.
-    - Each thread can execute a compiled plan
-    - The compiled plan can invoke vectorized operations.
+- The process of converting an algorithm's scalar implementation that processes a single pair of operands at a time, to a vector implementation that processes one 
+  operation on multiple pairs of operands at once.
+- Why this matters
+  - say we can parallelize our algorithms over 32 cores, assume each core has a 4-wide SIMD registers, speed-up 32x * 4x = 128x.
+- Single Instruction, Multiple Data
+  - a class of CPU instructions that allow the processor to perform the same operation on multiple data points simultaneously.
+  - all major ISAs have microarchitecture support SIMD operations
+    - x86: mmx, sse, sse2, sse3, sse4, avx, avx2, avx512
+    - PowerPC: Altivec
+    - ARM: Neon, SVE
+    - RISC-V: RVV.
+- Approaches
+  - Horizontal
+    - Perform operation on all elements together within a single vector.
+  - Vertical
+    - Perform operation in an elementwise manner on elements of each vector.
+
+- SIMD Instructions
+  - Data movement
+    - move data in and out of vector registers
+  - Arithmetic Operations
+    - apply operation on multiple data items.
+    - ADD, MUL, SUB, DIV, MAX, MIN.
+  - Logical Instructions
+    - logical operations on multiple data items.
+    - AND, OR, XOR, ANDN, ANDPS, ANDNPS.
+  - Comparison Instructions
+    - Compare multiple data items
+  - Shuffle Instructions
+    - move data between SIMD registers
+  - Miscellaneous
+    - Conversion: Transform data between x86 and SIMD registers.
+    - Cache Control: move data directly from SIMD registers to memory(bypass CPU cache)
+  - ref video:`james reinders`
+- SIMD Trade-offs
+  - Advantages
+    - Significant performance gains and resource utilization if an algorithm can be vectorized.
+  - Disadvantage
+    - Implement an algorithm using SIMD is still mostly a manual process.
+    - SIMD may have restrictions on data alignment
+    - Gathering data into SIMD registers and scattering it to the correct locations is tricky and/or inefficient.(no longer true in avx-512f)
+    - *read more on avx-512*
+
+- SIMD Implementations
+  - Automatic Vectorization
+    - compiler can identify when instructions inside of a loop can be rewritten as a vectorized operations.
+    - works for simple loops only and is rare in database operators. Require h/w support for SIMD instructions.
+  - Compiler Hints
+    - provide the compiler with additional information about the code to let it know that its safe to vectorize.
+    - Approaches:
+      - Give explicit information about memory locations
+      - Tell the compiler to ignore vector dependencies.
+      - *check languages support for such directives*
+  - Explicit Vectorization
+    - Use CPU intrinsics to manually marshal data between SIMD registers and execute vectorized instructions
+      - not portable across CPUs(ISAs / versions)
+    - There are libraries that hide the underlying calls to SIMD intrinsics.
+      - Google Highway
+      - simd
+      - Expressive Vector Engine
+      - std::simd
+
+- There are fundamental SIMD operations that the DBMS will use to build more complex functionality
+  - Masking
+    - Almost all avx-512 operations support predication variants whereby the CPU only performs operations on lanes specified by an input bitmask.
+  - Permute
+    - for each lane, copy values in the input vector specified by the offset in the index vector into the destination vector.
+    - prior to avx-512, DBMS had to write data from the SIMD register to memory then back to the SIMD register.
+  - Selective Load/Store
+  - Compress/Expand
+  - Selective Gather/Scatter
+  - ref paper:`make the most out of your smid investments: counter control flow divergence in compiled query pipelines`
+
+- Vectorized DBMS algorithms
+  - ref paper:`rethinking simd vectorization for in-memory databases`
+  - principles for efficient vectorization by using fundamental vector operations to construct more advanced functionality.
+    - favor vertical vectorization by processing different input data per lane.
+    - maximize lane utilization by executing unique data items per lane subset(no useless computations)
+  - vectorized operators
+    - Selection Scans
+      - branchless.
+      - key - mask - offset.
+      - bitmasks replace if-clauses.
+      - relaxed operator fusion
+        - ref paper:`relaxed operator fusion for in-memory databases: making compilation, vectorization and prefetching work together at last`
+        - vectorized processing model designed for query compilation execution engines.
+        - decompose pipelines into stages that operate on vectors of tuples
+          - each stage may contain multiple operators
+          - communicate through cache-resident buffers
+          - stages are granularity of vectorization + fusion.
+        - dbms can tell the CPU to grab the next vector while it works on the current batch.
+          - prefetch enabled operators define start of new stage
+          - hides the cache miss latency
+        - any prefetching technique is suitable
+          - group prefetching, s/w pipelining, AMAC.
+          - Group prefetching works and is simple to implement.
+    - Hash Tables
+      - expand linear probing hash table
+      - converge on cache size degradation
+    - Partitioning / Histograms.
+      - use scatter and gathers to increment counts
+      - replicate the histogram to handle collisions.
+
+- Caveat Emptor
+  - AVX-512 is not always faster than AVX2
+  - Some CPUs downgrade their clockspeed when switching to AVX-512 mode
+    - compilers will prefer 256-bit SIMD operations
+  - If only a small portion of the process uses AVX-512, then it is not worth the downclock penalty.
+- Vectorization is essential for OLAP queries
+- We can combine all the intra-query parallelism optimizations we've talked about in a DBMS
+  - Multiple threads processinf the same query.
+  - Each thread can execute a compiled plan
+  - The compiled plan can invoke vectorized operations.
     
 ## Query Planning and Optimization
 
