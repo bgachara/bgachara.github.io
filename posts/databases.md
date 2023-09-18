@@ -333,7 +333,7 @@ tags:
   - Zip codes char(10)
   - IpAddress - function to work with ip-addresses. check them out.
 
-- Gnerated columns
+- Generated columns
   - use AS(function to obtain value form another column)
   - better than relying on application code to handle this
   - read more on this.
@@ -350,6 +350,16 @@ SMALLINT   - 2  - -32768
 MEDIUMINT  - 3  - -8388608
 INT        - 4  - -2147483648
 BIGINT     - 8  - -2^63
+
+Postgres: Numeric
+
+typedef struct {
+  intndigits;
+  int weight;
+  int scale;
+  int sign;
+  NumericDigit *digits;
+} numeric;
 
 ```
 
@@ -649,32 +659,6 @@ Seq scan on foo () Buffers: shared read=8334
   - ST_DISTANCE_SPHERE function
   - bouding box of a point.
   
-
-### ENGINES
-  
-- Divided by core functionality
-  - Supported field and data types.
-  - Locking types.
-  - Indexing
-  - Transactions.
-
-- Include:
-  - MyISAM
-    - read heavy.
-    - lacks transactions capabilities.
-  - Merge
-  - Memory
-  - Federated
-  - Archive
-  - Csv
-  - Blackhole
-  - Berkeley DB
-  - InnoDB
-    - Full transaction functionality support
-    - Row level locking     
-      
-## Evaluation Criteria
-
 ## Data-Intensive Apps
 
 - Reliability
@@ -747,7 +731,29 @@ Seq scan on foo () Buffers: shared read=8334
 
 ### Query Engine
 
-- How to build one
+- What is it?
+  - A piece of software that can execute queries against data to produe answers.
+  - They provide a set of standard operations and transformations that the end-user can combine in different ways via a simple query language or application
+    programming interface and are tuned for good performance.
+- Divided by core functionality
+  - Supported field and data types.
+  - Locking types.
+  - Indexing
+  - Transactions.
+- Parts of a query engine.
+  - Frontend
+    - Query language parser + Semantic checker
+    - Planner: Parse Tree -> Logical Plan
+  - Intermediate Query Representation("logical plan")
+    - Expression/Type system
+    - Query plan w/ relational operators(data flow graph)
+    - Rewrites/ Optimizations
+  - Low level query representation("Physical plan")
+    - Statistics, partitions, sort orders, algorithms(Hash join vs merge join)
+    - Rewrites /Optimizations
+  - Execution Runtime: Operators
+    - Allocate resources(CPU, memory)
+    - Pushes  bytes around, vectorized calculations.
 - The first step in building a query engine is to choose a type system to represent the different types of data that the query engine will process.
   - One option is to invent a proprietary type system specific to the query engine.
   - Another option is to use the type system of the data source that the query engine is designed to qiery from.
@@ -912,7 +918,6 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Data summary / sketches.
   - Some systems require pages to self-contained(Oracle).
 
-
 ### Page Layout
 
 - Page storage architectures need to decide how data is organized inside the page.
@@ -930,6 +935,15 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - A tuple is a sequence of bytes, it's job of the DBMS to interpret those bytes into attribute types and values.
     - Each tuple is prefixed with a header that contain meta-data and attribute data, i.e visibility info(concurrency control), Bitmap for NULL values.
     - We don't need to store meta-data about the schema.
+    - Word-aligned tuples
+      - All attributes in a tuple must be word aligned to enable the CPU to access it without any unexpected behaviour or additional work.
+      - Problems with reading data that spans word boundaries
+        - Perform extra reads, execute two reads to load the appropriate parts of the data word and reassemble them.
+        - Random reads, read some unexpected combination of bytes assembled into a 64-bit word.
+        - Reject, throw an exception and hope app handles it.
+      - Solutions
+        - Padding, add empty bits after attributes to ensure that tuple is word aligned.
+        - Reordering, switch the order of attributes in the tuples' physical layout to make sure they are aligned.
     - DBMS can physically denormalize related tuples and store them together in the same page. reduce i/o but make updates expensive.
   - Insert a new Tuple
     - check page directory to find a page with a free slot.
@@ -941,33 +955,59 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - find offset in page using slot array.
     - overwrite existing data(if new data fits)
   - Problems
-    - fragmentation
-    - useless disk i/o
-    - random disk i/o
+    - Fragmentation, pages are not fully utilized(unusable space, empty slots)
+    - Useless disk I/O, DBMS must fetch entire page to update one tuple.
+    - Random disk I/O, worst case scenario when updating multiple tuples is that each tuple is on a separate page.
   
-  - Log-structured Storage
-    - stores log records that contain changes to tuples(put, delete).
-    - each log record must contain tuple's unique identifier
-    - put records contain the tuple contents.
-    - deletes marks the tuple as deleted.
-    - as app makes changes to the db, DBMS appends log records to end of file without checking previous log records.
-    - all disk writes are sequential.
-    - read a tuple, DBMS finds newest log record corresponding to that id.
-    - log-structured compaction.
-    - after compaction, DBMS doesnt need to maintain temporal ordering of records within the page.
-    - coalesces larger log files into smaller files by removing unnecessary records.
-    - DBMS can instead sort the page based on id order to improve efficiency of future look-ups.
-    - Sorted String Tables (SSTables).
-    - Universal compaction(Rocks DB).
+- Log-structured Storage
+  - DBMS stores log records that contain changes to tuples(put, delete).
+  - each log record must contain tuple's unique identifier
+  - put records contain the tuple contents.
+  - deletes marks the tuple as deleted.
+  - as app makes changes to the db, DBMS appends log records to end of file without checking previous log records.
+  - DBMS appends new log entries to an in-memory buffer and then writes out the changes sequentially to disk.
+  - The dbms may also flush partially full pages for transactions.
+  - On-disk pages are immutable.
+  - To read a tuple with a given id, DBMS finds newest log record corresponding to that id, scanning log from newest to oldest.
+  - For faster traversal, maintain an index that maps a tuple id to the newest log record.
+  - Log-structured compaction.
+    - DBMS does not need to maintain all older log entries for a tuple indefinitely, periodically compact pages to reduce wasted space.
+    - After a page is compacted, DBMS doesnt need to maintain temporal ordering of records within the page, each tuple id to appear at most once in the page.
+  - Coalesces larger disk-resident log files into smaller files by removing unnecessary records.
+  - DBMS can instead sort the page based on id order to improve efficiency of future look-ups.
+    - Sorted String Tables, SSTables.
+    - Universal compaction (Rocks DB).
     - Level compaction(Level DB).
-    - Problems:
-      - Write-amplification??
-      - Compaction is expensive.
+  - Problems:
+    - Reads are slower.
+    - Write-amplification??, High number of read and writes between memory and disk.
+    - Compaction is expensive.
     
-    
-  - Variable precision numbers
-  - Fixed precision numbers
-  - System Catalogs
+- Index-organized storage
+  - DBMS stores a table's tuples as the value of an index data structure, still using a page layout that looks like a slotted page.
+  - Tuples are typically sorted in page based on key.    
+  
+- System Catalogs
+  - The DBMS catalogs contain the schema information about tables that the system uses to figure out the tuple's layout.
+  - Most dbms don't allow a tuple to exceed the size of a single page, to store them dbms uses separate overflow storage pages.
+    - Postgres, TOAST(>2KB)
+    - MySql, Overflow(>1/2 size of page)
+    - SQL server, overflow(> size of page)
+
+- External value storage
+  - Some systems allow you to store a large value in an external file, treated as a BLOB type.
+  - Oracle, BFILE data type.
+  - Microsoft, FILESTREAM data type.
+- The DBMS cannot manipulate the contents of an external file, no durability or transaction protections.
+- ref paper: To BLOB or NOT To Blob
+  
+- Variable precision numbers
+- Fixed precision numbers
+- Null data type
+  - Null column bitmap header, store a bitmap in a centralized header that specifies what attributes are null.
+  - Designate a value to represent NULL for a data type.
+  - Per attribute Null flag, store a flag that marks that a value is null.
+
 
 ## Database Workloads
 
@@ -976,10 +1016,11 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - usually kind people build first
   
 - OLAP - Online Transactional Analytics Processing.
-  - Complex queries that read alot of data to compute aggregates
+  - Complex queries that read large portions of database spanning multiple entities to compute aggregates.
+  - These workloads executed on the data collected from the OLTP applications.
 
 - Hybrid Transaction and Analytical Processing
-  - OLAP + OLTP
+  - OLAP + OLTP together on the same database instance.
   
 - The relational model does not specify that the DBMS must store all a tuple's attributes together in a single page.
 - This may not actually be the best layout for some workloads.
@@ -987,59 +1028,64 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 ## Storage Model
 
 - A DBMS storage model specifies how it physically organizes tuples on disk and in memory.
+  - It can have different perfromance characteristics based on the target workload (OLTP vs OLAP).
+  - This also influences the design choices of the rest of the DBMS.
   
 ### N-ary storage model (NSM)
 
-- been assuming n-ary storage model aka "row-storage"
-- ideal for OLTP workloads where txns tend to access individual entities and insert-heavy workloads.
+- It is ideal for OLTP workloads where queries tend to access individual entities and execute write-heavy workloads.
   - use the tuple-at-a-time iterator processing model.
-- stores all the attributes for a single tuple contiguously in a single page.
-- fast inserts, updates and deletes
-- good for queries that need entire tuples
-- not good for scanning large portions of the table and/or a subset of the attributes.
-- terrible mrmory locality in access patterns.
-- not ideal for compression because of multiple value domains within a single page.
+- The DBMS stores all the attributes for a single tuple contiguously in a single page, also known as a "row store".
 - NSM db page size are typically some constant multiple of 4KB h/w page.
 - A disk oriented NSM system stores a tuple's fixed-length and variable-length attributes contiguously in a single slotted page.
 - The tuple's record id(page#, slot#) is how the DBMS uniquely identifies a physical tuple.
 - header + slot array.
+- Advantages
+  - fast inserts, updates and deletes.
+  - good for queries that need entire tuples(OLTP).
+  - Can use index-oriented physical storage for clustering.
+- Disadvantages
+  - not good for scanning large portions of the table and/or a subset of the attributes.
+  - terrible memory locality in access patterns.
+  - It is not ideal for compression because of multiple value domains within a single page.
 
 ### Decomposition storage model (DSM)
 
-- stores the values of a single attribute for all tuples contiguously in a page, also known as a column store.
-- ideal for OLAP workloads where read-only queries perform large scans over a subset of the table's attrbutes.
-- store attributes and meta-data in separate arrays of fixed-length values.
+- The DBMS stores the values of a single attribute for all tuples contiguously in a page, also known as a column store.
+- It is ideal for OLAP workloads where read-only queries perform large scans over a subset of the table's attrbutes.
+- DBMS is responsible for combining/splitting a tuple's attributes when reading/writing.
+- It stores attributes and meta-data in separate arrays of fixed-length values.
   - most systems identify unique physical tuples using offsets into these arrays
   - need to handle variable-length values.
-    - padding varibale lenght fields to ensure they are fixed-length is wasteful, especially for large attributes.
+    - padding variable length fields to ensure they are fixed-length is wasteful, especially for large attributes.
     - better approach is to use dictionary compression to convert repetitive variable-length data into fixed-lenght values(typically 32-bit integers)
-- maintain a separate file per attribute with a dedicated header area for metadata about entire column.
-- tuple identification
-  - fixed-length offsets, each value is the same length for an attribute.
-  - embedded tuple ids, value is stored with it tuple id in a column.
-- advantages: 
-  - reduces amount wasted i/o because DBMS only reads data it needs.
-  - better query processing and data compression because of increased locality and cached data reuse.
-  - better data compression.
-- disadvantages:
-  - slow for point queries, inserts, updates and deletes because of tuple splitting/stitching.
+- Maintain a separate file per attribute with a dedicated header area for metadata about entire column.
+- Tuple identification across pages, i.e in queries that access more than one column.
+  - Fixed-length offsets, each value is the same length for an attribute.
+  - Embedded tuple ids, value is stored with it tuple id in a column.
+- Advantages: 
+  - Reduces amount wasted i/o because DBMS only reads data it needs.
+  - Better query processing and data compression because of increased locality and cached data reuse.
+  - Better data compression.
+- Disadvantages:
+  - Slow for point queries, inserts, updates and deletes because of tuple splitting/stitching.
+- See: Cantor DBMS, DSM proposal, SybaseIQ, Vertica, MonetDB, Parquet/ORC.
   
 #### Observation
   
-  - OLAP queries almost never access a single column in a table by itself
-    - at some point during query execution, the DBMS must get other columns and stitch the original tuple back together.
-  - We still need to store data in a columnar format to get the storage + execution benefits.
-  - We need columnar scheme that still stores attributes separately but keeps the data for each tuple physically close to each other.
+- OLAP queries almost never access a single column in a table by itself, at some point during query execution, the DBMS must get other columns and stitch the original tuple back together.
+- We still need to store data in a columnar format to get the storage + execution benefits.
+- We need columnar scheme that still stores attributes separately but keeps the data for each tuple physically close to each other.
   
 ### PAX storage model
 
-  - Partition Attributes Across(PAX) is a hybrid storage model that vertically partitions attributes within a database page
-    - Parquet and Orc
-  - The goal is to get the benefit of faster processing on columnar storage while retaining the spatial locality benefits of row storage.
-  - Horizontally partition row into groups. Then vertically partition their attributes into columns.
-  - Global header contains directory with the offsets to the file's row groups
-    - this is stored in the footer if the file is immutable
-  - Each row group contains its own meta-data header about its contents.
+- Partition Attributes Across(PAX) is a hybrid storage model that vertically partitions attributes within a database page
+  - Parquet and Orc
+- The goal is to get the benefit of faster processing on columnar storage while retaining the spatial locality benefits of row storage.
+- Horizontally partition row into groups. Then vertically partition their attributes into columns.
+- Global header contains directory with the offsets to the file's row groups
+  - This is stored in the footer if the file is immutable(Parquet, Orc)
+- Each row group contains its own meta-data header about its contents.
 
 - Transaparent Huge Pages(THP)
   - instead of always allocating memory in 4KB pages, linux supports creating larger pages.
@@ -1063,7 +1109,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - I/O is the main bottleneck if the DBMS fetches data from disk during query execution.
 - DBMS can compress pages to increase the utility of the data moved per I/O operation.
 - Key trade-off is speed vs compression ratio.
-  - compression reduces the database DRAM requirements
+  - Compression reduces the database DRAM requirements
   - It may decrease CPU costs during query execution
 
 - Data sets tend to have highly skewed distributions for attribute values.
@@ -1161,7 +1207,6 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 ## Database Compression
 
 - Reduce the size of the database physical representation to increase the # of values accessed and processed per unit of computation or I/O.
-
 - Data sets tend to have highly skewed distributions for attrbute values.
 - Data sets tend to have high correlation between attributes of the same tuple.
 - Key trade-off is speed vs compression ratio.
@@ -1176,11 +1221,13 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 
 - Block-level
   - compress a block of tuples for the same table
-  - naive compression 
+  - Naive compression 
+    - scope of compression is only based on the data provided as input.
     - LZO, LZ4, Snappy, Zstd*.
     - Computational overhead
     - compress vs decompress speed.
-    - schemes do not consider the high-level meaning or semantics of the data.
+    - DBMS must decompress data first before it can be read and potentially modified, limiting the scope of the compression scheme.
+    - The schemes do not consider the high-level meaning or semantics of the data.
   
 - Tuple-level
   - compress the contents of the entire tuple(NSM only)
@@ -1190,31 +1237,49 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - can target multiple attributes for the sam tuple
 
 - Column-level
-  - compress multiple values for one or more attrbutes stored for multiple tuples.(DSM only)
+  - Compress multiple values for one or more attrbutes stored for multiple tuples.(DSM only)
   - Run-length encoding
-    - compress runs of the same value in a single column into triplets
-    - value of the attribute, start position in the column segment, # of elements in run.(v,o,l)
-    - sort then compress for better results.
-    - requires columns to be sorted intelligently to maximise compression opportunities. 
+    - Compress runs of the same value in a single column into triplets
+      - value of the attribute,
+      - start position in the column segment, 
+      - the # of elements in run.(v,o,l)
+    - Sort then compress for better results.
+    - Requires columns to be sorted intelligently to maximise compression opportunities. 
   - Bit-Packing encoding
-    - when values for an attribute are always less than the values declared largest size, store them as smaller data type.
-    - mostly encoding - bit-packing variant that uses special marker to indicate when a value excess largest size.
+    - When values for an attribute are always less than the values declared largest size, store them as smaller data type.
+    - Use bit-shifting tricks to operate on multiple values in a single word.
+    - Mostly encoding 
+      - A bit-packing variant that uses special marker to indicate when a value excess largest size, store them with smaller data type.
+      - The remaining values that cannot be compressed are stored in their raw form.
   - Bitmap encoding
-    - store a separate bitmap for each unique value for an attribute where an offset in the vector corresponds to a tuple.
+    - Store a separate bitmap for each unique value for an attribute where an offset in the vector corresponds to a tuple.
+      - The ith position in the Bitmap corresponds to the ith tuple in the table.
+      - Typically segmented into chunks to avoid allocating large blocks of contiguous memory.
+    - Only practical if the value cardinality is low.
   - Delta encoding
-    - record the difference between values that follow each other in the same column
-    - can combine with RLE for better results
+    - Record the difference between values that follow each other in the same column.
+    - Can combine with RLE for better results
   - Incremental encoding
-    - type of delta encoding that avoids duplicating common prefixes/suffixes between consecutive tuples.
+    - Type of delta encoding that avoids duplicating common prefixes/suffixes between consecutive tuples.
     - works best with sorted data.
-  - Dictionary encoding
-    - ref paper:`integrating compression and execution in column-oriented database systems`
-    - build a data structure that maps variable-length values to a smaller integer identifier.
-    - replace those values with their corresponding identifier in the dictionary data structure.
-      - need to support fast encoding and decoding
-      - need to also support range queries.
-    - most widely used compression scheme in DBMS.
-    - support encode/locate and decode/extract.
+  - Dictionary encoding*
+    - ref paper:`Integrating compression and execution in column-oriented database systems`
+    - Build a data structure, dictionary, that maps variable-length values to a smaller integer identifier.
+    - Replace those values with their corresponding identifier in the dictionary data structure.
+      - need to support fast encoding and decoding for both point and range queries.
+    - Most widely used compression scheme in DBMS.
+    - A dictionary needs to support encode/locate and decode/extract. 
+    - It should also be order preserving.
+    - Data structures used:
+      - Array
+       - One array of varibale lenght string and another array with pointers that maps to string offsets.
+       - Expensive to update so only usable in immutable files.
+      - Hash Table
+       - Fast and compact.
+       - Unable to support range and prefix queries.
+      - B+ Tree
+       - Slower than a hash table and takes more memory.
+       - It can support range and prefix queries.
   
 ## Memory management and Buffer Pool
 

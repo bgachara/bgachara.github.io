@@ -12,7 +12,7 @@ ref:
 # Parallel Programming
 
 `Notes from Patterns for parallel programming`
-`Also Structured Parallel Porgramming`
+`Also Structured Parallel Programming`
 
 
 ## Introduction
@@ -37,7 +37,6 @@ ref:
 - Exploiting instruction-level parallelism. susperscalar
 - Faster clock rates. 10mhz - 200mhz - 3Ghz
 
-```
   
 > Defn:
    **Power Density Wall**
@@ -45,7 +44,6 @@ ref:
     - Instruction-level parallelism wall - limits to available low-level parallelism.
     - Memory wall - growing disparity of processor speeds relative to memory speed. 
    **Non Uniform Memory Access***(NUMA)
-   ** **
 
 > The difference CPU and GPU is that CPU is designed to excel at executing a sequence of operations called a thread, as fast as possible and can execute a few tens of them
   in parallel, GPU is designed to excel at executing thousands of them in parallel(amortizing the slower single-thread performance to achieve greater throughput)
@@ -53,7 +51,6 @@ ref:
 > GPU is specialised for highly parallel computations hence more transistors are devoted to data processing rather than data caching and flow control.
   also floating point computations
   GPU can hide memory access latencies with computations instead of relying on large data caches and complex flow control.
-```
 
 ## Parallel Programming Models
 
@@ -135,22 +132,19 @@ ref:
 
 ### Parallel Computations Themes
 
-: parallel thinking
-
+Parallel thinking 
 - Decomposing work into pieces that can safely be performed in parallel.
 - Assigning work to processors.
 - Managing communication/synchronization between processors so that it does not limit speedup
 - Write code in parallel programming languages.
 
-: how parallel computers work
-
+How parallel computers work
 - performance characteristicsof implementations
 - design tradeoffs, performance vs cost vs convenience
 - characteristics of hardware(communication speedup)
 - know about h/w as you care about efficiency and performance.
 
-: thinking of efficiency
-
+Thinking of efficiency
 - fast != efficient, i.e 2x speedup on 10 processor system.
 - programmer pers: making use of machine capabilities.
 - h/w pers: right capabilities to put into the system.
@@ -170,3 +164,45 @@ ref:
   - How the parallel program will be organized and techniques used to manage shared data.
 - Implementation mechanism
   - Software specific constructs for implementing parallel program.
+
+## Finding Concurrency
+
+- Parallel programs attempt to solve bigger problems in less time by simultaneously solving different parts of the problem on different processing elements.
+- This can only work only if the problem contains exploitable concurrency.
+- Programmers should start their design of a parallel solution by analyzing the problem within the problem domain to expose exploitable concurrency.
+- Algorithm designer should decide whether the effort to create a parallel program justified and results significant enough.
+- If it is, make sure the key features and data elements within the problem are well understood.
+- Understand computationally intensive parts, key data structures and data usage as problem's solution unfolds because the effort to parallelize these problem should be focused on those parts.
+
+- Patterns
+- Decomposition patterns
+  - Task decomposition
+    - Views the problem as a stream of instructions that can be broken into sequences called tasks that can execute simultaneously.
+    - For efficiency, operations that make up the task should be largely be independent of operations inside other tasks.
+  - Data decomposition
+    - It focuses on the data required by the tasks and how it can be decomposed into distinct chunks, desired outcome being chunks can be operated upon independently.
+    - Array based computations
+    - Recursive data structures.
+- Dependancy Analysis patterns
+  - Group tasks
+    - Define groups of tasks that share constraints and simplify the problem of managing constraints by dealing with groups rather than individual tasks.
+    - Constraints categories
+      - Temporal dependency
+      - Ordering constraints
+      - Lack of one.
+    - The goals is to pick a grouping of tasks that simplifies the dependency analysis, finding and satisfying constraints on the concurrent execution of a program.
+  - Order tasks
+    - This step finds and correctly accounts for dependencies resulting from constraints on the order of execution of a collection of tasks.
+  - Data sharing
+    - How is data shared among group of tasks.
+    - Categories
+      - Read-only
+      - Effectively-local
+      - Read-write
+        - Accumulate
+        - Multiple-read/single-write
+- Design Evaluation pattern
+  - Guides the algorithm designer through an analysis of what has been done so far before moving on to the algorithm structure design space.
+  - Process is inherently iterative
+  - A critical factor is determining whether a design is effective is the ratio of time spent doing computation to time spent in communication or synchronization.
+  
