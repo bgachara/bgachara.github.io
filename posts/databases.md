@@ -9,13 +9,13 @@ tags:
 ---
 ## References 
 
-`Jamie Brandon What is a database TigerBeetle talk`\\
-`Database Engineering by Meta`\\
-`Expert Mysql`\\
-`Database System Concepts 7th Edition`\\
-`CMU: Intro to Databases Systems`\\
-`Mysql for Developers: Aaron@planetscale.com`\\
-`Database Internals: Alex Petrov`\\
+`Jamie Brandon What is a database TigerBeetle talk`, 
+`Database Engineering by Meta`, 
+`Expert Mysql`, 
+`Database System Concepts 7th Edition`, 
+`CMU: Intro to Databases Systems`, 
+`Mysql for Developers: Aaron@planetscale.com`, 
+`Database Internals: Alex Petrov`.
 
 
 ## Introduction
@@ -162,7 +162,7 @@ tags:
   - Optimized query approach is dividing it into subvectors.
   
 - At their core, they use specialised indexes to perform NN searches quickly.
-- E.g Pinecone, Marqo, LnaceDB, Milvus
+- E.g Pinecone, Marqo, LanceDB, Milvus
 
 
 ## SQL
@@ -1292,12 +1292,15 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - goal: minimise number of stalls from having to read data from disk.
 
 - Buffer Pool 
-  - memory region organized as an array of fixed size pages.
-  - an array entry is called a frame.
-  - when DBMS requests a page, an exact copy is placed into one of these frames.
-  - dirty pages are buffered and not written to disk immediately: write back cache.
-  - page table keeps track of pages that are currently in memory.
-  - also maintains metadata: dirty flag, pin(prevent swap)/reference counter.
+  - This is a memory region organized as an array of fixed size pages.
+  - An array entry is called a frame(name is to distinguish it from other components).
+  - When DBMS requests a page, an exact copy is placed into one of these frames.
+  - Dirty pages are buffered and not written to disk immediately: write back cache.
+  - A page table keeps track of pages that are currently in memory, usually a fixed-size hash table protected with latches to ensure thread-safe access.
+  - It also maintains metadata per page: 
+    - Dirty flag. 
+    - Pin(prevent swap)/reference counter.
+    - Access tracking information.
   
 ### Locks vs Latches
   
@@ -1314,12 +1317,12 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 ### Page Table vs Page Directory
 
 - Page directory
-  - page directory is the mapping from page ids to page locations in the database files
-  - all changes must be recorded on disk to allow the dbms to find on restart.
+  - This is the mapping from page ids to page locations in the database files.
+  - All changes must be recorded on disk to allow the dbms to find on restart.
 
 - Page table
-  - mapping form page ids to a copy of the page in buffer pool frames
-  - in-memory data structure that does not need to be stored on disk
+  - This is the mapping from page ids to a copy of the page in buffer pool frames.
+  - Its an in-memory data structure that does not need to be stored on disk.
   
 
 ## Allocation policies
@@ -1328,7 +1331,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - make decisions for all active queries
   
 - Local policies
-  - allocate frames to a specific queries without considering the behaviour of concurrent queries.
+  - Allocate frames to a specific queries without considering the behaviour of concurrent queries.
   - still need to support sharing pages.
   
 ### Buffer Pool Optimizations
@@ -1336,78 +1339,96 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Multiple Buffer Pools
   - per-database buffer pool.
   - per-page type buffer pool
-  - partitioning memory access across multiple pools helps reduce latch contention and improve locality
-  - approach:
-    - object id.
-    - hashing.
+- Partitioning memory access across multiple pools helps reduce latch contention and improve locality
+  - Approach:
+    - Object id, embed an object identifier in record ids and then maintain a mapping from objects to specific buffer pools.
+    - Hashing, hash the page id to select which buffer pool to access.
     
 - Pre-Fetching
-  - can prefetch pages based on a query plan: sequential scans, index scans. 
+  - DBMS can prefetch pages based on a query plan: sequential scans, index scans. 
   
 - Scan Sharing
-  - reuse data retrieved from storage or operator computations
-  - also called synchronized scans.
-  - different form result caching.
+  - Queries can reuse data retrieved from storage or operator computations
+  - Also called synchronized scans.
+  - different fromm result caching.
   - cursor sharing.
+  - Variant, continuous scan sharing.
 
 - Buffer Pool Bypass
-  - sequential scan operator will not store fetched pages in the buffer pool to avoid overhead.
-  - memory is local to running query
-  - works well if operator needs to read a large sequence of pages that are contiguous on disk
-  - store temporary data.
+  - The sequential scan operator will not store fetched pages in the buffer pool to avoid overhead.
+  - Memory is local to running query
+  - It works well if operator needs to read a large sequence of pages that are contiguous on disk
+  - It can be used for temporary data(sorting, joins).
   - light scans
 
 - OS page cache
-  - most disl ops go through the OS API.
-  - unless DBMS tells it not to, the OS maintains its own filesystem cache(page cache, buffer cache)
-  - most DBMS use direct i/o(o_direct) to bypass the OS's cache.
-    - redundant copies of pages
-    - different eviction policies
-    - loss of control over file i/o.
+  - Most disk ops go through the OS API.
+  - Unless DBMS tells it not to, the OS maintains its own filesystem cache(page cache, buffer cache)
+  - Most DBMS use direct I/O(O_DIRECT) to bypass the OS's cache.
+    - Redundant copies of pages
+    - Different eviction policies
+    - Loss of control over file I/O.
+
+- Fsync problems
 
 ### Buffer replacement policies
 
 - When DBMS needs to free up a frame to make room for a new page, it must decide which page to evict from buffer pool.
 - Goals:
-  - correctness
-  - accuracy
-  - speed
-  - meta-data overhead
+  - Correctness
+  - Accuracy
+  - Speed
+  - Meta-data overhead
+  
 - Least Recently Used
-  - maintain a single timestamp of when each page was last accessed.
-  - when eviction comes, select the one with the oldest timestamp.
-  - keep pages in sorted order to reduce the search time on eviction.
+  - Maintain a single timestamp of when each page was last accessed.
+  - When eviction comes, select the one with the oldest timestamp.
+  - Keep pages in sorted order to reduce the search time on eviction.
+  
 - Clock 
-  - approximation of LRU that does not need a separate timestamp per page.
-  - each page has a reference bit, when accessed set to 1.
-  - organize pages ina circular buffer with a clock hand
-  - upon sweeping, check if a page bit is set to 1, if yes, set to zero, if no, evict.
+  - Approximation of LRU that does not need a separate timestamp per page.
+  - Each page has a reference bit, when accessed set to 1.
+  - Organize pages in a circular buffer with a clock hand
+  - Upon sweeping, check if a page bit is set to 1, if yes, set to zero, if no, evict.
   - *common mechanism* - read more.
+  
 - Clock and LRU are susceptible to sequential flooding.
+  - A query performs a sequential scan that reads every page.
+  - This pollutes the buffer pool with pages that are read once and then never again.
+  - In OLAP workloads, the most recently used page is often the best page to evict.
+- Clock and LRU only tracks when a page was last accessed but not how often a page is accessed.
+
 - Better policies: 
   - LRU-K
-    - track history of last K references to each page as timestamps and compute the interval between subsequent accesses.
+    - Track history of last K references to each page as timestamps and compute the interval between subsequent accesses.
     - DBMS then uses history to estimate the next time that page is going to be accessed.  
+      - Maintain an ephemeral in-memory cache for recently evicted pages to prevent them from always being evicted.
+      - Can also track who is accessing pages.
+      
   - Localization
-    - chooses which pages to evict per query basis
-    - minimizes pollution of the buffer pool from each query.
-    - postgres maintain small ring buffer that is private to the query.
+    - The dbms chooses which pages to evict a per query basis.
+    - This minimizes pollution of the buffer pool from each query.
+    - Postgres maintain small ring buffer that is private to the query.
+    
   - Priority Hints
-    - DBMS knows about the context of each page during query execution
-    - provides hints to the buffer pool on whether a page is important or not.
+    - The dbms knows about the context of each page during query execution.
+    - It provides hints to the buffer pool on whether a page is important or not.
+
 
 ### Dirty pages
 
 - Fast Path:
-  - if a page in the buffer pool is not dirty then the DBMS can simply drop it.
+  - If a page in the buffer pool is not dirty then the DBMS can simply drop it.
 
 - Slow Path
-  - if a page is dirty then the DBMS must write back to disk to ensure that its changes are persisted.
+  - If a page is dirty then the DBMS must write back to disk to ensure that its changes are persisted.
+
+- Trade-off between fast evictions versus dirty writing pages that will not be read again in the future.
 
 - Background writing
   - DBMS can periodically walk through the page table and write dirty pages to disk
-  - when dirty page is written, DBMS can either evict or unset dirty flag.
-  - careful system doesnt write dirty pages before their log records are written.
+  - When dirty page is written, DBMS can either evict or unset dirty flag.
+  - A careful system doesnt write dirty pages before their log records are written.
   
 ### Other Memory Pools
 
@@ -1423,6 +1444,14 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - DBMS can almost always manage memory better than the OS.
 - Leverage semantics about the query plan to make better decisions.
 
+- OS/HW tries to maximize disk bandwidth by reordering and batching I/O requests, but they do not know which I/O requests are more important.
+- The dbms maintain internal queue to track page read/write requests from entire system.
+- It computes priorities based on several factors;
+  - Sequential vs Random I/O.
+  - Critical path task vs Background Task.
+  - Table vs Index vs Log vs Ephemeral Data.
+  - Transaction information.
+  - User-based SLAs
 
 ## Hash Tables
 
