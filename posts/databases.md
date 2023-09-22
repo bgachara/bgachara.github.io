@@ -1468,7 +1468,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   
 - Design decisions
   - Data Organisation
-    - how we layout data structure in memory/pages and what information to store to support efficient access.
+    - How we layout data structure in memory/pages and what information to store to support efficient access.
   - Concurrency
     - how to enable multiple threads to access the data structure at the same time without causing problems.
 
@@ -1506,47 +1506,67 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       
 - Static Hashing Schemes
   - Linear Probe Hashing
-    - also known as open addressing
-    - single giant table of slots
-    - resolve collisions by linealry searching for the next free slot in the table.
-    - inserts and deletions are generalizations of lookups.
+    - Also known as open addressing
+    - Single giant table of slots
+    - It resolve collisions by linearly searching for the next free slot in the table.
+      - To determine whether an element is present, hash to a location in the index and scan for it.
+      - Store the key in the index to know when to stop scanning.
+      - Insertions and deletions are generalizations of lookups.
     - Non-unique Keys
       - Separate Linked List
+        - Store values in separate storage area for each key.
+        - Value lists can overflow to multiple pages if the number of duplicates is large.
       - Redundant Keys
+        - Store duplicate keys entries together in  the hash table.
+        - This is what most systems do.
         
   - Robin Hood Hashing
     - Variant of linear probe hashing that steals slots from rich keys and give them to poor keys.
     - difference from initial position and move the rest to equidistant position.
   
   - Cuckoo Hashing
-    - use multiple hash tables awith different hash function seeds.
-    - one insert, check every table and pick anyone that has a free slot, if no table has a free slot, evict element from one of them and re-hash it to find a new location.
-    - look-ups and deletions are always because only one location per hash table is checked.
-    
-- *above hash tables require the DBMS to know the number of elements it wants to store, otherwise needs to rebuild the table if it needs to grow.shrink in size*.
+    - Use multiple hash tables awith different hash function seeds.
+    - Use multiple hash functions to find multiple locations in the hash table to insert records.
+    - One insert, check every table and pick anyone that has a free slot, if no table has a free slot, evict element from one of them and     re-hash it to find a new location.
+    - Look-ups and deletions are always 0(1) because only one location per hash table is checked.
+
+- Optimizations
+  - Specialized hash table implementations based on key type and sizes, i.e maintain multiple hash tables for different string sizes for a set of keys.
+  - Store metadata separate in a seprate array, packed bitmap tracks whether a slot is empty/tombstone.
+  - Use table + slot versioning metadata to quickly invalidate all entries in the hash table, i.e if the table version does not match slot version then treat slot as empty.
+
+- *Above hash tables require the DBMS to know the number of elements it wants to store, otherwise needs to rebuild the table if it needs to grow.shrink in size*.
   
 - Dynamic Hashing Schemes
   - Chained Hashing
-    - maintain a linked list of buckets for each slot in the hash table.
-    - resolve collisions by placing all elements with the same hash key into the same bucket.
+    - Maintain a linked list of buckets for each slot in the hash table.
+    - Resolve collisions by placing all elements with the same hash key into the same bucket.
+      - To determine whether an element is present, hash to its bucket and scan for it.
+
   - Extendible Hashing 
-    - multiple slot locations can point to the same bucket chain
-    - reshuffle bucket entries on split and increase the number of bits to examine.
+    - Chained-hashing approach that splits buckets incrementally instead of letting the linked list grow forever.
+    - Multiple slot locations can point to the same bucket chain.
+    - Reshuffle bucket entries on split and increase the number of bits to examine.
+      - Data movement is localized to just the split chain.
+
   - Linear Hashing
-    - maintains a pointer that tracks the next bucket to split
-      - when bucket overflows, split the bucket at the pointer location
-    - use multiple hashes to find the right bucket for a given key.
-    - can use different overflow criterion
-      - space utilization.
-      - average lenght of overflow chains.
-    - splitting buckets based on the split pointer will eventually get to all overflowed buckets. 
+    - The hash table maintains a pointer that tracks the next bucket to split.
+      - When any bucket overflows, split the bucket at the pointer location.
+    - Use multiple hashes to find the right bucket for a given key.
+    - It can use different overflow criterion:
+      - Space Utilization.
+      - Average length of overflow chains.
+    - Splitting buckets based on the split pointer will eventually get to all overflowed buckets.
+      - When the pointer reaches the last slot, remove the first hash function and move pointer back to the beginning.
+    - If the highest bucket below the split pointer is empty, the hash table could remove it and move the splinter pointer in reverse direction.
+    
+
+## B+ Trees
   
-- B+ Trees
-  
-- This is a self-balancing tree data structure that keeps data sorted and allows searches, sequential access, insertions and deletions always in 0(log n)
+- This is a self-balancing tree data structure that keeps data sorted and allows searches, sequential access, insertions and deletions always in 0(log n).
 - Generalization of a binary search tree, since a node can have more than two children.
-- optimized for systems that read and write large blocks of data.
-- mostly used for table indexes
+- It is optimized for systems that read and write large blocks of data.
+- It is mostly used for table indexes.
 - A tableindex is a replica of a subset of a table's attributes that are organised and/or sorted for efficient access using those attributes.
 - DBMS ensure that contents of the table and the index are logically synchronized.
 - It's the DBMS job to figure out the best indexes to use to execute each query.
