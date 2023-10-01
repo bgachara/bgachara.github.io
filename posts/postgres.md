@@ -144,10 +144,27 @@ GRANT some_privilege to some_role;
 ```
 - Default priviliges.
 
+### Under-the-hood
+
+- psql, doesnt know about the database.
+- psql/libpq - abstract network connections.
+- Frontend/backend protocol - custom.
+- Lexical analysis - yylex().
+- Parsing - yyparse()
+- Parse analysis - syntax checks, tables n columns exist, types match, system catalogs - result is modified parse tree.
+- Rewriting - expand views and rules.
+- Planning/Optimizing - takes in parse tree gives out execution plan.
+- Plan tree
+- Execution
+- Access methods - sequential scan.
+- Storage management - 8k pages.
+- WAL logging - journaling.
+
+
 ## Extensions
 
 - Every decade brings new workloads for databases.
-- add-ons that you can install to extend functionality beyond base offerings.
+- These are add-ons that you can install to extend functionality beyond base offerings.
 - They allow you to leverage the database eco-systemand grow with it.
 - Areas that are extensible.
   - Type system and operators

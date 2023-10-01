@@ -1694,34 +1694,81 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 ## Concurrent Control
    
 - Assumption has been all DS that we've discussed so far are single-threaded, but a DBMS needs to allow multiple threads to safely access DS to take advantage of CPU core and hide I/O disk stalls.
-- Concurrency control protocol is the mehtod that DBMS uses to ensure correct results for concurrent operations on a shared object
+- Concurrency control protocol is the method that DBMS uses to ensure correct results for concurrent operations on a shared object
 - Protocol correctness criteria can vary:
-  - Logical correctness: can thread see data it is not supposed to see.
-  - Physical correctness: is IR of the object sound
-- Locks vs Latches
+  - Logical correctness: Can a thread see data it is supposed to see.
+  - Physical correctness: Is the internal representation of the object sound?(start here)
 
+- Locks(transactions) vs Latches(workers)
+  - Protect db logical sections from other txns vs protect critical sectionsof dbms internal DS from other workers(threads).
+  - Held for txns durations vs held for operation duration.
+  - Need to be able to rollback changes vs dont need to be able to rollback changes.
+
+- Locks are used to separate transactions, protecting database contents, during entire transactions, can either be shared, exclusive, update or intention mode, providing 
+  deadlock detection and resolution, by waits-for, timeouts or aborts and information kept in lock manager.
+- Latches separate workers(threads, processes), protecting in-memory data structures, during critical sections, can either be in read or write modes, offers deadlock avaoidance
+  only through coding discipline and inforamtion is kept in protected data structures.
+    
 - Latch Modes
   - Read Mode
-  - Write Mode  
+    - Multiple threads can read the same object at the same time.
+    - A thread can acquire the read latch if another thread has it in read mode.
+  - Write Mode
+    - Only one thread can access the object.
+    - A thread cannot acquire a write latch if another thread has it in any mode.  
+
+- Latch Implementation Goals
+  - It should have a small memory footprint.
+  - It should have fast execution path when no contention, descheduling thread when it has been waiting for too long to avoid burning cycles.
+  - Each latch should not have to implement their own queue to track waiting threads.
 
 - Latch Implementations
+  - Test-and-Set Spinlock.
+    - Very efficient (single instruction to latch/unlatch)
+    - Non-scalable, not cache friendly, not OS friendly.
   - Blocking OS mutex.
+    - Simple to use.
+    - Non-scalable(about 25ns per lock/unlock invocation)
   - Reader-writer latches
+    - Allows for concurrent readers, must manage read/write queues to avoid starvation.
+    - They can be implemented on top of spinlocks.
+  - Adaptive Spinlock(Apple ParkingLot)
+  - Queue-based Spinlock(MCS Locks)
 
+- Compare-and-swap
+  - Atomic instruction that compares contents of a memory location M to a given value V.
+  - If values are equal, installs new given value V' in M, otherwise, operation fails.
+  
  - Hash Table Latching
-  - Page Latches
-  - Slot Latches  
+  - Easy to support concurrent access due to the limited ways threads access the data structure.
+  - All threads move in the same direction and only access a single page/slot at a time, deadlocks are not possible.
+  - To resize the table, take a global write latch on the entire table(in the header page).
+  - Latch implementations
+    - Page Latches
+      - Each page has its own reader-writer latch that protects its entire contents.
+      - Threads acquire either a read or write latch before they access a page.
+    - Slot Latches
+      - Each slot has its own latch.
+      - It can use a single-mode latch to reduce meta-data and computational overhead.  
   
 - B+ Tree concurrency control
-  - multiple threads to read and update the b+ tree.
+  - Ideally, allow multiple threads to read and update a B+ tree at the same time.
+  - Protect against
+    - Threads trying to modify the contents of a node at the same time.
+    - One thread traversing the tree while another thread splits/merges nodes.
   - Latch crabbing/coupling
-    - allow access/modify
-    - latch parent, latch child, release if parent is safe.
-    - a safe node is one that will not split or merge on update
-    - fifo release style.
-    - better latching algorithm
-  - Leaf noe scanning concurrency
+    - This is a protocol to allow multiple threads to access/modify B+ tree at the same time.
+      - Get latch for parent, latch for child, release latch for parent if safe.
+    - A safe node is one that will not split or merge on update, not full on insertion, more than half-full on deletion.
+  - Taking a write latch on the root every time becomes a bottleneck with higher concurrency.
+    - Fifo release style.
+    - Better latching algorithm, `ref paper: Concurrency of operations on B+Trees`.
+      - Most modifications to B+ Tree will not require a split or merge.
+      - Instead of assuming there will be a split/merge, optimistically traverse the tree using read latches, if wrong, repeat with pessimistic algorithm.
+  - Leaf node scanning concurrency.
   - Latches do not support deadlock detection or avoidance, only via coding discipline
+  - The leaf node sibling latch acquisition protocol must support a no-wait mode.
+  - The dbms data structures must cope with failed latch acquisitions.
 
 *Making a data structure thread-safe is notoriously difficult in practice*
 
