@@ -14,11 +14,11 @@ menu:
 - Thank you!
 
 ### Arithmetic Expression Evaluator
-**Goal**
+- **Goal**
   - Understanding how one would implement one.
-**Lessons**
+- **Lessons**
   - It is very tricky to implement one.
-**Language**
+- **Language**
   - Rust
-**Github**
+- **Github**
   - [Arithmetic](https://github.com/bgachara/prac_sys_prog/tree/main/cli_app)  
