@@ -53,7 +53,7 @@ menu:
 - **Github Link**: [LLJSVM](https://github.com/bgachara/lljsvm)
 
 ### Very Lite Database
-- **Goal**: Dive into the world that is data storage and retrieval.
+- **Goal**: Dive into the world that is data storage, access, transform and analysis.
 - **Lessons**: If you play with a system enough times, you can understand any part of it.
 - **Language**: Rust.
 - **Side Note**: I might make this my ideal labour of love, port all of Postgres to Rust through this.

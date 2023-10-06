@@ -541,9 +541,9 @@ Seq scan on foo () Buffers: shared read=8334
   - invisible keyword to exclude from default SELECT * unless explicitly called.
 
 - Limiting rows
-  - onyl return rows to remain performant.
+  - only return rows to remain performant.
   - look for calculations or operations that can be done in the DB.
-  - slect count(*) and select *
+  - select count(*) and select *
   - accompany your LIMIT with ORDER BY.
   
 - Joins
@@ -668,24 +668,14 @@ Seq scan on foo () Buffers: shared read=8334
 - Maintainability
   - Operability, simplicity and evolvability
 - Fault vs Failure
-  - fault is when a particular system component deviates from its spec, whereas a failure is when the system as a whole stops providing required service to user.
+  - Fault is when a particular system component deviates from its spec, whereas a failure is when the system as a whole stops providing required service to user.
   
-## Data Models
-
-- Object-relational Mismatch
-- Declarative vs Imperative
 
 ## Anatomy of a DB.
 
 - Good to understand how best to optimize a server and even how to utilize its features.
 - Essential when modifying or extending its features
 
-### Types of DBs
-
-- Object Oriented Database systems.
-  - access via a programmatic interface.
-- Object Relational 
-- Relational
 
 ## Structure
 
@@ -774,7 +764,7 @@ Seq scan on foo () Buffers: shared read=8334
   - Filter
   - Aggregate
 - Dataframe API
-  - build logical query plans in a much more user-friendly way.
+  - Build logical query plans in a much more user-friendly way.
 - Physical plans and expressions.
 - Query planning
 - Query optimizations.
@@ -843,13 +833,13 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Buffer pool is on memory, manage page access.
 - DBMS can use memory maping(mmap) to store contents of a file into the address space of a program.
 - Don't rely on OS, take care of everythng in DB as knows better
-  - Flushing dirty pages to disk in the correcr order
+  - Flushing dirty pages to disk in the correct order
   - Specialized prefetching.
   - Buffer replacement policy.
   - Thread/process scheduling.
 
 - Memory-mapped I/O Problems
-  - Transaction safetY.
+  - Transaction safety.
     - OS can flush dirty pages at any time.
   - I/O Stalls
     - DBMS does not know which pages are in memory, this will stall a thread on page fault.
@@ -916,7 +906,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Compression / Encoding meta-data.
   - Schema Information.
   - Data summary / sketches.
-  - Some systems require pages to self-contained(Oracle).
+- Some systems require pages to self-contained(Oracle).
 
 ### Page Layout
 
@@ -964,7 +954,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - each log record must contain tuple's unique identifier
   - put records contain the tuple contents.
   - deletes marks the tuple as deleted.
-  - as app makes changes to the db, DBMS appends log records to end of file without checking previous log records.
+  - As app makes changes to the db, DBMS appends log records to end of file without checking previous log records.
   - DBMS appends new log entries to an in-memory buffer and then writes out the changes sequentially to disk.
   - The dbms may also flush partially full pages for transactions.
   - On-disk pages are immutable.
@@ -999,7 +989,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Oracle, BFILE data type.
   - Microsoft, FILESTREAM data type.
 - The DBMS cannot manipulate the contents of an external file, no durability or transaction protections.
-- ref paper: To BLOB or NOT To Blob
+- `ref paper: To BLOB or NOT To Blob`
   
 - Variable precision numbers
 - Fixed precision numbers
@@ -1007,7 +997,6 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Null column bitmap header, store a bitmap in a centralized header that specifies what attributes are null.
   - Designate a value to represent NULL for a data type.
   - Per attribute Null flag, store a flag that marks that a value is null.
-
 
 ## Database Workloads
 
@@ -1088,7 +1077,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Each row group contains its own meta-data header about its contents.
 
 - Transaparent Huge Pages(THP)
-  - instead of always allocating memory in 4KB pages, linux supports creating larger pages.
+  - Instead of always allocating memory in 4KB pages, linux supports creating larger pages.
   - reduced the # of TLB entries.
 
 ### Hybrid storage model.
@@ -1772,37 +1761,71 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 
 *Making a data structure thread-safe is notoriously difficult in practice*
 
-> OPERATOR EXECUTION
+## OPERATOR EXECUTION
 
 ## Sorting and Aggregation Algorithms
 
 - Query Plan
+  - Operators are arranged in a tree.
+  - Data flows from the leaves of the tree up towards the root.
+  - The output of the root node is the result of the query.
 - Disk-oriented DBMS.
-- Still need the buffer pool.
-- if fits in memory, quicksort
+  - A disk-oriented DBMS cannot assume that query results fit in memory, just like it assumes a table cannot fit in memory.
+  - Use the buffer pool to implement algorithms that need to spill to disk.
+  - We are also going to prefer algorithms that maximize the amount of sequential I/O.
+- Queries may request that tuples are sorted in a specific way (ORDER BY), and even when a query does not specify an order, we may still want to sort to do other things.
+  - i.e Aggregations(GROUP BY), Duplicate elimination (DISTINCT)
+- If data fits in memory, then we can use a standard sorting algorithm like Quicksort.
 
 - Include: 
   - Top N Heap Sort
-    - if a query contains an order by with a limit, DBMS only needs to scan data once to find top-N els.
-    - scan data once and maintain an in-memory sorted priority queue.
+    - If a query contains an ORDER BY with a LIMIT, DBMS only needs to scan data once to find top-N elements.
+    - If the top-N elements fit in memory, scan data once and maintain an in-memory sorted priority queue.
+  
   - External Merge Sort
     - Divide and conquer algo that splits data into separate runs, sorts them individually and then combines then into longer sorted runs.
     - Sorting
-      - sort chunks of data that fit in memory and then write back the sorted chunks to a file on disk.
+      - Sort chunks of data that fit in memory and then write back the sorted chunks to a file on disk.
     - Merging
-      - combine sorted runs into larger chunks.
-    - a run is a list of key(attr to compare)/value(tuple(early mat), record ID) pairs.
+      - Combine sorted runs into larger chunks.
+    - A run is a list of Key(attr to compare to compute the sort order)/Value(Tuple(early materialization), Record ID(late materialization)) pairs.
     - 2-way external merge sort.
+      - Pass #0
+        - Read one page of the table into memory, sort page into a "run" and write it back to disk.
+        - Repeat until the whole table has been sorted into runs.
+      - Pass #1,2,3
+        - Recursively merge pairs of runs into runs twice as long.
+        - Need at least 3 buffer pages(2 for input, 1 for output)
+      - Can be improved by increasing number of pages and also increasing number of K-way merges.
+      - Double buffering
+        - Prefetch the next run in the background and store it in a second buffer while the system is processing the current run, overlapping CPU and I/O operations.
+      - Comparison optimizations
+        - Code Specialization
+          - Instead of providing a comparison funtion as pointer to sorting algorithm, create a hardcoded versions of sort that is specific to a key type.
+        - Suffix truncation
+          - First compare a binary prefix of long VARCHAR keys instead of slower string comparison, fallback to slower version if prefixes are equal.
+  
   - B+tree to sort
-    - clustered b+ tree.
+    - If the table has a B+ tree index on the sort attribute, oen can use that to accerelate sorting.
+    - Retrieve tuples in desired sort order by simply traversing the leaf pages of the tree.
+    - Clustered B+ tree
+      - Traverse to the left-most leaf page and then retrieve tuples from all leaf pages.
+      - This is always better than external sorting because there is no computational cost and all disk access is sequential.
+    - Unclustered B+ Tree
+      - Chase each pointer to the page that contains the data.
+      - This is almost always a bad idea, in general, one I/O per data record.
+    
   - Aggregations
-    - collapse values for a single attribute from multiple tuples into a single scalar value.
+    - Collapse values for a single attribute from multiple tuples into a single scalar value.
     - DBMS needs to quickly find tuples with the same distinguishing attributes for grouping.
     - Implementations:
       - Sorting
-        - partition.
-        - rehashing
       - Hashing
+        - Populate an ephemeral hash table as the DBMS scans the table, for each record, check whether there is already an entry in the hash table.
+        - Partition.
+          - Divide tuples int buckets based on hash key, write them out to disk when they get full.
+        - Rehashing.
+          - Build in-memory hash table for each partition and compute the aggregation.
 
 ## Join Algorithms
 
