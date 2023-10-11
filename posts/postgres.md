@@ -144,22 +144,59 @@ GRANT some_privilege to some_role;
 ```
 - Default priviliges.
 
+
 ### Under-the-hood
 
 - psql, doesnt know about the database.
-- psql/libpq - abstract network connections.
-- Frontend/backend protocol - custom.
-- Lexical analysis - yylex().
-- Parsing - yyparse()
-- Parse analysis - syntax checks, tables n columns exist, types match, system catalogs - result is modified parse tree.
-- Rewriting - expand views and rules.
-- Planning/Optimizing - takes in parse tree gives out execution plan.
+- Libpq 
+  - Abstract network connections.
+  - Each connection is handled by a different PID(backend).
+  - Each backend is responsible for its own authentication.
+  - Each backend process plus auxiliary processes are responsible for handling all queries and database maintenance tasks.
+- Frontend/backend protocol
+  - Custom protocol.
+  - Message based.
+  - Asynchronous notification: LISTEN/NOTIFY
+  - Native SSL support
+  - Implements bulk import and export via COPY.
+- Lexical analysis 
+  - yylex(), scan.l, gram.y
+  - Parse tree is an in memory representation of your query structures.
+- Parsing 
+  - yyparse()
+- Parse analysis 
+  - Syntax checks, tables and columns exist, types match, system catalogs, error checking, aware about extensions. 
+  - Result is modified parse tree.
+- Rewriting 
+  - Expand views and rules.
+- Planning/Optimizing 
+  - How/Why/When of data retrieval
+  - Decodes the parse tree to give out execution plan.
+  - Parse tree(table's statistics + cost parameters) = Execution Plan Tree.
 - Plan tree
+  - Command EXPLAIN allow us to observe the Plan Tree.
+  - EXPLAIN ANALYZE get real data after a real execution.
 - Execution
-- Access methods - sequential scan.
-- Storage management - 8k pages.
-- WAL logging - journaling.
-
+  - Responsible for execute the query based on the executor plan tree(read-only and can be used for caching and reuse).
+- Access methods 
+  - Accessing the tuples.
+  - Executor does not know how indexes work.
+  - Sequential scans implemented by an access method.
+- Storage management 
+  - There is a directory for each database inside the data directory and a file for each object i.e index, table.
+  - 8k pages.
+- Auxiliary processes
+  - Background writer.
+  - WAL writer.
+  - Autovacuum: normal, full, freeze.
+  - Stats collector
+  - Logger
+  - Checkpointer
+- Shared memory will glue auxiliary process together.
+- Backend processes 
+  - temp_buffers, work_mem, maintenance_work_mem.
+- Shared memory 
+  - shared buffer pool, WAL buffer, commit log.
 
 ## Extensions
 
@@ -176,3 +213,49 @@ GRANT some_privilege to some_role;
   - Query planner and query executer.
   - Configuration and database metadata.
 - Type systems and UDF can be done in SQL, everything else needs to be done low level language like C.
+
+
+## HOT
+
+- Heap only Tuple
+  - This feature eliminates redundant index entries and allows the re-use of space taken by deleted or obselete tuples without performing a table-wide vacuum.
+  - It does this by allowing single-page vacuming, defragmentation.
+  - `page-inspect` with aws.
+- Pruning can happen before vacuuming.
+- Fillfactor, expressed as a percentage, 100 by default in Postgres.
+
+
+## Full Page Writes
+
+- Bring the full block into the WAL on update and then on change update each copy.
+- Checkpoint comes into frame here.
+- Helps overcome the 4k operating system block on recovery.
+- All changes WAL logged ->Logical decoding and replication. 
+
+## Performance
+
+- Performance insights
+  - Measures database load to help you identify bottlenecks, intensive queries, adjustable timeframes, DB and OS metrics.
+- Enhanced monitoring
+  - Continued top level information about processes.
+- Cloudwatch
+  - Comparative tool.
+- Custom monitoring
+  - Regular snapshots of statistical data; SQL statements and objects statistics.
+  - Samples of database activity.
+  - Summary reports.
+  - Drill-down and historical analysis.
+  - Third-party tools.
+- pg_statsinfo, pgsentinel
+
+- Explicit Locking
+- Reusing Execution plans.
+
+- Queueing theory, Oracle performance pdf
+- Session sampling.
+- Wait events
+  - the database is waiting any time when its not running on the CPU.
+  - Start with active session summary(perf insights)
+  - Get the Top SQL and Top Wait Events.
+  - Explain analyze with buffers, IO, Timing
+  - Investigate STEP and WAIT taking the most time.

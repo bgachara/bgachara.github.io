@@ -42,13 +42,13 @@ Ref:
   - manages rust version, installs compiler, cargo, std lib and other core tools.
   - determines toolcahin depending on the host platform.
   - It is a tool multiplexer as it installs and manages toolchains.
-  - there are two ABIs in use in windows
+  - There are two ABIs in use in windows
     - Msvc abi by vs, provides best interop with other Windows s/w.
     - GNU ABI by GCC.
     - controlled by `rustup set-default host xxxx`, `rustup toolchain install stable-gnu`
 
 - Cargo 
-  - official build and dependency management tool during development.
+  - Official build and dependency management tool during development.
   - i.e compiles code, download and compile dependent libraries, linking libraries and building development and release binaries.
   - Also performs incremental builds of code to reduce compilation time as programs evolve.
   - Also guides idiomatic project structure.
@@ -60,16 +60,16 @@ Ref:
 
 - Two basic projects in Rust: 
   - Libraries(lib crate)
-    - this can either be static and dynamic.
-    - self contained code intended for use by other programs to speed up devt cycle and encourage code reuse.
-    - can be published to a public package repository such as crates.io.
+    - This can either be static and dynamic.
+    - Self contained code intended for use by other programs to speed up devt cycle and encourage code reuse.
+    - Can be published to a public package repository such as crates.io.
     - program execution begins in the src/lib.rs.
   
   - Binaries(bin crate) 
-    - standalone executable that may download and link other libraries into a single binary.
+    - Standalone executable that may download and link other libraries into a single binary.
     - program execution starts in the main() function present in the src/main.rs file.
 
-- Cargo new project_name
+- `cargo new project_name`
 
 - Cargo.toml 
   - serves as the config file for our crate.
