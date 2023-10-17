@@ -1832,50 +1832,88 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - We normalize tables in a relational database to avoid unnecessary repetition of information.
 - We then use the join operator to reconstruct the original tuples without loss of information.
 - We will focus on performing binary joins using inner equijoin algorithms
-  - can be tweaked to support other joins.
+  - They can be tweaked to support other joins.
   - multi-way joins exist but only in research
+
 - In theory we want the smaller table to always be the left table in the query olan
-  - optimizer will figure this out when generating the physical plan.
+  - Optimizer will figure this out when generating the physical plan.
+- The operators are arranged in a tree in a query plan, data flowing from the leaves of the tree up towards the root, output of the root node is the 
+  result of the query.
+  
 - Join Operators
   - Output
-    - what data does the join operator emit to its parent operator in the query plan tree.
-    - output contents can vary:
+    - What data does the join operator emit to its parent operator in the query plan tree.
+    - Output contents can vary:
       - processing model
       - storage model
       - data requirements in the query.
-  - Cost Analysis Criteria
-    - how do we determine whether one join algorithm is better than the other.
-    - Number of IOs to compute join
+    - Output: Data
+      - Early materialization
+        - Copy the values for the attributes in outer and inner tuples into a new output tuple.
+        - Subsequent operators in the query plan never need to go back to the base tables to get more data.
+    - Output: Record IDs
+      - Late materialization
+        - Only copy the joins keys along with the Record IDs of the matching tuples.
+        - Ideal for column stores because the DBMS does not copy data that is not needed for the query.
+        
+- Cost Analysis Criteria
+  - How do we determine whether one join algorithm is better than the other.
+  - Number of I/O's to compute join.
+  - There are many algorithms for reducing join cost, but none works well in all scenarios.
+
 - Join Algorithms
   - Nested Loop Join
-    - Simple/Stupid
-      - Nested loop join
+    - Naive/Simple/Stupid
+      - for each tuple r in R: for each tuple s in S: if r and s match then emit. 
+      - cost: M + (m * N)
     - Block
-      - for every block in R scans S once.
+      - for each block Br in R: foreach block Bs in S: foreach tuple r in Br: foreach tuple s in Bs: if r and s match then emit.
+      - cost: M + (M * N)
+      - The smaller table should be the outer table.
+      - We determine size based on the number of pages, not the number of tuples.
     - Index
+      - We can avoid sequential scans by using an index to find inner table matches.
+      - foreach tuple r in R: foreach tuple s in Index(r1 = sj): if r and s match then emit.
+    
   - Sort-Merge Join
     - Sort
-      - sort both tables on the join key
-      - worst case is when join attribute of all tuples is same on join tables
+      - Sort both tables on the join key.
+      - You can use any appropriate sort algorithm.
+      - These phases are distinct from the sort/merge phases of an external merge sort.
     - Merge
+      - Step through the two sorted tables with cursors and emit matching tuples.
+      - It may need to backtrack depending on the join type.
+    - The worst case for the merging phase is when join attribute of all tuples is same on join tables.
+    - The best case is when one or both tables are already sorted on join key or output must be sorted on join key.
+    
   - Hash Join
     - Build
+      - Scan the outer relation and populate a hash table using the hash function h1 on the join attributes, i.e linear probing.
     - Probe
+      - Scan the inner relation and use h1 on each tuple to jump to a location in the hash table and find a matching tuple.
+    - Hash table contents
+      - Key: attribute that the query is joining on, hash table needs to store the key to verify we have a correct match in case of hash collisions.
+      - Value: it varies per DBMS, depends on what the next query operators will do with the output from the join.
     - Cost Analysis
+    
     - Optimization
       - Probe filter
-        - Bloom Filter
-          - probabilistic data structure that answers set membership queries
-            - false negatives will never occur
-            - false positives can sometimes occur
+        - Create a probe filter i.e Bloom Filter during the build phase if the key is likely to not exist in the inner relation.
+        - Check filter before probing hash table.
+        - It is fast because the filter fits in CPU cache.
+        - It is sometimes called sideways information passing.
+        - Probabilistic data structure that answers set membership queries
+          - false negatives will never occur
+          - false positives can sometimes occur
+    
     - Partitioned Hash Join
-      - Hash join when tables dont fit in memory
-        - Bloom Filter
-          - probabilistic data structure that answers set membership queries
-            - false negatives will never occur
-            - false positives can sometimes occur
-    - Partitioned Hash Join
-      - Hash join when tables dont fit in memory.
+      - Hash join when tables dont fit in memory, GRACE Hash join.
+      - Partition phase: hash both tables on the join attribute into partitions.
+      - Probe phase: compares tuples in corresponding partitions for each table.    
+    
+    - Hybrid Hash Join
+      - If keys are skewed, then the DBMS keeps the hot partition in-memory and immediately perform the comparison instead of spilling it to disk.
+      - Difficult to get right.
 
 *Integrate a profile for project*
 ## Query Execution and Processing Models
