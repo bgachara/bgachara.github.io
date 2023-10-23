@@ -495,4 +495,305 @@ Performance issues can originate from anywhere, including areas of the system th
 - They enable pattern matching and pattern recognition as more data is easily examined and understood.
 - This can be an easy way to identify correlations between different metric sources, which may be difficult to accomplish programmatically.
 - i.e Line charts, Scatter plots, Heat Maps(column quantization), Timeline charts, Surface plots 
+
   
+## Observability Tools
+
+- Operating systems have historically provided many tools for observing system software and hardware components.
+- Even with wide range of tools, system perf experts must be skilled in inference and interpretation, figuring out activity from indirect tools and statistics.
+
+### Tool Coverage
+
+- 
+
+### Static Performance Tools
+
+- This is a type of observability that examines attributes of a system at rest rather than under active workload.
+- i.e issues with configuration and components.
+
+### Crisis Tools
+
+- Handle production performance issues.
+- Production systems should have majority of these types of tools installed.
+- Kernel and user space software may also need to be configured to support these tools.
+
+## Tool Types
+
+- A useful categorization is whether they provide system wide or per process observability and whether they are based on counters or events.
+- Some tools may fit in more than one quadrant.
+- Event-based include profilers and tracers.
+
+### Fixed counters
+
+- Kernels maintain various counters for providing system statistics, usually implemented as unsigned integers incremented when events occur.
+- i.e counters for network packets received, disk I/O issued, interrupts occured, exposed by monitoring software as metrics.
+- A common kernel approach is to maintain a pair of cumulative counters, one to count events and other to record total time in the event, latency gotten by dividing the two.
+- Since they are cumulative, reading the pair at a time interval the delta can be calculated and from that the per-second count and average latency.
+- Performance wise they are considered free since they are enabled by default, cost may come reading them from user-space though even that is little.
+
+#### System wide
+
+- These tools examine system-wide activity in the context of system software and hardware resources using kernel counters.
+- Include;
+  - vmstat, virtual and physical memory statistics, system-wide.
+  - mpstat, per-CPU usage.
+  - iostat, per-disk I/O usage, reported from block-interface device.
+  - nstat, tcp/ip stack statistics.
+  - sar, various statistics, can also archive for historical reporting.
+
+#### Per-process
+
+- These tools are process-oriented and use counters that the kernel maintains for each process.
+- Include;
+  - ps, process status and statistics.
+  - top, shows top processes, sorted by CPU usage or another statistic.
+  - pmap, lists process memory segments with usage statistics.
+- Tools read from the /proc file system.
+
+### Profiling
+
+- Characterizes the target by collecting a set of samples or snapshots of its behavior.
+- i.e CPU, where timer-based samples are taken of the instruction pointer or stack trace to characterise CPU-consuming code paths.
+- It can also be based on untimed h/w events, CPU h/w cache misses or bus activity.
+- Unlike counters, profilers are enabled on an as-needed basis, since they can cost CPU overhead to collect and storage overhead to store.
+- Timer-based profilers are safer as they predictable, overhead-wise
+
+#### System-wide
+
+- Include;
+  - perf, std linux profiler, which includes profiling subcommands.
+  - profile, bpf-based CPU profiler, that frequency counts stack traces in kernel context.
+  - Intel VTune Amplifier XE, linux and windows profiler.
+- They can also be used to target a single process.
+
+#### Process-wide
+
+- Include;
+  - gprof, GNU profiling tool which analyzes profiling information added by compilers.
+  - cachegrind, profile h/w cache usage and visualizes profiles using kchachegrind.
+  - Java Flight Recorder, language context inspector, Java.
+  
+### Tracing
+
+- Similar to profiling but withe intent to collect and inspect all events not just a sample.
+- This can incur higher CPU and storage overheads thatn profiling which can slow the target, skew measured timestamps.
+- Logging is a form of low-frequency tracing
+
+#### System-wide
+
+- Use kernel tracing facilities;
+  - tcpdump, network packet tracing.
+  - biosnoop, block i/o tracing.
+  - execsnoop, new processes tracing, bcc or bpftrace.
+  - perf, std linux profiler, also trace events.
+  - perf trace, trace system calls system-wide.
+  - ftrace, linux built-in tracer.
+  - bcc, a bpf-based tracing library and toolkit.
+  - bpftrace, bpf-based tracer.
+  
+#### Per-process
+
+- Include;
+  - strace, system call tracing.
+  - gdb, a source-level debugger.
+- Debuggers that examine a per-event data, must do so by starting and stopping the target which has huge overhead cost, not ideal for production use.
+
+### Monitoring
+
+- This involves the recording of statistics continuously in case they are later needed.
+- sar, System Activity Recorder.
+  - It is counter-based and has an agent that executes at scheduled times to record the state of system-wide counters.
+  - It reads its statistics archive to print recent historical statistics.
+  - It can record a dozen or so different statistics to provide insight into CPU, memory, disks, network, interrupts, power usage and more.
+- SNMP
+  - Simple Network Management Protocol
+  - Traditionally used for networking.
+- Agents
+  - Also known as exporters and plugins on each system to record kernel and application metrics.
+  - These include agents for specific applications and targets, MySQL db server, Apache web server, Memcached caching system.
+  - They can provide detailed application request metrics that are not available from the system counters alone.
+- Include
+  - Perfomance Co-Pilot(PCP)
+  - Prometheus
+  - Collectd
+- The system statistics shown by monitoring products are typically the same as those shown by system tools, i.e vmstat, iostat.
+- Some monitoring products read their system metrics by running system tools and parsing the text output, which is inefficient, better tools use library and kernel
+  interfaces to read the metrics directly.
+
+### Observability Sources
+
+- Summary;
+  - per-process counters, /proc.
+  - system-wide counters, /proc, /sys.
+  - device configuration and counters. /sys.
+  - cgroup statistics, /sys/fs/cgroup.
+  - per-process tracing, ptrace.
+  - H/w counters(PMC), perf_event.
+  - Network statistics, netlink.
+  - Network packet capture, libpcap.
+  - per-thread latency metrics, delay accounting.
+  - System-wide tracing, ftrace, tracepoints, software events, kprobes, uprobes, perf_event.
+
+#### /proc
+
+- This is a file system interface for kernel statistics.
+- It contains a number of directories where each directory is named after the process ID for the process it represents.
+- In each of these directories is a number of files containing informations and statistics about each process mapped from kernel data structures.
+- There are additional files in /proc for system-wide statistics.
+- It is created dynamically by kernel and is in-memory, mostly read-only, providing stats for observability tools.
+- The file system interface is convenient, intuitive, user-level security
+
+- Per-process statistics
+  - limits, in-effect resource limits.
+  - maps, memory-mapped regions.
+  - sched, various CPU scheduler statistics.
+  - schedstat, CPU runtime, latency and time slices.
+  - smaps, mapped memory regions with usage statistics.
+  - stat, process status and statistics, including total CPU and memory usage.
+  - statm, memory usage sumamry in units of pages   
+  - status, stat and statm information.
+  - fd, directory of file descriptor symlinks.
+  - cgroup, cgroup membership.
+  - task, directory of per-task(thread) statistics.
+
+- System-wide statistics
+  - cpuinfo, physical processor information.
+  - diskstats, disk I/O statistics for all disk devices.
+  - Interrupts, interrupt counters per CPU.
+  - loadavg, load averages.
+  - meminfo, system memory usage breakdowns.
+  - net/dev, network interface statistics.
+  - net/netstat, system-wide networking statistics.
+  - net/tcp, active tcp socket information.
+  - pressure, pressure stall information files.
+  - schedstat, system-wide CPU scheduler statistics.
+  - self, a symlink to the current process ID directory
+  - slabinfo, kernel slab allocator cache statistics.
+  - stat, a summary of kernel and system resource statistics.
+  - zoneinfo, memory zone information.   
+
+- The accuracy of these statistics depends on the kernel configuration.
+- /proc is usually text formatted, convenient but adds a small overhead to encode.
+
+#### /sys
+
+- Introduced in 2.6 kernel to provide a directory-based structure for kernel statistics.
+- It has tens of thousands of statistics in read-only files as well many writeable files for changing kernel state, i.e CPU can be set to online or offline 
+  by setting 1 or 0 to a file name online.
+
+#### Delay accounting
+
+- Linux systems with the CONFIG_TASK_DELAY_ACCT option track time per task in the following states
+  - Scheduler Latency, waiting for a turn on-CPU.
+  - Block I/O, waiting for a block I/O to complete.
+  - Swapping, waiting for paging(memory pressure)
+  - Memory reclaim, waiting for memeory reclaim routine.
+- Technically scheduler latency statistic is sourced from schedstats but it is exposed with the other delay accounting states.
+- These stats can be read from the user-level using taskstats, which is a netlink-based interface for fetching  per-task and process statistics.
+
+#### Netlink
+
+- This is a special socket address family(AF_NETLINK)for fetching kernel information, involves opening a socket with AF_NETLINK address family and then using a series
+  of send and recv calls to pass requests and receiving information in binary structs. 
+  
+#### Tracepoints
+
+- They are a linux kernel event source based on static instrumentation.
+- They are hard-coded instrumentation points placed at logical locations in kernel code, i.e start and end of system calls, scheduler events, file system operations and disk I/O.
+- They are important resource for performance analysis as they power advanced tracing tools that go beyond summary statistics, providing deeper insight into kernel behavior.
+- They provide a more stable interface than function-based tracing, allowing for robust tools to be built.
+- Apart from showing when an event happened, tracepoints can also provide contextual data about the event.
+- Activation of tracepoints add a small amount of CPU overhead to each event.
+- Variation of tracepoints called `raw tracepoints`.
+
+#### kprobes
+
+- Kernel probes is a linux kernel event source for tracers based on dynamic instrumentation.
+- kprobes can trace any kernel function or instruction.
+- They are considered unstable because they expose raw kernel functions and arguments that may change between kernel versions.
+- kprobes can work in different ways internally with the standard way being modifying the instruction text of running kernel code to insert instrumentation where needed.
+- When instrumenting the entry of functions, an optimization may be used where kprobes use existing Ftrace function tracing as it has lower overhead.
+- kprobes offer a last resort of virtually unlimited information about kernel behaviour in production, crucial to observing performance issues invisible to other tools.
+- kprobes can trace the entry to functions as well as instruction offsets within functions.
+- Their use creates kprobe events, that only exist when a tracer creates them.
+- kretprobes trace the return from kernel functions, when paired with kprobes and a tracer that records timestamps, duration of a kernel function can be measured.
+
+#### uprobes
+
+- Similar to kprobes but for user-space.
+- They can dynamically instrument functions in applications and libraries and provide an unstable API for diving deep into software internals.
+- They currently work by trapping into the kernel, cost much higher CPU overhead than kprobes and tracepoints.
+
+#### USDT
+
+- User-level stastically-defined tracing is the user-space version of tracepoints.
+- It is to uprobe what tracepoints are to kprobes.
+- Some apps and libraries have added USDT probes to their code, providing a stable API for tracing application-level events, i.e postgres, libc
+- What makes USDT probes different from custom application event logs is that they can be used from various tracers that can combine application context with
+  kernel events such as disk and network I/O giving more accurate information.
+- USDT probes must be compiled into the executable they instrument with alternatives being dynamic USDT, which precompiles probes as a shared library providing
+  an interface to call them from the JIT-compiled language, Java, Nodejs.
+
+#### Hardware Counter(PMCs)
+
+- Performance monitoring counters, also known as CPCs and PICs or PMU events.
+- They are refer to programmable hardware registers on the processor that provide low-level performance information at the CPU cycle level. 
+- They are vital as only through them can you measure efficiency of CPU instructions, hit ratios of CPU caches, utilization of memeory and device buses,
+  interconnect utilization, stall cycles.
+- Intel architectural PMCs
+  - Unhalted core cycles
+  - Instruction retired
+  - Unhalted reference cycles
+  - LLC misses
+  - Branch instruction retired
+  - Branch misses retired
+- Although they are hundreds of PMCs available, you can only measure around 6 at the same time due to the number of registers available.
+- They can be used in different modes, counting(quantify problems) and overflow sampling(show code path responsible).
+- Overflow sampling may not record the correct instruction pointer that triggered the event due to instruction latency or out-of order execution.
+- Solution for which is processor support for precise events, which use a hardware buffers to record a more accurate IP at time of the event.
+- Some cloud providers disable PMC access for their guests.
+
+#### MSRs
+
+- PMCs are implemented using model-specific registers.
+- There are other MSR for showing configuration and health of the system, i.e CPU clock rate, usage, temperatures and power consumption.
+- Available MSRs are dependent on processor type, BIOS version and settings and hypervisor settings.
+
+#### ptrace
+
+- This syscall controls process tracing, used by gdb for debugging and strace for tracing syscalls.
+- It is breakpoint based and can slow target one hundred-fold.
+
+#### Function profiling
+
+- Profiling function calls are added to the start of all non-inlined kernel functions on x86 for efficient ftrace function tracing.
+- They are converted to nop instructions until needed.
+
+#### Network sniffing
+
+- These interfaces provide a way to capture packets from network devices for detailed investigations into packet and protocol performance.
+- On linux its done via libpcap and /proc/net/dev and consumed by tcpdump tool.
+- There are overheads to this.
+
+#### Netfilter conntrack
+
+- This allows custom handlers to be executed on events not just firewalls, but also for connection tracking, allowing logs to be created out of network flows.
+
+#### Process accounting
+
+- Dates back to mainframes and need to bill departments for their usage based on execution and runtime of processes.
+
+#### Software events
+
+- Similar to hardware events but are instrumented in software, i.e page faults
+- They are made available via the perf_event_open interface and used by perf and bpftrace.
+
+#### System calls
+
+- Some system and library calls may be available to provide performance metrics.
+- i.e getrusage, a system call for processes to get their own resource usage statistics. 
+
+### Observing Observability
+
+- When multiple observability tools have overlapping coverage, you can use them to cross-check each other.
+- One can also use known workloads to as a verification technque, combining it with micro-benchmarks.
