@@ -2347,3 +2347,186 @@ lock
 - DCCP - IP 33
 - RDP - IP 26
 - SCTP - IP 132
+
+## Virtualization
+
+- Type 1 hypervisor: runs directly on hardware, no need for host OS.
+- Type 2 hypervisor: runs as an application on top of host OS.
+- How to trick the guest OS into relinquishing hardware control?
+- Design virtual machine monitors.
+  - Hardware assisted virtualization (KVM/QEMU): modern CPUs have support for virtualization and VMMs are built over this support.
+  - Full virtualization (VMWare): Original technique to run unmodified OS over original hardware with no virtualization support.
+  - Paravirtualization (Xen): Modify OS source code to be compatible with virtualization.
+- Understand how CPU, Memory, I/O devices are virtualized with each of the above techniques.
+- VM live migration.
+- Containers
+
+- Process execution
+  - The set of values of all CPU registers pertaining to a process execution is called its CPU context.
+  - To run a process, OS allocates memory, loads CPU context.
+  - OS runs multiple process concurrently by multiplexing on the same CPU.
+  - Context switch, OS switches from one process to another.
+  - OS has a PCB(process control block) for each process, temporarily stores context of a process when its not running.
+
+- Virtual memory
+  - Allocated at granularity of pages(4KB).
+  - A piece of hardware called MMU(memory management unit) translates virtual addresses to physical addresses.
+  - A page table of a process stores the mapping of logical page number ->physical frame number, built up by OS when allocating memory, used by MMU to translate addresses.
+  - MMU looks up CR3 register of CPU(x86) which stores location of page table of current process, looks up page number on page table.
+  - CR3 reset on every context switch.
+  - Recent address translations cached on TLB(Translation Lookaside Buffer) located within MMU.
+  - Hierarchial page tables, cant store a large page table contiguously in memory, so page table of a process is stored in memory in page sized chunks, i.e 32-bit has 2 levels.
+  - Walking the page table.
+  - Demand paging, page fault.
+  - OS is part of high virtual address space of every process, some addresses are reserved for OS code.
+  - Page table of process maps these kernel addresses to location of kernel code in memory.
+  - Only one copy of OS code in memory, but mapped into virtual address space/page table of every process.
+  - Process jumps to high virtual addresses to run OS code.
+
+- User mode and kernel mode.
+  - Unpriviliged and Unprivileged instructions.
+  - Privilege levels, 0 = kernel mode, 3 = user mode.
+  - Privilege level checked by CPU and MMU, every page has privilege bit.
+  - When user process needs to perform privileged action, must jump to privileged OS code, set CPU to high privilege and then perform the action.
+  - Kernel mode
+    - A process go from user mode to kernel mode via traps, i.e system call, program fault, interrupt.
+    - How is trap handled?
+      - It changes CPU privilege level to high privilege/kernel mode, begins by running a CPU instruction(int n in x86).
+      - It jump to OS code that handles trap and run it, lookup IDT to get address of kernel code that handles this trap, set EIP to this value, user kernel stack of process as the main stack, set ESP to this value.
+      - It then returns to user code after handling trap, kernel invokes iret(x86) instruction.
+      - It can choose to return to user code of another process too.
+
+- Segmentation, alternative to paging.
+  - Base and Limit addresses.
+  - Virtual addresses made up of segment base and offset in segment.
+  - Mostly used to check permissions.
+
+- I/O subsystem.
+  - Processes use system calls to access I/O devices.
+  - DMA, Direct Memory Access to store I/O data in memory, when initiating I/O request, device driver provides (physical) address of memory buffer in which to store I/O data.(disk block)
+  - Device first stores data in DMA buffer before raising interrupt, interrupt handler need not copy data from device memory to RAM.
+
+### VMM  
+
+- Multiple VMs running on a physical machine, multiplex the underlying machine, similar to hos OS multiplexes processes on CPU.
+- VMM performs machine switch, run a VM a bit, save context and switch to another VM.
+- Problem? Guest OS expects to have unrestricted access to hardware, runs privileged instructions unlike user processes.
+
+- VMM Techniques
+  - Trap and emulate VMM,
+    - Guest OS runs at lower privilege level that VMM, traps to VMM for privileged operation.
+    - Guest app has to handle syscall/interrupt, special trap instr traps to VMM, VMM doesnt know how to handle trap, VMM jumps to guest OS trap handler, Trap handled by guest OS normally.
+    - Any privileged action by guest OS traps to VMM, emulated by VMM, sensitive data structures like IDT must be managed by VMM not guest OS.
+    - One problem with this is that some x86 instructions which change hardware state run in both privileged and unprivileged modes, behave differently when is in ring 0 vs ring 1.
+    - This is because instruction set architecture of x86 is not easily virtualizable, not designed with virtualization in mind.
+    - Popek Goldberg theorem, in order to build a VMM efficiently via trap-and-emulate method, sensitive instructions(changes hardware state) should be a subset of privileged instructions(runs only in privileged mode).
+    
+- Memory virtualization
+  - Shadow paging, VMM creates a combined mapping GVA ->HPA and MMU is given a pointer to this page table.
+  - Extended page tables, MMU hardware is aware of virtualization, takes pointers to two separate page tables.
+  - Memory reclamation techniques
+    - Uncooperative swapping, VMM reclaims some guest RAM pages and swaps them to disk.
+    - Ballooning, VMM opens dummy device, requests pages from VM, then swaps these pages out.
+    - Memory sharing, memory pages with identical content across VMs shared between VMs.
+
+- I/O virtualization
+  - Communication between OS and device happens via device memory exposed as registers(command, status, data), I/O happens by reading/writing this memory.
+  - OS can read/write device registers in two ways;
+    - Explicit I/O, in/out instructions in x86 can write to device memory.
+    - Memory mapped I/O; some memory addresses are assigned to device memory not RAM, I/O happening by reading/writing this memory.
+  - Accessing device memory can be configured to trap to VMM.
+  - Device raises interrupt when I/O completes (alternate to polling), modern I/O devices perform DMA and copy data from device memory to RAM before raising interrupt.
+  - Techniques
+    - Emulation, guest OS I/O operations trap to VMM, emulated by doing I/O in VMM/host OS, i.e virtio
+    - Direct I/O or device passthrough, assign a slice of a device directly to each VM, more efficient than emulation, i.e sr-iov.
+
+### Hardware-assisted virtualization
+
+- Modern technique after hardware support for virtualization introduced in CPUs, Intel VT-X or AMD-V support, VMX mode for running VMs.
+- i.e 
+  - QEMU(userspace process) - works with binary translation if no h/w support.
+  - KVM(kernel module) - when invoked, KVM switches to VMX mode to run guest.
+  - CPU with VMX mode - CPU switched between VMX and non-VMX root modes.
+- libvirt also installed, a set of tools to manage hypervisors, a daemon runs on the system and communicates with hypervisors, exposing an API using which hypervisors can be managed.
+
+- QEMU architecture
+  - QEMU is a userspace process.
+  - KVM exposes a dummy device, talking to QEMU via open/ioctl syscalls
+  - Allocates memory via mmap for guest VM physcial memory.
+  - Creates one thread fr each virtual CPU in guest.
+  - Multiple file descriptors to dev/kvm(one for QEMU, one for VM, one for VCPU).
+  - Host OS sees QEMU as a regular multi-threaded process.
+  - VCPU thread has kvm_run structure to share info from QEMU to KVM, runtime information stored.
+
+- QEMU/KVM operation
+  - QEMU thread calls KVM_RUN.
+  - KVM shifts CPU to VMX mode via VMRESUME/VMLAUNCH, host context saved in VMCS, guest context restored.
+  - Guest OS and user applications run normally.
+  - Guest OS exits back to KVM, via VMEXIT, guest context saved, host restored from VMCS.
+  - KVM handles exit or returns to QEMU thread.
+
+- VMX mode
+  - special CPU isntructions to enter and exit VMX mode, VMLAUNCH, VMRESUME, VMEXIT.
+  - On VMX entry/exit instructions, CPU switches context between host OS to guest OS, page tables(address space), CPU register values switched, Hardware manages this mode switch.
+  - VMCS, virtual memory control structure is a common memory area accessible in both modes as it cant be stored in host OS or guest OS data structures alone.
+  - It is usually one VMCS per VM, KVM tells CPU which VMCS to use.
+  - What is stored in VMCS?
+    - Host CPU context, stored when launching VM, restored on VM exit.
+    - Guest CPU context, stored on VM exit, restored when VM is run.
+    - Guest entry/execution/exit control area, KVM can configure guest memory and CPU context, which instructions and events should cause VM to exit.
+    - Exit information, exit reason and any other exit-related information, exchanged with QEMU via kvm_run structure.
+  - Restrictions on guest OS execution, configurable exits to KVM, guest OS exits to KVM on certain instructions.
+  - No hardware access to guest, emulated by KVM, i.e via virtual interrupts to guest OS during VMX mode entry.
+  - Mimics the trap-and-emulate architecture with hardware support.
+
+- Host view
+  - Host sees QEMU as regular multithreaded process that has memory-mapped memory talking to KVM device via ioctl calls.
+  - Multiple QEMU VCPU threads can be scheduled in parallel on multiple cores.
+  - Host OS context is stored in VMCS when KVM launches a VM as its execution is suspended.
+  - When guest OS exits, host OS context is restored from VMCS.
+  - Host OS is not aware of guest OS execution.
+
+### Full virtualization
+
+- It came about since x86 and other h/w lacked virtulization support.
+- The key idea is dynamic(on a need basis) binary translation of OS instructions.
+- It has a higher overhead than hardware-assisted virtulization.
+- Architecture
+  - ioctl call to run VM
+  - World switch to VMM context.
+  - Guest OS and user applications run with less privilege.
+  - Privileged actions trap to VMM.
+  - VMM switched back to host on interrupt I/O requests etc.
+  - VMM kernel driver or userspace process handle exits.
+  - Common cross page mapped into host and guest address spaces.
+  - VMM is located in top 4mb of guest address space, guest OS traps to VMM for privileged ops. World switch to host if VMM cannot handle trap in guest context. 
+
+- Binary translation
+  - Guest OS binary is translated instruction-by-instruction and stored in translation cache.
+  - Guest OS code executes from TC in ring 1.
+  - Privileged OS code traps to VMM.
+  - Dynamic binary translation in that VMM translator logic translates guest code one basic block(sequence of instructions until a jump/return) at a time to produce a compiled code fragment(CCF).
+  - Once CCF is created, move to ring 1 to run translated guest code.
+  - An optimization called chaining can be used where if the next CCF is present in TC, jump directly to it without invoking VMM translator logic.
+  - Segmentation is used to protect VMM from guest.
+  
+### Paravirtualization
+
+- Modify guest OS to be amenable to virtualization without application interface changing.
+- It has better performance than binary translation even though it requires code changes to OS.
+- Xen architecture
+  - It runs directly over hardware.
+  - Trap-and-emulate architecture, Xen runs in ring 0, guest OS in ring 1 with Xen sitting in the top 64mb of address space of guests.
+  - A guest VM is called a domain, a special domain called dom0 runs control/management software.
+  - Guest OS code modified to not invoke any privileged instruction.
+  - Hypercalls, guest OS voluntarily invokes Xen to perform privileged ops, guest pauses while Xen services the hypercall.
+  - Asynchronous event mechanism, communication from Xen to domain, much like interrupts from hardware to kernel, used to deliver h/w interrupts and other notifications to domain.
+  - When trap/interrupt occurs, Xen copies the trap frame onto the guest OS kernel stack, invokes guest interrupt handler.
+  - Guest registers an IDT with Xen to handle traps with the guest trap handlers working off information on kernel stack, no modifications needed to guest OS code.
+  - For memory virtualization, Xen uses shadow page tables but in guest memory not in VMM.
+  - Guest page table is in guest memory, but validated by Xen.
+  - Segment descriptor tables are also maintained similarly, as read-only copy in guest memory with updates validated and applied by Xen.
+  - I/O virtualization in Xen happens via shared memory rings between geust domain and Xen/domain0.
+   
+## Containers
+
