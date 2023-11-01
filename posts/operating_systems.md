@@ -2527,6 +2527,91 @@ lock
   - Guest page table is in guest memory, but validated by Xen.
   - Segment descriptor tables are also maintained similarly, as read-only copy in guest memory with updates validated and applied by Xen.
   - I/O virtualization in Xen happens via shared memory rings between geust domain and Xen/domain0.
-   
+
+### Live Migration
+
+- This is the process of migrating an entire VM from one physical host to another, including all user processes and kernel state without having to shut down the machine.
+- This can be due to system maintenance, distribute VM load efficiently across servers in a cloud.
+- It is easier than migrating processes as VM have a much narrower interface than a process.
+- Techniques;
+  - Pure stop-and-copy, VM stopped, all state transferred to target, VM restarts. Too much downtime.
+  - Pre-copy, Most state is transferred in the push phase, followed by a brief stop-and-copy phase.
+  - Post-copy, VM stopped, bare minimum state is required to run the VM is transferred to the target host, remaining state is pulled on demand while the VM is running at the new location.
+  - Hybrid, mix of pre-copy and post-copy, some pushing of state followed by stop-and-copy, followed by pulling of state on demand.
+- ref paper: `Live Migration of VM`, `Post-copy based live virtual machine migration using adaptive pre-paging and dynamic self-ballooning`
+- CPU context of VM and Contents of main memory are the main things migrated.
+- For disk, assume NAS that is accessible from both hosts or local disk is mirrored.
+- For network assume both hosts on same LAN, so migrate IP address, MAC address.
+- Virtual I/O devices easier to migrate, direct device assignment of physical devices to VMs makes migration harder.
+- Steps to migrate a VM
+  - Setup target host B, reserve resources for the VM
+  - Push phase, push some memory of VM from A to B.
+  - Stop-and-copy, stop VM at A, copy CPU context and some memory.
+  - Pull phase, Start VM at B, pull any further memory required from A.
+  - Clean up state from host A, migration complete.
+- Metrics to consider
+  - Total migration time.
+  - Service downtime
+  - Impact on application performance.
+  - Network bandwidth consumed.
+  - Total pages transferred.
+- Failures
+  - Pre-copy can simply abort the migration, restart with another target.
+  - Post-copy, source has stale memory, target has updated memory, cannot recover application data unless replication was performed.
+  
+
+### VM checkpointing and cloning
+
+- VM checkpointing is necessary for high availability(backup) while VM cloning is needed for parallel execution of tasks.
+- ref paper:`Remus: High availability via Async VM replication`, `Snowflock: Rapid VM cloning for cloud computing`
+- Reliability techniques
+  - Application-based replication.
+    - Application communicates with other replicas and replicates state.
+    - Consensus protocols like Raft or Paxos used to maintain consistency of replicated state.
+    - Application decides what state to replicate.
+    - Reliability via changes to application code.
+  - VM-based replication or whole system replication.
+    - Entire VM state(memory,CPU, disk of apps, kernel) is replicated.
+    - Higher overhead than application-based.
+    - Does not require application code changes.
+    - VM provides easy way to capture whole system state.
+- What to replicate
+  - Replicate state.
+  - Replay inputs, may lead to non-determinism.
+- Uses of VM fork
+  - Sandboxing, run untrusted code.
+  - Parallel computation.
+  - Load handling.
+  - Opportunistic job.
+  
 ## Containers
+
+- They share base OS, have different set of libraries, utilities, root filesystem, view of process tree, networking, IPC endpoints, users.
+- Containers offer lightweight virtualization with less overhead that VMs but also lesser isolation.
+- Containers are built on
+  - Namespace
+    - A way to provide isolated view of a certain global resource to a set of processes, processes within a namespace see only their slice of the global resource.
+    - Default namespace for all processes in Linux, system calls to create new namespaces and place processes in them.
+      - Mount namespace, isolates the filesystem mountpoints seen by a group of processes.
+      - PID namespace, isolates PID numberspace seen by processes, A process can see all other processes in its own or nested namespaces but not in its parent namespace.
+      - Network namespace, isolates network resources like IP addresses, routing tables, port numbers, create a virtual ethernet linkto connect parent namespace to new child namespace.
+      - UTS namespace, isolates the hostname seen by processes.
+      - User namespace, isolates UID/GID numberspace.
+      - IPC namespace, isolates IPC endpoints like POSIX message queues.
+    - Namespaces API
+      - clone(), used to create a new process and place it into a new namespace, general version of fork().
+      - setns(), lets a process join an existing namespace,args specify which namespace and which type.
+      - unshare(), creates a new namespace and places calling process into it, flags indicate which namespace to create.
+  - Cgroups
+    - A way to set resource limits on a group of processes.
+    - Create separate hierarchies for each resource, or a combined hierarchy for multiple resources together.
+    - No new sysstem calls, a special cgroup filesystem is mounted at sys/fs/cgroup.
+    - Create directories and sub-directories for different resources and different user classes.
+- Implementations include LXC, Docker leverage these mechanisms to build the container abstractions.
+- Kubernetes and Swarm are used to manage multiple containers across hosts, along with autoscaling, lifecycle management and so on.
+- Kubernetes
+  - Runs over multiple physical machines(nodes) each with multiple pods.
+  - A pod contains one or more containers within the same network namespace with the same IP address.
+  - Pod is a tier of a multi-tier application.(frontend, backend, database, webserver)
+  - K8s manages multiple nodes and their pods, instantiating pods on free nodes, auto-scaling pods when load increases, restarting pods when they crash.
 

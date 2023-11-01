@@ -1930,73 +1930,95 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - use multiple threads to compute each query in parallel.
     
 - Processing Models
-  - defines how the system executes a query plan
+  - It defines how the system executes a query plan.
   - different trade-offs for different workloads
   
-  - Approaches:
-    - Iterator Model
-      - also known as volcano or pipeline model.
-      - each query olan operator implements a Next() function.
-      - used in almost every DBMS, allows for tuple pipelining.
-      - some operators must block until their children emit all their tuples, joins, subqueries, order by.
-    - Materialization Model
-      - Each operator processes its input all at once and then emits its output all at once.
-      - Better for OLTP workloads because queries only access a small number of tuples at a time. 
-      - Not good for OLAP with large intermediate results.
-      - The output can be either whole tuples (NSM) or subsets of columns(DSM).
-    - Vectorized / Batch Model
-      - each operator emits a batch of tuples instead of a single tuple
-      - ideal for OLAP / data warehouses because it greatly reduces the number of invocations per operator.
-      - allows for opearators to more easily use SIMD to process batches of tuples.
+### Approaches:
+
+- Iterator Model
+  - Its also known as Volcano or Pipeline model.
+  - Each query plan operator implements a Next() function, where on each invocation, the operator returns either a single tuple or a eof marker if there are no more tuples.
+  - Each operator implementation also has Open() and Close() functions.
+  - It is used in almost every DBMS, allows for tuple pipelining.
+  - Some operators must block until their children emit all their tuples, joins, subqueries, order by.
+
+- Materialization Model
+  - Each operator processes its input all at once and then emits its output all at once.
+  - Better for OLTP workloads because queries only access a small number of tuples at a time as they have lower execution/coordination overhead and result in fewer function calls. 
+  - Not good for OLAP queries with large intermediate results.
+  - The output can be either whole tuples (NSM) or subsets of columns(DSM).
+
+- Vectorized / Batch Model
+  - It is like the iterator model where each operator implements a Next() function, but now each operator emits a batch of tuples instead of a single tuple.
+  - The size of the batch can vary based on hardware or query properties.
+  - Ideal for OLAP / data warehouses because it greatly reduces the number of invocations per operator.
+  - Allows for opearators to more easily use SIMD to process batches of tuples.
   
 - Plan Processing Direction
   - ref paper:`push vs pull-based loop fusion in query engines`
   - Top-to-Bottom
-    - start with the root and pull data up from its children
-    - tuples are always passed with function calls.
+    - Start with the root and pull data up from its children
+    - Tuples are always passed with function calls.
   - Bottom-to-Top
-    - start with lead nodes and push data to their parents
-    - allows for tighter control of caches/registers in pipelines.
+    - Start with lead nodes and push data to their parents
+    - It allows for tighter control of caches/registers in pipelines.
 
-- Access Methods
-  - This is the way DBMS access the data stored in a table
-  - Approaches
-    - Sequential
-      - Optimizations
-        - Prefetching
-        - Buffer Pool Bypass
-        - Parallelization
-        - Heap Clustering
-        - Late Materialization
-        - Data Skipping
-          - Approximate Queries (Lossy)
-            - execute queries on a sampled subset of the entire table to produce approxiate results
-          - Zone Maps (Loseless)
-            - pre-computed aggregates for the attribute values in a page. DBMS checks zone map first to decide whether it wants to access the page
-    - Index Scan
-      - DBMS picks an index to find the tuples that the query needs.
-      - Depends on:
-        - What attributes the index contains
-        - What attributes the query references
-        - Attribute's value domains
-        - Predicate composition
-        - Whether the index has unique or non-unique keys
-    - Multi-Index Scan
-      - multiple indexes that the DBMS can use for a query.
+### Access Methods
+  
+- This is the way DBMS access the data stored in a table
+- Approaches
+  - Sequential Scan
+    - For each page in the table, retrieve it from the buffer pool, iterate over each tuple and check whether to include it.
+    - The DBMS maintains an internal cursor that tracks the last page/slot it examined.
+    - Optimizations
+      - Prefetching
+      - Buffer Pool Bypass
+      - Parallelization
+      - Heap Clustering
+      - Late Materialization
+      - Data Skipping
+        - Approximate Queries (Lossy)
+          - execute queries on a sampled subset of the entire table to produce approxiate results
+        - Zone Maps (Loseless)
+          - pre-computed columnar aggregates for the attribute values in a page. DBMS checks zone map first to decide whether it wants to access the page
+          - ref paper:`Small materialiazed Aggreagtes; A lightweight index structure for Data warehousing`
+          - In large OLAP systems they can eliminate need to for indexes.
+  
+  - Index Scan
+    - DBMS picks an index to find the tuples that the query needs.
+    - Depends on:
+      - What attributes the index contains
+      - What attributes the query references
+      - Attribute's value domains
+      - Predicate composition
+      - Whether the index has unique or non-unique keys
+  
+  - Multi-Index Scan
+    - multiple indexes that the DBMS can use for a query.
+    - Compute sets of Record IDs using each matching index, combine these sets based on the query predicates(union vs intersect), retrieve the records and apply any remaining predicates.
 
 - Modification Queries
-  - operators that modify the database(INSERT, UPDATE, DELETE) are responsible for modifying the target table and its indexes.
+  - Operators that modify the database(INSERT, UPDATE, DELETE) are responsible for modifying the target table and its indexes.
     - constraint checks can either happen immediately inside of operator or deferred until later in query/transaction.
+  - The output of these operators can either be Record Ids or tuple data.
   - Halloween problem
     - anomaly where an update operations chages the physical location of a tuple which causes a scan operator to visit the tuple multiple times.
     - track modified record ids per query.
+    - Materialization would prevent this from occuring.
+    - Solution is to track modified record ids per query.
     
 - Expression Evaluation
-  - represents a WHERE clause as an expression tree.
-  - nodes in the tree represent different expression types
+  - The DBMS represents a WHERE clause as an expression tree.
+  - The nodes in the tree represent different expression types
     - comparisons, conjuction, arithmetic operators, constant values, tuple attribute references.
+  - Evaluating predicates in this manner is slow as the DBMS traverses the tree and for each node that it visits, it must figure out what the operator needs to do.
+  - JIT compilation can potentially speed times up hence a better approach.
 
-- JIT compilation can potentially speed times up.
+### Scheduler
+
+- The previous perspective has been that of a data flow to query processing model.
+- The control flow was implicit in the processing model, we can make the control flow more explicit with a scheduler.
+- CMU Quickstep project.
   
 ## Parallel Query Execution
 
