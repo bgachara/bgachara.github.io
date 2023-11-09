@@ -2022,198 +2022,231 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   
 ## Parallel Query Execution
 
-- Multiple workers in the same database
+- Multiple workers in the same database.
 - Increased perfomance for potentially the same hardware resources
   - Higher Throughput
   - Lower Latency
 - Increased responsiveness of the system.
 - Potentially lower TCO(total cost of ownership)
-  - fewer machines
+  - fewer machines means less parts/ physical footprint/ energy consumption.
+
 - Parallel vs Distributed
-  - both appear as single logical to a client application or DBMS frontend.
-  - same wury should have the same results for both.
-  - resources close vs far from each other
-  - resources communicate fast vs slow.
-  - comminication cheap and reliable vs very opposite.
+  - Database is spread across multiple resources to dealwith large data sets, higher performance and redundancy/fault tolerance.
+  - Both appear as single logical database instance to a client application or DBMS frontend.
+  - SQL query for a single-resource DBMS should have the same results on parallel or distributed DBMS.
+  - Resources close vs far from each other
+  - Resources communicate fast vs slow.
+  - Communication cheap and reliable vs very opposite.
 
 - Process Models
-  - how system is architectured to support concurrent requests ftom a multi-user application
-  - worker is the DBMS component that is responsible for executing tasks on behalf of the client and returnin the results.
+  - A process model defines how a system is architectured to support concurrent requests / queries from a multi-user application.
+  - A worker is the DBMS component that is responsible for executing tasks on behalf of the client and returning the results.
   
-- Approach:
-  - Process per DBMS worker
-    - each process is a separate OS process.
-    - relies on OS scheduler.
-    - uses hared memory for gloabl data structures.
-  - Thread per DBMS worker
-    - single process with multiple worker threads.
-    - DBMS manages its own scheduling
-    - may or not use a dispatcher thread.
-    - thread crash may kill the entire system.
-    - Query Scheduling
-      - How many tasks should it use?
-      - How many CPU cores should it use.
-      - What CPU core should the tasks eecute on
-      - Where should a task store its output
-    - DBMS always knows more than the OS.
-    - Scheduling Goals
-       - Throughput
-        - maximise the number of completed queries.
-       - Fairness
-        - Ensure that no query is starved for resources.
-       - Query Responsiveness
-        - Minimize tail latencies(especially for short queries)
-       - Low Overhead
-        - Workers should spend most of their time executing not figuring out what task to run next.
-    - Worker Allocation
-      - Approach: 
-        - One worker per core
-          - each core is assigned one thread that is pinned to that core in the OS.
-          - sched_setaffinity
-        - Multiple workers per core
-          - Use a pool of workers per core or per socket.
-          - Allows CPU cores to be fully utilized in case one worker at a core blocks.
-    - Task Assignment
-      - Approach:
-        - Push
-          - A centralized dispatcher assigns taks to workers and monitors their progress.
-          - When the worker notifies the dispatcher that it is finished, it is given a new task.
-        - Pull
-          - Workers pull the next task form a queue, process it and then return to get the next task.
-    - The DBMS scheduler must be aware of its hardware memory layout
-      - Uniform vs Non-Uniform Memory Access.
-    - Data Placement
-      - DBMS can partition memory for a database and assign each partition to a CPU.
-      - By controlling and tracking the location of partitions, it can schedule operators to execute on workers at the closest CPU core.
-      - Linux move_pages and numactl
-    - Memory Allocation
-      - What happens when the DBMS calls malloc?
-        - Assume that the allocator doesnt already have a chunk of memory that is an give out.
-        - Almost nothing!
-          - The allocator will extend the process data segment
-          - But this new virtual memory is not immediately backed by physical memory
-          - OS allocates physical memory when there is a page fault on access.
-        - After a page fault, where does theOS allocate physical memory in a NUMA system.
-      - Memory Allocation Location
-        - Approach:
-          - Interleaving
-            - Distribute allocated memory uniformly across CPUs
-          - First Touch
-            - at the CPU of the thread that access the memory location that caused the page fault.
-        - OS can try to move memory to another NUMA region from observed access patterns.
-    - Partitioning vs Placement
-      - A partitioning scheme is used to split the database based on some policy
-        - Round-robin
-        - Attribute Ranges
-        - Hashing
-        - Partial/Full Replication
-      - A placement scheme then tell the DBMS where to put those partitions
-        - Round-robin
-        - Interleave across cores
-    - How do we decide how to create a set of tasks from a logical query plan?
-      - Static scheduling
-        - DBMS decided how many threads to use to execute the query when it generates the plan.
-        - It does not change while the query executes
-          - Easiest approach is to just use the same # of tasks as the # of cores.
-          - Can still assing tasks to threads based on data location to maximize local data processing.
-      - Morsel-driven scheduling
-        - ref paper: `morsel-driven parallelism: numa-aware query evaluation framewrok for the many-core age`
-        - Dynamic scheduling of tasks that operate over horizontal partitions called morsels distributed across cores
-          - One worker per core.
-          - One morseld per task.
-          - Pull-based task assignment.
-          - Round-robin data placement
-        - Supports parallel, NUMA-aware operator implementations.
-        - Because there is only one worker per core and oe morsel per task, HyPer must use work stealing because otherwise threads could sit idle waiting for stragglers
-        - DBMS uses a lock-free has table to maintain the global work queues.
-        - Tasks can have different execution costs per tuple
-          - Simple selection vs string matching
-        - HyPer has no notion of execution priorities...
-          - Short-running queries get blocked behind long-running queries
-          - All query tasks are executed with same priority
-        - Umbra - Morsel scheduling 2.0
-          - ref paper:`self-tuning query scheduling for analytical workloads`
-          - taks are not created statically at runtime.
-          - each task may contain multiple morsels.
-          - implementation of stride scheduling
-            - each worker maintains its own thread-local meta-data about the available tasks to execute.
-              - active slots - which entries in the global slot arrat have active task sets available.
-              - change mask - indicates when a new task set is added to the global slot array.
-              - return mask - indicates when a worker completes a task set.
-            - workers perform CaS updates to TLS meta-data to broadcasr changes
-          - priority decay - query arrival times.
-      - SAP HANA - NUMA-AWARE SCHEDULER
-        - ref paper: `scaling up concurrent main-memory column store scans:towards adaptive numa-aware data and task placement`
-        - pull-based scheduling with multiple worker threads that are organized into groups
-          - each CPU can have multiple groups
-          - each group has a soft and hard priority queue
-        - uses a separate "watchdog" thread to check whether groups are saturated and can reassingn tasks dynamically.
-        - DBMS maintains soft and hard priority task queues for each thread group.
-          - threads can steal tasks from other groups soft queue
-        - Four different pools of thread per group
-          - Working: actively executing a task.
-          - Inactive: blocked inside of the kernel due to a latch
-          - Free: Sleeps for a little, wake up to see whether there is a new task to execute.
-          - Parked: Waiting for a task(free thread) but blocked in the kernel until the watchdog thread wakes it up.
-        - Dynamically adjust thread pinning based on whether a task is CPU or memory bound.
-    - SQLOS 
-      - user-level OS layer that runs inside the DBMS and manages provisioned hardware resources.
-        - determines which taks are schedules onto which threads.
-        - Also manages I/O scheduling and higher-level concepts like logical database locks.
-        - ref: `Ms sql server 2012 interals`
-      - Non-preemptive thread scheduling through instrumented DBMS code.
-    - If requests arrive at the DBMS faster than it can execute them, then the system becomes overloaded.
-      - The OS cannot help us here bacause it does not know what threads are doing
-        - CPU bound: do nothing
-        - memory bound:oom
-      - Easiest DBMS solution: Crash
-      - Approach:
-        - Admission control
-          - abort new requests whwn the system believes that it will not have enough resources to execute that request.
-        - Throttling
-          - delay responses ro clients to increase amount of time between requests
-          - assumes a synchronous submission scheme.
-  - Embedded worker
-    - runs inside the same address space as the application
-    - application is responsible for threads and scheduling
-    - application may support outside connections, BerkeleyDB, SQLite, RocksDB, LevelDB.
-  - Process models
-    - adavantages of multi-thread
-      - less overhead per context switch
-      - do not have to manage shread memory.
-      - thread per worker does not mean that DBMS supports intra-query parallelism
-  - Inter vs Intra Query Parallelism
-    - Inter: 
-      - Execute multiple disparate queries simultaneously
-      - increases throughput and reduces latency
-      - if read-ony then this requires almost no explicit co-ord between queries.
-      - hard if updating tables.
-      - OLAP queries have parallelizable and non-parallelizable phases, goal is to keep all cores active.
-    - Intra: 
-      - Execute the operations of a single query in parallel
-      - improve the performance of a single query by executing its operators in parallel.
-      - there are parallel versions of every operator.
-      - decreases latency for long-running queries esp for OLAP queries.
-      - Approaches
-        - Intra-operator(Horizontal)
-          - inserts an exchange operator into the query plan to coalesce/split results from multiple parent/child.
-          - types: Gather, Distribute, Repartition
-        - Inter-operator(Vertical)
-          - also called pipeline parallelism.
-        - Bushy
-          - Hybrid of Intra and Inter
-            
-  - Using additional processes/threads to execute queries in parallel wont help if the disk is always the main bottleneck.
+### Approaches
+
+- Process per DBMS worker
+  - Each worker is a separate OS process.
+  - Relies on OS scheduler.
+  - Uses shared memory for gloabl data structures.
+  - A process crash does not take down the entire system.
+
+- Thread per DBMS worker
+  - Single process with multiple worker threads.
+  - DBMS manages its own scheduling
+  - It may or not use a dispatcher thread.
+  - Thread crash may kill the entire system.
+
+- Query Scheduling
+  - How many tasks should it use?
+  - How many CPU cores should it use.
+  - What CPU core should the tasks eecute on
+  - Where should a task store its output
+- DBMS always knows more than the OS.
+
+- Scheduling Goals
+   - Throughput
+    - maximise the number of completed queries.
+   - Fairness
+    - Ensure that no query is starved for resources.
+   - Query Responsiveness
+    - Minimize tail latencies(especially for short queries)
+   - Low Overhead
+    - Workers should spend most of their time executing not figuring out what task to run next.
+
+- Worker Allocation
+  - Approach: 
+    - One worker per core
+      - each core is assigned one thread that is pinned to that core in the OS.
+      - sched_setaffinity
+    - Multiple workers per core
+      - Use a pool of workers per core or per socket.
+      - Allows CPU cores to be fully utilized in case one worker at a core blocks.
+
+- Task Assignment
+  - Approach:
+    - Push
+      - A centralized dispatcher assigns taks to workers and monitors their progress.
+      - When the worker notifies the dispatcher that it is finished, it is given a new task.
+    - Pull
+      - Workers pull the next task form a queue, process it and then return to get the next task.
+
+- The DBMS scheduler must be aware of its hardware memory layout
+  - Uniform vs Non-Uniform Memory Access.
+
+- Data Placement
+  - DBMS can partition memory for a database and assign each partition to a CPU.
+  - By controlling and tracking the location of partitions, it can schedule operators to execute on workers at the closest CPU core.
+  - Linux move_pages and numactl
+
+- Memory Allocation
+  - What happens when the DBMS calls malloc?
+    - Assume that the allocator doesnt already have a chunk of memory that is an give out.
+    - Almost nothing!
+      - The allocator will extend the process data segment
+      - But this new virtual memory is not immediately backed by physical memory
+      - OS allocates physical memory when there is a page fault on access.
+    - After a page fault, where does theOS allocate physical memory in a NUMA system.
+  - Memory Allocation Location
+    - Approach:
+      - Interleaving
+        - Distribute allocated memory uniformly across CPUs
+      - First Touch
+        - at the CPU of the thread that access the memory location that caused the page fault.
+    - OS can try to move memory to another NUMA region from observed access patterns.
+
+- Partitioning vs Placement
+  - A partitioning scheme is used to split the database based on some policy
+    - Round-robin
+    - Attribute Ranges
+    - Hashing
+    - Partial/Full Replication
+  - A placement scheme then tell the DBMS where to put those partitions
+    - Round-robin
+    - Interleave across cores
+
+- How do we decide how to create a set of tasks from a logical query plan?
+  - Static scheduling
+    - DBMS decided how many threads to use to execute the query when it generates the plan.
+    - It does not change while the query executes
+      - Easiest approach is to just use the same # of tasks as the # of cores.
+      - Can still assing tasks to threads based on data location to maximize local data processing.
+  
+  - Morsel-driven scheduling
+    - ref paper: `morsel-driven parallelism: numa-aware query evaluation framewrok for the many-core age`
+    - Dynamic scheduling of tasks that operate over horizontal partitions called morsels distributed across cores
+      - One worker per core.
+      - One morseld per task.
+      - Pull-based task assignment.
+      - Round-robin data placement
+    - Supports parallel, NUMA-aware operator implementations.
+    - Because there is only one worker per core and oe morsel per task, HyPer must use work stealing because otherwise threads could sit idle waiting for stragglers
+    - DBMS uses a lock-free has table to maintain the global work queues.
+    - Tasks can have different execution costs per tuple
+      - Simple selection vs string matching
+    - HyPer has no notion of execution priorities...
+      - Short-running queries get blocked behind long-running queries
+      - All query tasks are executed with same priority
+    - Umbra - Morsel scheduling 2.0
+      - ref paper:`self-tuning query scheduling for analytical workloads`
+      - taks are not created statically at runtime.
+      - each task may contain multiple morsels.
+      - implementation of stride scheduling
+        - each worker maintains its own thread-local meta-data about the available tasks to execute.
+          - active slots - which entries in the global slot arrat have active task sets available.
+          - change mask - indicates when a new task set is added to the global slot array.
+          - return mask - indicates when a worker completes a task set.
+        - workers perform CaS updates to TLS meta-data to broadcasr changes
+      - priority decay - query arrival times.
+  
+  - SAP HANA - NUMA-AWARE SCHEDULER
+    - ref paper: `scaling up concurrent main-memory column store scans:towards adaptive numa-aware data and task placement`
+    - pull-based scheduling with multiple worker threads that are organized into groups
+      - each CPU can have multiple groups
+      - each group has a soft and hard priority queue
+    - uses a separate "watchdog" thread to check whether groups are saturated and can reassingn tasks dynamically.
+    - DBMS maintains soft and hard priority task queues for each thread group.
+      - threads can steal tasks from other groups soft queue
+    - Four different pools of thread per group
+      - Working: actively executing a task.
+      - Inactive: blocked inside of the kernel due to a latch
+      - Free: Sleeps for a little, wake up to see whether there is a new task to execute.
+      - Parked: Waiting for a task(free thread) but blocked in the kernel until the watchdog thread wakes it up.
+    - Dynamically adjust thread pinning based on whether a task is CPU or memory bound.
+
+- SQLOS 
+  - user-level OS layer that runs inside the DBMS and manages provisioned hardware resources.
+    - determines which taks are schedules onto which threads.
+    - Also manages I/O scheduling and higher-level concepts like logical database locks.
+    - ref: `Ms sql server 2012 interals`
+
+- Non-preemptive thread scheduling through instrumented DBMS code.
+- If requests arrive at the DBMS faster than it can execute them, then the system becomes overloaded.
+  - The OS cannot help us here bacause it does not know what threads are doing
+    - CPU bound: do nothing
+    - memory bound:oom
+  - Easiest DBMS solution: Crash
+  - Approach:
+    - Admission control
+      - abort new requests whwn the system believes that it will not have enough resources to execute that request.
+    - Throttling
+      - delay responses ro clients to increase amount of time between requests
+      - assumes a synchronous submission scheme.
+
+- Embedded worker
+  - DBMS runs inside the same address space as the application.
+  - The application is responsible for threads and scheduling.
+  - The application may support outside connections, BerkeleyDB, SQLite, RocksDB, LevelDB.
+
+- Process models
+  - advantages of multi-thread
+    - less overhead per context switch
+    - do not have to manage shread memory.
+    - thread per worker does not mean that DBMS supports intra-query parallelism
+
+### Inter vs Intra Query Parallelism
+
+- Inter-Query 
+  - Execute multiple disparate queries simultaneously improving overall performance.
+  - Increases throughput and reduces latency.
+  - If queries are read-ony then this requires almost no explicit co-ord between queries.
+  - If multiple queries are updating the db at the same time, then this is hard.
+  - OLAP queries have parallelizable and non-parallelizable phases, goal is to keep all cores active.
+  
+- Intra-Query 
+  - Improve the performance of a single query by executing its operators in parallel.
+  - Organisation of operators can be thought of in a producer/consumer paradigm.
+  - There are parallel versions of every operator, can either have multiple threads access centralized data structures or use partitioning to divide work up. 
+  - decreases latency for long-running queries esp for OLAP queries.
+- Approaches
+  - Intra-operator(Horizontal)
+    - Decompose operators into independent fragments that perform the same function on different subsets of data.
+    - DBMS inserts an exchange operator into the query plan to coalesce/split results from multiple parent/child.
+    - Types: Gather, Distribute, Repartition
+  - Inter-operator(Vertical)
+    - Operations are overlapped in order to pipeline data from one stage to the next without materialization.
+    - Workers execute operators from different segments of a query plan at the same time.
+    - More common in streaming systems, Flink, Kafka, Pulsar, Spark.
+    - Also called pipeline parallelism.
+  - Bushy
+    - Hybrid of Intra and Inter, where workers execute multiple operators from different segments of a query plan at the same time.
+    - It still needs exchange operators to combine intermediate results from segments.
+        
+- Using additional processes/threads to execute queries in parallel wont help if the disk is always the main bottleneck.
 
 - Execution Parallelism
+
 - I/O Parallelism
-  - split the DBMS across multiple storage devices to improve disk bandwidth latency.
-  - many different options that have trade-offs
+  - Split the DBMS across multiple storage devices to improve disk bandwidth latency.
+  - Many different options that have trade-offs
     - multiple disks per db.
     - one db per disk.
     - one relation per disk.
     - split relation across multiple disks
-  - some dbms support this natively, others require admin to configure outside of DBMS.
+  - Some dbms support this natively, others require admin to configure outside of DBMS.
+
+- Multi-disk parallelism
+  - Data on the disk can get corrupted or an entire disk can fail, can get higher performance from a disk array.
+  - Performance, Capacity, Durability.
 
 - Database Partitioning
   - some DBMS allow you to specify the disk location of each individual database.
@@ -2360,73 +2393,80 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - **This is the hardest part of any database**
 
 - Logical plans vs Physical plans
-  - the optimzer generates a mapping of a logical algebra expression to the optimal equivalent physical algebra expression
+  - The optimizer generates a mapping of a logical algebra expression to the optimal equivalent physical algebra expression.
   - Physical operators define a specific execution strategy using an access path.
-    - they can depend on the physical format of the data that they process(sorting, compression).
+    - They can depend on the physical format of the data that they process(sorting, compression).
     - Not always a 1:1 mapping from logical to physical.
   - The goal is to increase the likelihood of enumerating the optimal plan in the search.
   
 - Architecture overview
-  - | Application | --> SQL Query -> | SQL Rewriter | --> SQL Query -> | Parser | --> AST -> | Binder | --> Logical Plan | Tree Rewriter | --> Logical Plan -> | Optimizer | --> Physical Plan | Execute |.
-  - System Catalog --> name - internal ID, Schema Info, 
-  - Cost model --> Estimates.
+  - | Application | -> SQL Query -> | SQL Rewriter | -> SQL Query -> | Parser | -> AST -> | Binder | -> Logical Plan | Tree Rewriter | -> Logical Plan -> | Optimizer | -> Physical Plan | Execute |.
+  - System Catalog -> name - internal ID, Schema Info, 
+  - Cost model -> Estimates.
 
 - Query Optimization
+  - Identify candidate equivalent trees(logical. It is an NP-hard problem so the space is large.
+  - For each candidate, find the execution plan tree (physical). We need to estimate the cost of each plan.
+  - Choose the best overall (physical) plan.
   - Heuristics / Rules
-    - rewrite the query to remove stupid / inefficient things
-    - techniques may need to examine catalog but they do not need to examine data
+    - Rewrite the query to remove inefficient things.
+    - The techniques may need to examine catalog but they do not need to examine data.
+    - Predicate pushdown, replace cartesian product, projection pushdown.
   - Cost based search
-    - use a model to estimate the cost of executing a plan.
-    - enumerate multiple equivalent plans for a query and implement the one with the lowest cost
+    - Use a model to estimate the cost of executing a plan.
+    - Enumerate multiple equivalent plans for a query, estimate their costs and implement the one with the lowest cost.
+    - I.e Single relation, Multiple relations, Nested sub-queries.
+    - It chooses the best plan it has seen for the query after exhausting all plans or some timeout.
 
 - Logical Query Optimization
   - Split Conjuctive predicates
-    - decompose predicates into their simplest forms to make it easier for the optimizer to move them around.
+    - Decompose predicates into their simplest forms to make it easier for the optimizer to move them around.
   - Predicate pushdown
-    - move the predicate to the lowest applicable point in the plan.
+    - Move the predicate to the lowest applicable point in the plan.
   - Replace cartesian products with joins
-    - replace with inner joins using the join predixcate
+    - Replace with inner joins using the join predicate.
   - Projection pushdown  
-    - eliminate redundant attributes before pipeline breakers to reduce materialization cost.
+    - Eliminate redundant attributes before pipeline breakers to reduce materialization cost.
 
 - Nested Sub-Queries.
   - DBMS treats nested sub-queries in the where clause as functions that take parameters and return a single value or set of values
   - Two approaches
     - Rewrite to de-correlate and/or flatten them
     - Decompose nested query and store result to temporary table.
-      - for harder one, optimzer breaks up queries into blocks and then concentrates on one block at a time.
-      - sub-queries are written to a temporary table that are discarded after the query finishes
+      - For harder one, optimzer breaks up queries into blocks and then concentrates on one block at a time.
+      - Sub-queries are written to a temporary table that are discarded after the query finishes
 
 - Expression Rewriting 
   - Optimizer transforms a query expressions(WHERE/ON) into the minimal set of expressions.
   - Implemented using if/then/else clauses or a pattern-matching rule engine.
-    - search for expressions that match a pattern
-    - when a match is found, rewrite the expression
+    - Search for expressions that match a pattern
+    - When a match is found, rewrite the expression
     - Halt if there are no more rules that match.
   - Impossible /Unnecessary predicates
   - Merging predicates
 
 - Cost Estimation
-  - DBMS uses a cost model to predict the behavior of a query plan given a database state
+  - DBMS uses a cost model to predict the behavior of a query plan given a database state.
     - Internal cost that allows the DBMS to compare one plan with another.
   - Its too expensive to run every possible plan to determine this information, so DBMS need a way to derive this information.
   - * Look into MongoDB implementation 
   - Cost model components:
     - Physical costs
-      - predict CPU cycles, I/O, cache misses, RAM consumption, network messages
-      - heavily dependant on hardware
+      - Predict CPU cycles, I/O, cache misses, RAM consumption, network messages.
+      - Heavily dependant on hardware
     - Logical Costs
-      - estimate output size per operator
-      - independent of the operator algorihtm
-      - need estimations for operator result sizes
+      - Estimate output size per operator
+      - Independent of the operator algorihtm
+      - Need estimations for operator result sizes
     - Algorithmic costs
       - Complexity of the operator algorithm implementation
   - Postgres cost model
-    - uses a combo of CPU and I/O costs that are weighted by magic constant factors.
-    - default settings are obviously for a disk-resident database without a lot of memory
-      - processing a tuple in memory is 400x faster than reading a tuple from disk
-      - sequential i/o is 4x faste than random i/o.
-    - some dbs run benchmark tests to update planner cost constants.
+    - Uses a combo of CPU and I/O costs that are weighted by magic constant factors.
+    - Default settings are obviously for a disk-resident database without a lot of memory
+      - Processing a tuple in memory is 400x faster than reading a tuple from disk
+      - Sequential i/o is 4x faste than random i/o.
+    - Some dbs run benchmark tests to update planner cost constants.
+  
   - Statistics
     - DBMS stores internal statistics about tables, attributes and indexes in its internal catalog
     - Different systems update them at different times
@@ -2439,21 +2479,22 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Uniform Data
         - distribution of values is the same.
       - Independent Predicates
-        - predicates on attributes are independent
+        - predicates on attributes are independent.
       - Inclusion Principle
-        - domain of join keys overlap such that each key in inner relation will also exist in the outer table
+        - domain of join keys overlap such that each key in inner relation will also exist in the outer table.
     - Correlated attributes
     - Statistics storage:
       - Histograms
-        - maintain an occurence count per value (or ranhe of values) in a column
-        - equi-width histogram.
-        - equi-depth histogram.
+        - Maintain an occurence count per value (or ranhe of values) in a column
+        - Equi-width histogram.
+        - Equi-depth histogram.
       - Sketches
-        - probabilistic data structure that gives an approximate count for a given value
-        - can replace histograms with sketches to improve its estimate accuracy
+        - Probabilistic data structure that gives an approximate count for a given value.
+        - Cost-model can replace histograms with sketches to improve its selectively estimate accuracy.
+        - I.e, Count-Min Sketch, HyperLogLog.
       - Samplings
-        - maintains a small subset of each table that is used to evaluate expressions to compute selectivity.
-        - update samoles when the underlying table chages significantly.
+        - Maintains a small subset of each table that is used to evaluate expressions to compute selectivity.
+        - Update samoles when the underlying table chages significantly.
         
   - Query Optimization
     - After performing rule-based rewriting, the DBMS will enumerate different plans for the query and estimate their costs
@@ -2468,19 +2509,36 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Simple heuristics are often good enough for this.
       - OLTP queries are easy
         - Sargable (Search Argument Able)
+      - System R Optimizer
+        - Break the query into blocks and generate the logical operators for each block.
+        - For each logical operator, generate a set of physical operators that implement it.
+        - Then, iteratively construct a left-deep join tree that minimizes the estimated amount of work to execute the plan.
+      
     - Multiple Relation QP
       - Bottom-up optimization
-        - use static rules to perform initial optimization.
-        - The use dynamic programming to determine the best join order for tables using the divide and conquer search method.
-        - Used by most DBMS
+        - Use static rules to perform initial optimization.
+        - Then use dynamic programming to determine the best join order for tables using the divide and conquer search method.
+        - Used by most DBMS.
         - System R optimizer
       - Top-down optimization
         - Start with a logical plan of what we want the query to be.
-        - Perform a branch and bound search to traverse the plan tree by converting logical operators into physical operators
-          - keep track of global best plan during search
-          - treat physical properties of data as first class entities during planning.
+        - Perform a branch and bound search to traverse the plan tree by converting logical operators into physical operators.
+          - Keep track of global best plan during search.
+          - Treat physical properties of data as first class entities during planning.
         - **Watch the MSSQL query optimizer talk**
+    
+    - Nested Sub-queries
+      - The DBMS treats nested sub-queries in the where clause as functions that take parameters and return a single value or set of values.
+      - Two approaches:
+        - Rewrite to de-correlate and/or flatten them.
+        - Decompose nested query and store results in a temporary table.
         
+    - Ref: Essential Query Optimization Papers.
+      - An overview of Query Optimization in Relational Systems, Surajit Chaudhuri.
+      - The Volcano Optimizer Generator: Extensibility and Efficient Search.
+      - Access path Selection in a Relational DBMS.
+      - Of Nests and Trees,Umeshwar Dayal.
+  
 ## Query Compilation and Code Generation
 
 - Optimization goals:
