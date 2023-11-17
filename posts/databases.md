@@ -2636,7 +2636,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - How to avoid race condition? Lost Updates
   - What is the correct database state? after a failure? Durability
 - Concurrency control and recovery
-  - valuable properties of DBMS
+  - Valuable properties of DBMS
   - Based on concept of transactions with ACID properties
 
 ### Transactions
@@ -2648,140 +2648,167 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - execute txn one-by-one as they arrive at the DBMS.
   - before a txn starts, copy the entire db to a new file and make all changes to that file.
   - is it correct? is it fast?
+
 - A better approach is to allow concurrent execution of independent txns
-  - better utilization/throughput
-  - increased response times to users
+  - Better utilization/throughput
+  - Increased response times to users
+  
 - Arbitrary interleaving of operations can lead to"
   - Temporary Inconsistency
   - Permanent Inconsistency
+
 - A DBMS is only concerned about what data is read/written from /to the database.
+
 - Transactions in SQL
-  - start with BEGIN command
+  - Start with BEGIN command.
   - Stops with either COMMIT or ABORT.
-- Atomicity, Consistency, Isolation, Durability...ACID.
-- Atomicity
-  - Txn always either executes all its actions or executes no actions at all.
-  - Approach:
-    - Logging
-      - logs all actions so that it can undo the actions of aborted txns
-      - maintain undo records both in memory and on disk
-    - Shadow Paging
-      - makes copies of pages and txns make changes to theose copies, only when the txn commits is the page made visible to others
-- Consistency
-  - world represented by the db is logically correct, all qiestions asked about the data are given logically correct answers
-  - Database consistency
-    - accurately models the real world and follows integrity constraints
-    - txns in future see the effects of txns committed in the past inside of the database
-  - Transaction consistency
-    - if db is consistent before txn starts it will also be consistent after
-    - this is the application's responsibility.
-- Isolation
-  - usr submit txns and each txn executes as if it was running by itself
-  - but the dbms achieves concurrency by interleavinf txns
-  - A concurrency control protocol is how the DBMS decides the proper interleaving of operations from multiple transactions
-  - Categories:
-    - Pessimistic - dont let problems arise in the first place.
-    - Optimistic - assume conflicts are rare and deal with them after they happen.
-  - When one txn stalls because of resource then another txn allowed to go forward.
-  - Formal properties of schedules
-    - Serial schedule
-      - a schedule that does not interleave the actions of different transactions
-    - Equivalent schedules
-      - for any db state, the effect of executing the first schedule is identical to the effect of executing the second schedule.
-    - Serializable schedule
-      - a schedule that is equivalent to some serial execution of the transactions
-      - if each txn preserves consistency, every serializable schedule preserves consistency
-      - Serializability is a less intuitive notion of correctness compared to txn initiation time or commit order, but it provides the DBMS with more flexibility in scheduling operations
-      - more flexibility means better parallelism.
-  - Conflicting operations
-    - need a formal notion of equivalence that can be implemented efficiently based on the notion of conflicting operations
-    - Two ops conflict if:
-      - they are by different transactions
-      - they are on the same object and one of them is a write.
-    - Interleaved Execution Anomalies
-      - Read - Write conflicts
-      - Write- Read conflicts
-        - one txn reads data written by another txn that has not committed yet
-      - Write - Write conflicts.
-        - one txn overwrites uncommitted data from another uncommitted txn
-  - Levels of serializability
-    - Conflict serializability*
-    - View Serializability - no system can do this?????
-  - Conflict serializable schedules
-    - Two txns are conflict equivalent iff:
-      - they involve the same actions of the same txns
-      - every pair of conflicting actions is ordered the same way.
-    - Schedule S is conflict serializable if:
-      - S is conflict equivalent to some serial schedule
-      - Intuition
-  - Dependency graph
-- Durability
-  - all changes of committed txns should be persistent
-    - no torn updates
-    - no changes from failed transactions
-  - DBMS can use either logging or shadow paging  to ensure all changes are durable
-- Concurrency control and recovery are among the most important functions provided by a DBMS
+
+### ACID.
+
+#### Atomicity.
+
+- Txn always either executes all its actions or executes no actions at all, COMMIT or ABORT.
+- Approach:
+  - Logging
+    - DBMS logs all actions so that it can undo the actions of aborted txns.
+    - Maintain undo records both in memory and on disk.
+    - Used for audit trail and/or efficiency reasons.
+  - Shadow Paging
+    - Makes copies of pages and txns make changes to these copies, only when the txn commits is the page made visible to others.
+
+#### Consistency
+
+- The world represented by the db is logically correct, all questions asked about the data are given logically correct answers.
+- Database consistency
+  - Accurately models the real world and follows integrity constraints.
+  - Txns in future see the effects of txns committed in the past inside of the database.
+- Transaction consistency
+  - If db is consistent before txn starts it will also be consistent after.
+  - This is the application's responsibility.
+
+#### Isolation
+
+- User submit txns and each txn executes as if it was running by itself.
+- But the dbms achieves concurrency by interleaving txns
+- A concurrency control protocol is how the DBMS decides the proper interleaving of operations from multiple transactions.
+- Categories:
+  - Pessimistic - dont let problems arise in the first place.
+  - Optimistic - assume conflicts are rare and deal with them after they happen.
+- When one txn stalls because of resource then another txn allowed to go forward.
+
+- Formal properties of schedules
+  - Serial schedule.
+    - A schedule that does not interleave the actions of different transactions.
+  - Equivalent schedules.
+    - For any db state, the effect of executing the first schedule is identical to the effect of executing the second schedule.
+  - Serializable schedule
+    - A schedule that is equivalent to some serial execution of the transactions.
+    - If each txn preserves consistency, every serializable schedule preserves consistency.
+    - Serializability is a less intuitive notion of correctness compared to txn initiation time or commit order, but it provides the DBMS with more flexibility in scheduling operations
+    - More flexibility means better parallelism.
+
+- Conflicting operations
+  - Need a formal notion of equivalence that can be implemented efficiently based on the notion of conflicting operations.
+  - Two ops conflict if:
+    - They are by different transactions
+    - They are on the same object and one of them is a write.
+  - Interleaved Execution Anomalies
+    - Read - Write conflicts
+      - Unrepeatable Read: Txn gets different values when reading the same object multiple times.
+    - Write - Read conflicts
+      - Dirty Read: One txn reads data written by another txn that has not committed yet.
+    - Write - Write conflicts.
+      - Lost Update: One txn overwrites uncommitted data from another uncommitted txn
+
+- Levels of serializability
+  - Conflict serializability*
+  - View Serializability - no system can do this?????
+- Conflict serializable schedules
+  - Two txns are conflict equivalent iff:
+    - They involve the same actions of the same txns.
+    - Every pair of conflicting actions is ordered the same way.
+  - Schedule S is conflict serializable if:
+    - S is conflict equivalent to some serial schedule.
+    - Intuition
+- Dependency graph
+  - If the actions result in a cycle in the dependency graph then the schedule will violate isolation principles.
+
+#### Durability
+
+- All changes of committed txns should be persistent.
+  - No torn updates.
+  - No changes from failed transactions.
+- DBMS can use either logging or shadow paging to ensure all changes are durable.
+- Concurrency control and recovery are among the most important functions provided by a DBMS.
+
+-`ref paper: Spanner: Google's Globally-Distributed Database`.
  
-  ## Two Phase Locking
+## Two-Phase Locking
   
 - We need a way to guarentee that all execution schedules are correct(serializable) without knowing the entire schedule ahead of time.
-- Use *LOCKS* to protect database objects.
+- Use *LOCKS* to protect database objects, pessimistic.
 - Existing component called a Lock Manager.
-- Locks: 
-  - Separate User transactions.
-  - Protect Database contents.
-  - During Entire Transactions
-  - Modes: Shared, Exclusive, Update, Intention
-  - Deadlock Detection and Resolution
-  - By Waits-for, Timeout, Aborts
-  - Kept in Lock Manager.
+
+- Locks vs Latches: 
+  - Separate User transactions VS separate threads.
+  - Protect Database contents VS In-memory data structures.
+  - During Entire Transactions vs during critical sections.
+  - Modes: Shared, Exclusive, Update, Intention vs Read, Write modes.
+  - Deadlock Detection and Resolution vs deadlock avoidance.
+  - By Waits-for, Timeout, Aborts vs By coding discipline.
+  - Kept in Lock Manager vs kept in protected data structures.
   
 - Basic Lock Types
   - S-LOCK: Shared locks for reads.
   - X-LOCK: Exclusive locks for writes.
+
 - Executing with locks
-  - Transactions request locks
-  - Lock manager grants or blocks requests
-  - Transactions release locks
+  - Transactions request locks.
+  - Lock manager grants or blocks requests.
+  - Transactions release locks.
   - Lock manager updates its internal lock-table.
-    - keeps track of what transactions hold what locks and what transactions are waiting to acquire any locks.
-    - global view of a transactions activity
-    - cheaper than updating latches on a B+ TREE.
+    - Keeps track of what transactions hold what locks and what transactions are waiting to acquire any locks.
+    - Global view of a transactions activity
+    - Cheaper than updating latches on a B+ TREE.
+
 - Concurrency control protocol
   - 2PL is a concurrency control protocol that determines whether a txn can access an object in the database at runtime.
-  - protocol does not need to know all the queries that a txn will execute ahead of time.
+  - The protocol does not need to know all the queries that a txn will execute ahead of time.
+  
 - Two-Phase Locking
   - Growing
-    - each txn requests that locks that it needs from the DBMS lock manager
-    - lock manager grants/denies lock requests
+    - Each txn requests that locks that it needs from the DBMS lock manager.
+    - Lock manager grants/denies lock requests.
   - Shrinking 
-    - txn is allowed to only releasse/downgrade locks that it previously acquired, cannot acquire new locks.
-- 2PL on its own is sifficient to guarantee conflict serializability because it generates schedules whose precendence graph is acyclic.
+    - Txn is allowed to only release/downgrade locks that it previously acquired, cannot acquire new locks.
+    
+- 2PL on its own is sufficient to guarantee conflict serializability because it generates schedules whose precendence graph is acyclic.
 - But it is subject to cascading aborts.
 - Potential schedules that are serializable but would not be allowed by 2PL because locking limits concurrency.
 - May still have "dirty reads".
+
 - Strong Strict Two-phase locking.
-    - Txn is only allowed to release locks after it has ended(committed or aborted)
-    - Allows only conflict serializable schedules, but it is often stronger than needed for some apps.
-    - a schedule is strict if a value written by a txn is not read or overwritten by other txns unitl that txn finishes.
-    - Advantages:
-      - does not incur cascading aborts.
-      - aborted txns can be undone by just restoring original values of modified tuples.
+  - Txn is only allowed to release locks after it has ended(committed or aborted).
+  - Allows only conflict serializable schedules, but it is often stronger than needed for some apps.
+  - A schedule is strict if a value written by a txn is not read or overwritten by other txns until that txn finishes.
+  - Advantages:
+    - Does not incur cascading aborts.
+    - Aborted txns can be undone by just restoring original values of modified tuples.
 - May lead to deadlocks.
-  - A deadlock os a cycle of transactions waiting for locks to be released by each other.
+  - A deadlock is a cycle of transactions waiting for locks to be released by each other.
     - Deadlock Detection
-      - creates a waits-for graph to keep track of what locks each txn is waiting to acquire.
-        - nodes are transactions.
-        - edge from Ti to Tj if Ti is waiting for Tj to release a lock.
-      - system periodically checks for cycles in waits-for graph and then decided how to break it.
+      - DBMS creates a waits-for graph to keep track of what locks each txn is waiting to acquire.
+        - Nodes are transactions.
+        - Edge from Ti to Tj if Ti is waiting for Tj to release a lock.
+      - System periodically checks for cycles in waits-for graph and then decided how to break it.
     - Deadlock Handling
       - DBMS selects a victim txn to rollback to break the cycle.
       - Either by:
         - By age
         - By progress
-        - By the # of items alredy locked
+        - By the # of items alredy locked.
         - By # of txns that we have to rollback with it.
-      - Should also consider how many times a txn has been restarted to perevent starvation
+      - Should also consider how many times a txn has been restarted to prevent starvation.
       - Rollback length
         - Completely
           - Rollback entire txn and tell the application it was aborted.
@@ -2794,41 +2821,42 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - This approach does not require a waits-for graph or detection algorithm.
       - Approach
         - Wait-Die.
-          - if requesting txn has higher priority than holding txn, then requesting txn waits for holding txn.
-          - otherwise requesting txn aborts.
+          - If requesting txn has higher priority than holding txn, then requesting txn waits for holding txn.
+          - Otherwise requesting txn aborts.
         - Wound-Wait
-          - if requesting txn has higher priority than holding txn, then holding txn aborts and releases lock.
-          - otherwise requesting txn waits.
+          - If requesting txn has higher priority than holding txn, then holding txn aborts and releases lock.
+          - Otherwise requesting txn waits.
       - Why do schemes quarantee no deadlocks
-        - only one type of direction allowed when waiting for a lock.
+        - Only one type of direction allowed when waiting for a lock.
       - When a txn restarts, what is its new priority?
-        - its original timestamp to prevent it from getting starved for resources.
+        - Its original timestamp to prevent it from getting starved for resources.
     - Acquiring locks is amore expensive operation than acquiring a latch even if that lock is available
+
 - Lock Granularities
   - DBMS decides the granularity of a lock when a txn wants a lock.
     - Attribute, Tuple, Page, Table
   - DBMS should ideally obtain fewest number of locks that a txn needs.
-  - Trade-off parallelism versus overhead
+  - Trade-off parallelism versus overhead.
   - Database Lock Hierarchy 
-    - Database -> Table -> Page -> Tuple -> Attribute.
+    - Database ->Table ->Page ->Tuple ->Attribute.
 
 - Intention Locks
   - An intention lock allows a higher-level node to be locked in shared or exclusive mode without having to check all descendent nodes
   - If a node is locked in an intention mode, then some txn is doing explicit locking at a lower level in the tree.
   - Types:
-    - Intention-Shared
-      - intent to get S lcoks at finer granularity.
-    - Intention-Exclusive
-      - intent to get X lock at finer granularity.
-    - Shared+Intention Exclusive
-      - subtree rooted by that node is locked explicitly in shared mode and explicit locking is done at a lower level with exclusive-mode locks.
+    - Intention-Shared(IS)
+      - Intent to get S locks at finer granularity.
+    - Intention-Exclusive(IX)
+      - Intent to get X lock at finer granularity.
+    - Shared+Intention-Exclusive(SIX)
+      - Subtree rooted by that node is locked explicitly in shared mode and explicit locking is done at a lower level with exclusive-mode locks.
   - Compatibility Matrix
   - Locking Protocol
-    - eact txn obtains appropriate lock at the highest level of the database hierarchy.
+    - Each txn obtains appropriate lock at the highest level of the database hierarchy.
   - Lock Escalation
     - DBMS can automatically switch to coarse grained locks when a txn acquires too many low-level locks
     - This reduces the number of requests that the lock manager must process.
-- Applications dont acquire a txn's locks manually
+- Applications dont acquire a txn's locks manually.
 - Need to provide the DBMS with hints to help it improve concurrency.
 - Explicit locks are also useful when doing major changes to the database.
 - Lock Table

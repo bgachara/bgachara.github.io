@@ -7,6 +7,7 @@ tags:
     - pl
     - codeacademy
 ---
+
 Ref:
 `CodeAcademy Rust Tutorial`
 `Comprehensive Rust Google Android`
