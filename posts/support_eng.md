@@ -87,6 +87,7 @@ tags:
   - Managers will be evaluating your ability to accomplish responsibilites, serve customers, have a positive work attitude and set goals.
   - P.E show how you are performing in your role, provide an opportunity for recognition and set you up for advancement opportunities.
   - Define expectations -> Record performances -> Evaluate performance -> Provide feedback.
+
 - What to expect
   - Accomplishing responsibilities
     - Possess technical knowledge and skills necessary to perform your job.

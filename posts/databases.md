@@ -2861,85 +2861,96 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Explicit locks are also useful when doing major changes to the database.
 - Lock Table
   
+  
 ## Timestamp-Ordering Concurrency Control
   
-- Determine serializability order of txns beofre they execute.
+- Determine serializability order of txns before they execute.
 - Use timestamps to determine the serializability order of txns.
 - Each txn is assigned a unique fixed timestamp that is monotonically increasing.
 - Implementation strategies
-  - System/Wall clock
-  - Logical counter
-  - Hybrid
+  - System/Wall clock.
+  - Logical counter.
+  - Hybrid.
+  
 - Basic T/O
   - Txns read and write objects without locks
   - Every object X is tagged with timestamp of the last txn that successfully did read/write.
-  - Check timestamps for every operation.
+  - Check timestamps for every operation, if txn tries to access an object "from the future" it aborts and restarts.
   - Thomas Write Rule(Robert H Thomas)
-    - ignore the write to allow the txn to continue executing without aborting.
-  -  Generates a schedules htat is conflict serializable of you do not use the Thomas write Rules
+    - Ignore the write to allow the txn to continue executing without aborting.
+  - Generates a schedules that is conflict serializable of you do not use the Thomas write Rules
   - High overhead from copying data to txns workspace and from updating timestamps
-    - every read requires the txn to write to the database.
+    - Every read requires the txn to write to the database.
   - Long running txns can get starved
-    - likelihood that a txn will read sth from a newer txn increases.
+    - Likelihood that a txn will read sth from a newer txn increases.
+    
 - If you assume that conflicts between txns are rare and that most txns are short-lived then forcing txns to acquire locks or update timestamps adds unncessary overhead.
 - A better approach is to optimize for the no-conflict case.
+
 - Optimistic Concurrency Control
-  - DBMS creates a provate workspace for each txns
-    - any object read is copied into workspace
-    - modifications are applied to workspace.
-  - When a txn commits, DBMS compares workspace write set to see whether it conflicts with other txns
-  - If there are no conflicts, the write set is installed into the global database.
-  - Phases:
-    - Read Phase
-      - track the r/w sets of txns and store their writes in a provate workspace.
-      - DBMS copies every tuple that the txn accesses from the shared database to its workspace ensure repeatable reads
-    - Validation Phase
-      - when a txn commits, check whether it conflicts with other txns.
-      - Approaches:
-        - Backward Validation - check whether committing txn intersects its read/write sets with those of any txns that have already committed.
-        - Forward Validation - check whether the committing txn intersects its read/write sets with any active txns that have not yet committed.
-    - Write Phase
-      - if validation succeeds, apply private chnages to database, otherwise abort and restart the txn.
-      - Serial Commits: use a global latch to limit a single txn to be in the Validation/Write phases at a time.
-      - Parallel Commits: use fine-grained write latches to support parallel validation/Write phases
-                          txns acquire latches in primary key order to avoid deadlocks.
-  - OCC works well when the # of conflicts is low
-  - High overhead for copying data locally
-  - Validation/Write phase bottlenecks
+`ref paper: On Optimistic Methods for Concurrency Control.`
+  - DBMS creates a private workspace for each transaction.
+    - Any object read is copied into workspace.
+    - Modifications are applied to workspace.
+  - When a txn commits, DBMS compares workspace write set to see whether it conflicts with other txns.
+  - If there are no conflicts, the write set is installed into the `global` database.
+  
+- Phases:
+  - Read Phase
+    - Track the r/w sets of txns and store their writes in a private workspace.
+    - DBMS copies every tuple that the txn accesses from the shared database to its workspace ensure repeatable reads
+  - Validation Phase
+    - When a txn commits, check whether it conflicts with other txns.
+    - Approaches:
+      - Backward Validation - check whether committing txn intersects its read/write sets with those of any txns that have already committed.
+      - Forward Validation - check whether the committing txn intersects its read/write sets with any active txns that have not yet committed.
+  - Write Phase
+    - If validation succeeds, apply private changes to database, otherwise abort and restart the txn.
+    - Serial Commits - Use a global latch to limit a single txn to be in the Validation/Write phases at a time.
+    - Parallel Commits - Use fine-grained write latches to support parallel validation/Write phases
+                        Txns acquire latches in primary key order to avoid deadlocks.
+  
+- Performance Issues.
+  - OCC works well when the # of conflicts is low, all txns are read-only and txns access disjoint subsets of data.
+  - If the database is large and the workload is not skewed then there is a low probability of conflict, so again locking is wasteful. 
+  - High overhead for copying data locally.
+  - Validation/Write phase bottlenecks.
   - Aborts are more wasteful that in 2PL because they occur after a txn has already executed.
   
 - Dynamic Databases
   - We have only dealt with transactions that read and update existing objects in the database.
-  - But now if txns perfomr inserts, updates and deletions, we have new problems.
+  - But now if txns perform inserts, updates and deletions, we have new problems.
   - Phantom reads
-    - tuples can appear and disappear as txns are running.
+    - Tuples can appear and disappear as txns are running.
     - Approach:
       - Re-execute scans.
-        - tracks the WHERE clause for all queries that the tcn executes.
+        - DBMS tracks the WHERE clause for all queries that the tcn executes.
           - retain the scan set for every range query in a txn.
-        - upon commit, re-execute just the scan portion of each query and check whether it generates the same result.
+        - Upon commit, re-execute just the scan portion of each query and check whether it generates the same result.
       - Predicate Locking
-        - HyPer DB.
-        - In memory systems.
+        - Logically determine the overlap of predicates before queries start running.
+          - HyPer DB.
+          - In memory systems.
       - Index Locking Schemes
+        - Use keys in indexes to protect ranges.
         - Key-Value Locks
-          - locks that cover a single key-value in an index.
-          - need virtual keys for non-existant values.
+          - Locks that cover a single key-value in an index.
+          - Need "virtual keys" for non-existant values.
         - Gap Locks
-          - each txn acquires a key-value lock on the single key that it wants to access, then get a gap lock on the next key gap.
+          - Each txn acquires a key-value lock on the single key that it wants to access, then get a gap lock on the next key gap.
         - Key-Range Locks
-          - locks that cover a ley value and the gap to the next key value in a single index
+          - Locks that cover a key value and the gap to the next key value in a single index, need virtual keys for artificial values.
         - Hierarchical Locking
-          - allow for a txn to hold a wider key-range locks with different locking modes.
+          - Allow for a txn to hold a wider key-range locks with different locking modes.
             - reduces the number of visits to lock manager.
+    
     - Weaker levels of isolation
-      - Serializability is useful because it allows programmers to ignore concurrency issues.
-      - But enforcing it may allow too little concurrency and limit performance
-      - We may want to use a wekaer level of consisitency to improve scalability.
+      - Serializability is useful because it allows programmers to ignore concurrency issues but enforcing it may allow too little concurrency and limit performance
+      - We may want to use a weaker level of consisitency to improve scalability.
     
     - Isolation Levels
-      - Controls the extent that a txn is exposed to the actions of other concurrent txns
-      - Provides for greater concurrency at the cost of exposing txns to uncommitted changes
+      - Controls the extent that a txn is exposed to the actions of other concurrent txns.
+      - Provides for greater concurrency at the cost of exposing txns to uncommitted changes.
         - Dirty Reads
         - Unrepeatable Reads
         - Phantom Reads
@@ -2953,26 +2964,30 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
         - Repeatable Reads: Same as above but no index locks.
         - Read Committed: Same as abov, but S locks are released immediately.
         - Read Uncommitted: Same as above but allows dirty reads(no S locks).
+`ref paper: Critique of SQL Isolation Levels`
         
 ## Multi-Version Concurrency Control
-  
+`ref paper: An Empirical evaluation of In-Memory MVCC, The Hekaton Memory-Optimized OLTP Engine`  
+
 - DBMS maintains multiple physical versions of a single logical object in the database.
   - When a txn writes to an object, the DBMS creates a new verison of that object.
   - When a txn reads an object, it reads the newest version that existed when the txn started.
 - First implemented was db/VMS.
 - Firebird.....influenced firefox browser naming.
+
 - Key ideas:
   - Writers do not block readers.
   - Readers do not block writers
-  - Read-nly txns can read a consistent snapshot without acquiring locks.
-    - use timestamps to determine visibility.
-  - Easily support time-travel queries
+  - Read-only txns can read a consistent snapshot without acquiring locks, use timestamps to determine visibility.
+  - Easily support time-travel queries.
+
 - Snapshot Isolation
-  - when a txn starts, it sees a consistent snaphot of the database that existed when that txn started.
+  - When a txn starts, it sees a consistent snaphot of the database that existed when that txn started.
     - No torn writes from active txns
-    - If two txns update the same object, then forst writer wins
+    - If two txns update the same object, then first writer wins.
   - Susceptible to the *Write Skew Anomaly*.
-- MVCC is more than just a concurrency control protocol. It completely affets how the DBMS manages transactions and the database.
+
+- MVCC is more than just a concurrency control protocol. It completely affects how the DBMS manages transactions and the database.
 - Concurrency control protocol
   - Timestamp Ordering
   - Optimistic Concurrency Control
@@ -2980,7 +2995,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 
 - Version Storage
   - DBMS uses the tuples pointer field to create a version chain per logical tuple
-    - this allows the DBMS to find the version that is visible to a particular txn at runtime.
+    - This allows the DBMS to find the version that is visible to a particular txn at runtime.
     - Indexes always point to the head of the chain.
   - Different storage schemes determine where/what to store for each version
   - Approach:
@@ -2988,12 +3003,12 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - new versions are appended to the same table space.
       - on every update, append a new version of the tuple into an empty space in the table.
       - Version chain ordering
-        - oldest to newest
+        - Oldest to newest
         - Newest to Oldest
     - Time-Travel Storage
-      - old versions are copied to separate table space.
+      - Old versions are copied to separate table space.
     - Delta Storage
-      - original values of the modified attributes are copied into a separate delta record space.  
+      - Original values of the modified attributes are copied into a separate delta record space.  
       - Overwrite the master version
       - Store the delta values.
   
