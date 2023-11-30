@@ -7,6 +7,7 @@ tags:
   - structured parallel
 ref:
   - Patterns for parallel programming
+  - CUDA
 ---
 
 # Parallel Programming
@@ -129,6 +130,68 @@ ref:
   - Ability to offload computation and data to an attached co-processor with a separate memory space.
   - Invocation of a regular grid of parallel operations using a commin kernel function.
   - Support of a task queue for managing asynchronous kernel invocations
+  
+#### CUDA
+
+- CUDA is the heteregeneous(Host + Device) parallel programming language designed for Nvidia GPUs, C with extensions.
+- CPUs are designed to minimize latency while GPU are designed to maximize throughput.
+- Kernels are functions that run on the GPU.
+- Kernels execute as a set of parallel threads.
+- HOST - CPU and its on chip memory.
+- Device - Host + Device.
+- CUDA is designed to execute 1000s of threads in a SIMD fashion.
+- Threads are similar to data-parallel tasks, each thread performs the same operation on a subset of data, independently.
+- SIMT == SIMD.
+- Threads do not execute at the same rate, different paths taken in if/else statements and different number of iterations in a loop.
+- Organisation of threads
+  - Threads, kernels execute as a set of threads.
+  - Blocks, threads are grouped into blocks.
+  - Grid, blocks are grouped into grids.
+- Grids and Blocks dimensions
+
+- Program flow
+  - Kernels are launched on occurence of parallel computations and the program continues unless explicitly stated.
+  - Host code -> Allocate memory on device(cudamalloc, cudafree) -> Copy data from Host to Device(cudaMemcpy(dst, src, numBytes, direction)) ->Launch Kernel -> Copy Data from Device to Host.
+
+```c
+
+int main (void) {
+  //Declare variables
+  int *h_c, *d_c;
+  
+  //Allocate memory on the device
+  cudaMalloc((void**)&d_c, sizeof(int));
+  
+  //Allocate memeory on the device
+  cudaMemcpy(d_c, h_c, sizeof(int), cudaMemcpyHostToDevice );
+  
+  //Configuration Parameters
+  dim3 grid_size(1); dim3 block_size(1);
+  
+  //Launch the Kernel
+  kernel_name<<<grid_size, block_size>>>(...);
+  
+  //Copy data back to host
+  cudaMemcpy( h_c, d_c, sizeof(int), cudaMemcpyDeviceToHost );
+  
+  //De-allocate memory
+  cudeFree( d_c); free(h_c);
+  return 0;
+}
+```
+- Kernel definition.  
+- Memory coherence
+  - Thread <-->Local Memory, registers.
+  - Blocks <-->Shared Memory.__shared__, allows threads within a block to communicate.
+  - Grids <-->Global Memory.__global__, stores data copied to and from Host
+  - Constant cache - used for unchanging data in the kernel.
+  
+- Synchronization
+  - Race conditions avoided via explicit barrier.
+  - A barrier is a point in the kernel where all threads stop and wait on the others, proceeding only after all have reached it.
+  - __syncthreads();
+  - Implicit synchronization, cudahostsynchronize() 
+  
 
 ### Parallel Computations Themes
 

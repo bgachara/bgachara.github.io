@@ -2092,3 +2092,15 @@ ref:`High Performance Browser Networking`
 
 ### Digest Authentication
 
+### Backend design patterns
+
+- Request-response pattern.
+- Synchronous and asynchronous.
+- Push
+- Short polling.
+- Long polling
+- Server Sent Events
+- Publish Subscribe, try to implement one with topics. 
+- Multiplexing and Demultiplexing, https/2, QUIC, connection pool.
+- Stateful vs Stateless backends.
+- Sidecar pattern, server-side and client-side proxy.
