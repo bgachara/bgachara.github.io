@@ -20,13 +20,8 @@ tags:
 
 ## Introduction
 
-- Organized collection of inter-related data that models some asoect of real-world.
-- Databases are the core component of most computer applications. 
-- Why do we need one?
-  - Data integrity.
-  - Implementation.
-  - Durability.
-- Long lived data.
+- A database is an organized collection of inter-related data that models some aspect of real-world.
+Databases are the core component of most computer applications and among the reasons we might need one include data integrity, data implementation and data durability and security.
 - Parts:
   - Storage Engine.
     - intel memory lantency checker.
@@ -42,10 +37,6 @@ tags:
     - why are query languages weird?
   - Concurrency control.
   - Query Language
-- Concerns:
-  - Data Integrity.
-  - Implementation
-  - Durability
 - DBMS 
   - software that allows applications to store and analyze information in a database.
   - supports definition, creation, querying, update and administration in accordance to a data model.
