@@ -22,89 +22,53 @@ tags:
 
 - A database is an organized collection of inter-related data that models some aspect of real-world.
 Databases are the core component of most computer applications and among the reasons we might need one include data integrity, data implementation and data durability and security.
-- Parts:
-  - Storage Engine.
-    - intel memory lantency checker.
-    - prefetching
-    - pipelining
-    - speculation
-    - fio 
-      - disk perf tool
-    - ordering
-    - fsync
-    - reliability
-    - send code to data vs data to code??? cover for latency
-    - why are query languages weird?
-  - Concurrency control.
-  - Query Language
-- DBMS 
-  - software that allows applications to store and analyze information in a database.
-  - supports definition, creation, querying, update and administration in accordance to a data model.
+- A DBMS on the other hand is software that allows applications to store and analyze information in a database and among its functions supports: definition, creation, querying, update and administration in accordance to a data model.
+- A data model here is a collection of concepts for describing the data in a database while a schema is a description of a particular collection of data using a given data model.
 
-## Data models
+### RELATIONAL MODEL
 
-- Data models is a collection of concepts for describing the data in a database.
-- A schema is a description of a particular collection of data using a given data model.
+- It defines a database abstraction based on relations to avoid maintenance overhead by storing database in simple data structures called relations.
+- A relation is an unordered set that contain the relationship of attributes that represent entities. 
+- A tuple is a set of attribute values (domain) in the relation with the values are normally atomic or scalar. A special value NULL is a member of every domain.
+- A relations primary key uniquely identifies a single tuple. 
+  • Some DBMS automatically create an internal primary key if table does not define one via identity column, example SEQUENCE in postgres or AUTO_INCREMENT in Mysql.
+- A foreign key specifies that an attribute from one relation has to map to a tuple in another relation. 
+- There also exists the concept of constraints which are user-defined conditions that must hold for any instance of the database and can validate data within a single tuple or across entire relations. 
+- Unique key and referential constraints are the most common with the DBMS preventing modifications that violate any constraint.
+- The physical storage is left up to the DBMS implementation with access to data happening through a high-level language leaving the DBMS to figure out the best execution strategy.
+- Some key aspects of the relational model can therefore be defined as
+  •  Structure: The definition of the database relations and their contents.
+  •  Integrity: Ensure the database contents satisfy constraints.
+  •  Manipulation: Programming interface for accessing and modifying database contents.
+- Relational Algebra defines the high level steps of how to compute a query and can also be thought of as the fundamental operations to retrieve and manipulate tuples in a relation.
 
-- Types:
-- Relational
-  - Defines a database abstraction based on relations to avoid maintenance overhead.
-    - Store database in simple data structures(relations)
-    - Physical storage left up to the DBMS implementation.
-    - Access data through high-level language, DBMS figures out best execution strategy
-  - Key aspects
-    - Structure: definition of the database realtions and their contents.
-    - Integrity: Ensure the database contents satisfy constraints.
-    - Manipulation: Programming interface for accessing and modifying database contents.
-  - A relation is an unordered set that contain the r/ship of attributes that represent entities.
-  - A tuple is a set of attribute values(domain) in the relation.
-    - Values are normally atomic/scalar
-    - Special value NULL is a member of every domain.
-  - A relations `primary key` uniquely indentifies a single tuple.
-    - some DBMS automatically create an internal primary key if table does not define one via `identity column`.
-    - e.g IDENTITY(sql standard), SEQUENCE(postgres/oracle), AUTO_INCREMENT(mysql)
-  - A `foreign key` specifies that an attribute from one relation has to map to a tuple in another relation.
-    - create a secondary foreign key table relation handler.
-  - Constraints
-    - User-defined conditions that must hold for any instance of the database.
-    - Can validate data within a single tuple or across entire relations.
-    - DBMS prevents modifications that violate any constraint.
-    - Unique key and referential constraints are the most common.
-  - Relational Algebra 
-    - defines the high level steps of how to compute a query
-    - fundamental operations to retrieve and manipulate tuples in a relation.
-- Key/Value
-- Graph
-- Document/ Object
-  - A collection of record documents containing a hierarchy of named field/value pairs.
-  - A field's value can either be a scalar type, an array of values or another document.
-  - Modern implementations use JSON, older ones use XML or custom object representations.
-  - Goal was to avoid relational-object impedance mismatch by tightly coupling objects and database.
-- Wide Column
-- Array/ Matrix/ Vector
-  
+### Document/ Object
+
+- This is a model which consists of a collection of record documents containing a hierarchy of named field/value pairs. A field's value can either be a scalar type, an array of values or another document. 
+- Modern implementations use JSON, older ones use XML or custom object representations.
+- The goal of the document model was to avoid relational-object impedance mismatch by tightly coupling objects and database.
+
+### Wide Column
+
 ### Vector
 
-- Ideally for ML.
-- One dimensional arrays used for nearest-neighbor search(exact or approximate)
-- Used for semantic search onembeddings generated by ML-trained transformer models.
-- Native integration with modern ML tools and APIs
-- A query is a classifier
-  - Half-space(dot-product)
-  - Cone(cosine similarity)
-  - Ball(euclidean distance)
-
-- Similarity Algorithms
-  - Given a query, goal is to find the most similar documents to it among all the database documents.
-  - ML algo's cannot directly work with raw text and images, which is why documents and images are usually preprocessed and stored as vectors of numbers.
-  - These representations are called embeddings.
-  - To accelerate search performance, an index is built on top of dataset embeddings
-  - Similarity metrics
-    - Euclidean distance - d = sqrt(sum(n-i)(xi-yi)^2)
-    - Manhattan distance - d = sum(n ->i)|xi-yi|
-    - Chebyshev distance - d = max(xi-yi)
-    - Cosine distance - d = Theta = x.y/|x|.|y|
-    - Inner product - d = sum(n ->i) xi.yi
+- This is a model ideally used for Machine Learning workloads using one dimensional arrays for nearest-neighbor search (exact or approximate).
+- Vector model is also used for semantic search on embeddings generated by ML-trained transformer models and ideally have native integration with modern ML tools and APIs.
+- A query in a vector model is a classifier, for example
+  • Half-space (Dot-product)
+  • Cone (Cosine similarity)
+  • Ball (Euclidean distance)
+- Given a query, the goal is to find the most similar documents to it among all the database documents and given ML algorithms cannot directly work with raw text and images, documents and images are usually preprocessed and stored as vectors of numbers
+- These representations are called embeddings and to accelerate search performance, an index is built on top of dataset embeddings.
+- Some of the similarity metrics one can perform on the indexes include;
+  - Euclidean distance - d = sqrt(sum(n-i)(xi-yi)^2)
+  - Manhattan distance - d = sum(n ->i)|xi-yi|
+  - Chebyshev distance - d = max(xi-yi)
+  - Cosine distance - d = Theta = x.y/|x|.|y|
+  - Inner product - d = sum(n ->i) xi.yi
+  
+- Algorithms used in vector model index search include KNN, Locality sensitivity hashing, inverted file or clustering, hierarchical navigable small worlds and product quantization.
+  
   
 #### Algorithms
 
@@ -356,12 +320,10 @@ typedef struct {
 
 ### INDEXES
 
-- A separate data structure that maintains a copy of part of your data and points back to row.
-- Create as many as you need but as few as you can get away with.
-- Queries should drive the number and kind of indexes you need.
-
-- B+ Tree
-  - most common index ds.
+- An index is a separate data structure that maintains a copy of part of your data and points back to the row. 
+- The general idea of indexes is to create as many as you need but as few as you can get away with. An important consideration to keep in mind is that queries should drive the number and kind of indexes you need.
+- B+ Tree is a data structure that is mostly used to construct indexes.
+- Indexes are automatically created for primary keys as they are always not nullable and they exist in every table while columns with few distinct values not perfect candidate for indexes.
 
 - Primary Keys
   - Indexes are automatically created for primary keys.
