@@ -125,7 +125,7 @@ Databases are the core component of most computer applications and among the rea
 - Current standard is SQL:2016
 - DML 
   - Data Manipulation Language
-  - methods to store and retrieve information from a database.
+  - Methods to store and retrieve information from a database.
   - Approaches:
     - Procedural
       - query specifies the high-level strategy the DBMS should use to find the desired result.
@@ -171,8 +171,7 @@ Databases are the core component of most computer applications and among the rea
 
 - Output redirection
   - store query results in another tables
-    - table must not already be defined.
-    - table will have the same # of columns with the same type as the input.
+    - The table must not already be defined and the resultant table will have the same # of columns with the same type as the input.
 
 - Output Control
   - order the output tuples by the value in one or more of their columns.
@@ -181,14 +180,12 @@ Databases are the core component of most computer applications and among the rea
   - OFFSET
 
 - Nested Queries 
-  - Invoke queries inside other queries to compose more complex computations.
-  - They are difficult to optimize for the DBMS due to correlations.
-  - Inner queries can appear almost anywhere in query
+  - Invoke queries inside other queries to compose more complex computations.They are however difficult to optimize for the DBMS due to correlations.
+  - Inner queries can appear almost anywhere in query.
   - IN, ALL, ANY, EXISTS
 
 - Window Functions
-  - performs a sliding calculation across a set of tuples that are related.
-  - like an aggregation but tuples are not grouped into a single output tuples.
+  - performs a sliding calculation across a set of tuples that are related, like an aggregation but tuples are not grouped into a single output tuples.
   - ROW_NUMBER(), RANK(), 
   - OVER() - specifies how to group together tuples when computing the window function
   - use PARTITION BY to specify group.
@@ -210,22 +207,17 @@ Databases are the core component of most computer applications and among the rea
 - It defines the ordering of the high-level steps of how to compute a query.
 - A better approach is to state the high-level answer that you want the DBMS to compute.
 - The relational model is independent of any query language implementations
-- The DBMS is responsible for efficient evaluation of the query
-  - High-end systems have a sophisticated query optimzer that can rewrite queries and search for optimal execution strategies.
-- Fundamental operations to retrieve and manipulate tuples in a relation
-  - Based on set algebra(unordered lists with no duplicate)
-- Each operaotr takes one or more relations as its inputs and outputs a new relation.
-  - we can chain operators together to create more complex operations.
+- The DBMS is responsible for efficient evaluation of the query with high-end systems having a sophisticated query optimzer that can rewrite queries and search for optimal execution strategies.
+- Fundamental operations to retrieve and manipulate tuples in a relation based on set algebra(unordered lists with no duplicate)
+- Each operator takes one or more relations as its inputs and outputs a new relation and we can chain operators together to create more complex operations.
+
 - Operations
   - Select 
     - choose a subset of the tuples from a relation that satisfies a selection predicate.
       - predicate acts as a filter to retain only tuples that fulfill its qualifying requirements.
       - can combine multiple predicataes using conjuctions/disjunctions.
   - Projection
-    - generate a relation with tuples that contains only the specified attrbutes
-      - can rearrange attributes ordering.
-      - Remove unwanted attributes.
-      - can manipulate the values
+    - generate a relation with tuples that contains only the specified attributes, can rearrange attributes ordering, remove unwanted attributes and can manipulate the values.
   - Union 
     - generate a relation that contains all tuples that appear in either only one or both input relations.
   - Intersection
@@ -365,16 +357,14 @@ typedef struct {
   - access patterns crucial to consider when defining ci.
 
 - Covering Indexes
-  - is a regular index in a special situation.
-  - when an index supplies all a given query requires.
+  - This is a regular index in a special situation for example when an index supplies all a given query requires.
 
 - Functional Indexes
   - Index on a function, index something you can't quite reach.
-  - when you wrap a column in a function, MYSQL has no idea what's in there, blackbox essentially.
-  - case of index obsufication.
+  - when you wrap a column in a function, MYSQL has no idea what's in there, blackbox essentially, leading to a case of index obsufication.
   - *case sensitive collation* works well for comparison.
   - `alter table users add index m((month(birthday)))`
-  - Mysql: 8 and beyond, 5 : use generated column index
+  - Mysql: 8 and beyond, 5 : use generated column index.
   
 - Indexing JSON columns
   - No way to index an entire JSON column in MySQL
@@ -382,24 +372,20 @@ typedef struct {
   - Careful with collation here even after CAST.
   
 - Indexing for wildcard searches
-  - when searching for substring in a column, indexes can still be used but only unitl the first wildcard.
+  - When searching for substring in a column, indexes can still be used but only until the first wildcard.
 
 - Fulltext Indexes
-  - Mysql supports Fulltext searching although not as good as purpose built FTS tools.
-  - add fulltext keyword
-  - syntax match(a,b,c) against (expression)
-  - BOOLEAN mode and NORMAL LANGUAGE mode
-  - relevancy score
+  - Mysql supports Fulltext searching although not as good as purpose built FTS tools, adding fulltext keyword,
+    syntax match(a,b,c) against (expression), BOOLEAN mode and NORMAL LANGUAGE mode and relevancy score.
   
 - Invisible indexes
-  - Before you drop an index, you cna make an index invisible to test effects of removing it.
+  - Before you drop an index, you can make an index invisible to test effects of removing it.
 
 - Duplicate indexes
   - Because of the way composite indexes work, you may have duplicate and redundant indexes defined.
   
 - Foreign Keys
-  - Not the same as foreign key constraints
-  - Allows one to reference data in another table.
+  - Not the same as foreign key constraints as it allows one to reference data in another table.
   - Constraints check for referential integrity
   - column types have to be the same type.
   - on delete cascade/set null, on update cascade/set null.
@@ -418,15 +404,13 @@ typedef struct {
     - Buffers: blocks read and write, in cache(hit/read) and outside(write), measured in blocks
     - Filter:
     - Rows removed by Filter:
+  
   - Major scan modes
-    - Sequential scan
-      - read all the tables in sequential order
-    - Index scan
-      - read the index to filter on the WHERE clause and table to filter invsible rows.
-    - Bitmap Index scan
-      - same, but read fully the index and then the table, much quicker for a bigger number of rows.
-    - Index only scan
-      - for covering indexes
+    - Sequential scan: read all the tables in sequential order
+    - Index scan: read the index to filter on the WHERE clause and table to filter invsible rows.
+    - Bitmap Index scan: same, but read fully the index and then the table, much quicker for a bigger number of rows.
+    - Index only scan: for covering indexes.
+  
   - Join types
     - Hash join
       - only equality join
@@ -486,10 +470,10 @@ Seq scan on foo () Buffers: shared read=8334
 - Redundant and Approximate conditions
   - Impossible to index a condition correctly.
   - Use a redundant condition to help narrow down records quickly.
-  - should be logically correct.
+  - Should be logically correct.
   
 - Select only what you need.
-  - especially for large data format fields.
+  - Especially for large data format fields.
   - check ActiveRecord model for hrams of this.
   - invisible keyword to exclude from default SELECT * unless explicitly called.
 
@@ -512,19 +496,16 @@ Seq scan on foo () Buffers: shared read=8334
 *chapter 8 of MySql documentation on optimization*
 
 - Subqueries
-  - can be used in place of joins.
-  - used to either include or remove results of a query based on another query,
+  - can be used in place of joins and used to either include or remove results of a query based on another query,
   - semi-join, anti-join
   - where exists, where not in,
   
 - Common Table Expressions(CTEs)
-  - powerful way to refactor complicated queries into more readbale versions.
-  - with table_name as (insert query)
+  - powerful way to refactor complicated queries into more readable versions with table_name as (insert query).
   - run only once.
 
 - Recursive CTEs
-  - CTE that references itself 
-  - can be used to generate new data or work with existing data.
+  - CTE that references itself and can be used to generate new data or work with existing data.
   - use recursive keyword.
 
 - Unions
@@ -548,7 +529,7 @@ Seq scan on foo () Buffers: shared read=8334
   - can create a desc index.
   
 - Sorting with composite indexes
-  - order remains ad definition.
+  - order remains and definition.
   - index and query have to be the same.
 
 - Counting results
@@ -563,8 +544,7 @@ Seq scan on foo () Buffers: shared read=8334
 ### MISC EXAMPLES
 
 - MD5 Hash
-  - create a very fast lookup on very large values.
-  - can work on multiple columns
+  - create a very fast lookup on very large values.It can work on multiple columns.
   - GENERATED ALWAYS AS()
   - good for strcit equality and constraint esp on logical units across columns
 
@@ -587,8 +567,7 @@ Seq scan on foo () Buffers: shared read=8334
   - (*)
   
 - Meta Tables
-  - wide tables with many columns can be expensive to query and maintain.
-  - makes sense to put them in a secondary table.
+  - wide tables with many columns can be expensive to query and maintain therefore it makes sense to put them in a secondary table.
   - blob, json ,text columns for example.
   
 - Offset limit pagination
@@ -615,29 +594,31 @@ Seq scan on foo () Buffers: shared read=8334
 ## Data-Intensive Apps
 
 - Reliability
-  - Tolerating hardware and software faults and human arror
+  - Tolerating hardware and software faults and human error.
+  
 - Scalability
   - Measuring load and performance, Latency percentiles and throughput
+  
 - Maintainability
   - Operability, simplicity and evolvability
+  
 - Fault vs Failure
   - Fault is when a particular system component deviates from its spec, whereas a failure is when the system as a whole stops providing required service to user.
   
 
 ## Anatomy of a DB.
 
-- Good to understand how best to optimize a server and even how to utilize its features.
-- Essential when modifying or extending its features
-
+- Good to understand how best to optimize a server and even how to utilize its features. Essential when modifying or extending its features.
 
 ## Structure
 
 - Client Apps
   - Database connectors.
-    - based on Open Database Connectivity model.
-    - include client access, API, db driver
+    - based on Open Database Connectivity model, include client access, API, db driver
+
 - Query Interface
   - i.e SQL
+
 - Query Processing
   - query shipping
   - logical vs physical models of database design
@@ -654,7 +635,9 @@ Seq scan on foo () Buffers: shared read=8334
     - Heuristic optimization
     - Semantic optimization
     - Parametric optimization
+
 - Internal Representation of queries.
+
 - Query Execution
   - Iterative
     - generate iterative programs from algebra-based query specs.
@@ -663,12 +646,15 @@ Seq scan on foo () Buffers: shared read=8334
     - form query exec using exisiting compiled abstractions of basic operations.
     - reconstructed as a queue of method calls, which are each taken off queue and processed.
 *compiled here means one thats been optimised and stored for future execution not actually compiled*
+
 - File access
+
 - A storage engine is designed to read and write data mechanism that provides some unique benefits to the user.
   - Goal is to find data we want quickly and efficiently without scanning more blocks than necessary.
   - Storage strategies
   - Buffering mechanisms
   - Index mechanisms
+
 - Query results.
 
 
@@ -678,11 +664,13 @@ Seq scan on foo () Buffers: shared read=8334
   - A piece of software that can execute queries against data to produe answers.
   - They provide a set of standard operations and transformations that the end-user can combine in different ways via a simple query language or application
     programming interface and are tuned for good performance.
+
 - Divided by core functionality
   - Supported field and data types.
   - Locking types.
   - Indexing
   - Transactions.
+
 - Parts of a query engine.
   - Frontend
     - Query language parser + Semantic checker
@@ -697,13 +685,17 @@ Seq scan on foo () Buffers: shared read=8334
   - Execution Runtime: Operators
     - Allocate resources(CPU, memory)
     - Pushes  bytes around, vectorized calculations.
+
 - The first step in building a query engine is to choose a type system to represent the different types of data that the query engine will process.
   - One option is to invent a proprietary type system specific to the query engine.
   - Another option is to use the type system of the data source that the query engine is designed to qiery from.
+
 - Row-based or columnar
   - see `Volcano Query Planner`
+
 - Create an interface that the query engine can use to interact with data sources.
   - files, databases, in-memory objects.
+
 - Logical plans and expressions.
   - each logical plan can have zero or more logical plans as inputs.
   - printing logical plans.
@@ -716,6 +708,7 @@ Seq scan on foo () Buffers: shared read=8334
   - Projection
   - Filter
   - Aggregate
+
 - Dataframe API
   - Build logical query plans in a much more user-friendly way.
 - Physical plans and expressions.
@@ -2951,98 +2944,134 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - This allows the DBMS to find the version that is visible to a particular txn at runtime.
     - Indexes always point to the head of the chain.
   - Different storage schemes determine where/what to store for each version
-  - Approach:
-    - Append-Only Storage
-      - new versions are appended to the same table space.
-      - on every update, append a new version of the tuple into an empty space in the table.
-      - Version chain ordering
-        - Oldest to newest
-        - Newest to Oldest
-    - Time-Travel Storage
-      - Old versions are copied to separate table space.
-    - Delta Storage
-      - Original values of the modified attributes are copied into a separate delta record space.  
-      - Overwrite the master version
-      - Store the delta values.
-  
+
+- Approach:
+  - Append-Only Storage
+    - All the physical versions of a logical tuple are stored in the same table space, with versions being inter-mixed.
+    - new versions are appended to the same table space.
+    - On every update, append a new version of the tuple into an empty space in the table.
+    - Version chain ordering
+      - Oldest to newest
+        - Append new version at the end of the chain.
+        - Must traverse chain on look-ups.
+      - Newest to Oldest
+        - Must update index pointers for very new version.
+        - Do not have to traverse chain on look-ups.
+        
+  - Time-Travel Storage
+    - Old versions are copied to separate table space.
+    - On every update, copy the current version to the time-travel, update pointers.
+    - Overwrite master version on the main table and update pointers.
+    
+  - Delta Storage
+    - On every update, copy only the column values that were modified to the delta storage and overwrite the master version.
+    - Original values of the modified attributes are copied into a separate delta record space.  
+    - Transactions can recreate old versions by applying the delta in reverse order.
+      
 - Garbage Collection
   - DBMS needs to remove reclaimable physical versions from the database over time
     - No active txn in the DBMS can see that version
-    - the version was created by an aborted txn
-  - Two additional desgin decisions
+    - The version was created by an aborted txn
+    
+  - Two additional design decisions
     - How to look for expired versions
     - How to decide when it is safe to reclaim memory.
+    
   - Approach:
     - Tuple-level
-      - Find old versions by examining tuples directly
+      - Find old versions by examining tuples directly.
       - Background Vacuuming.
         - Separate threads periodically scan the table and look for reclaimable versions. Works with any storage.
         - Dirty Block bitMap.
       - Cooperative Cleaning.
-        - worker threads ideally scan reclaimable versions as they traverse tuples on operations.
-        - only works with Oldest to Newest
+        - Worker threads ideally scan reclaimable versions as they traverse tuple version chains on operations.
+        - Only works with Oldest to Newest
+        
     - Transactions level GC
       - Each txn keeps track of its read/write set
       - On commit/abort, the txn provides this information to a centralized vacuum worker.
       - DBMS periodically dtermines when all versions created by a finished txn are no longer visible.
-    - Index management 
-      - Primary key indexes point to version chain head
-        - How often the DBMS must update the pkey index depends on whether the system creates new versions when a tuple is updated.
-        - If a txn updates a tuple's pkey attributes then this is treated as a DELETE followed by an INSERT.  
-      - Secondary Indexes are more complicated.
-      *READ WHY UBER SWITCHED FROM POSTGRES TO MYSQL*
-        - Approach:
-          - Logical Pointers
-            - use a fixed indentifier per tuple that does not change
-            - requires an extra indirection layer
-            - Primary Key vs Tuple Id
-          - Physical Pointers
-            - Use the physical address to the version chain head.
-      - MVCC Indexes
-        - MVCC DBMS indexes usually do not store version information about tuples with their keys
-          - exception: Index-organized tables(MySQL)
-        - Every index must support deuplicate keys from different snapshots
-          - the same key may point to different logical tuples in different snapshots.
-    - Transaction-level
-      - Txns keep track of their old versions os the DBMS does not have to scan tuples to determine visibility
+    
+  - Index management 
+    - Primary key indexes point to version chain head
+      - How often the DBMS must update the pkey index depends on whether the system creates new versions when a tuple is updated.
+      - If a txn updates a tuple's pkey attributes then this is treated as a DELETE followed by an INSERT.  
+    - Secondary Indexes are more complicated.
+    *READ WHY UBER SWITCHED FROM POSTGRES TO MYSQL*
+      - Approach:
+        - Logical Pointers
+          - use a fixed indentifier per tuple that does not change
+          - requires an extra indirection layer
+          - Primary Key vs Tuple Id
+        - Physical Pointers
+          - Use the physical address to the version chain head.
+    
+    - MVCC Indexes
+      - MVCC DBMS indexes usually do not store version information about tuples with their keys
+        - exception: Index-organized tables(MySQL)
+      - Every index must support deduplicate keys from different snapshots
+        - the same key may point to different logical tuples in different snapshots.
+      - MVCC duplicate key problem.
+        - Each index underlying data structure must support the storage of non-unique keys.
+        - Use additional execution logic to perform conditional inserts for pkey/unique indexes, atomically check whether the key exists and then insert.
+        - Workers may get back multiple entries for a single fetch, they must follow the pointers to find the proper physical tuple.
+      - MVCC Deletes
+        - The DBMS physically deletes a tuple from the database only when all versions of a logically deleted tuple are not visible.
+        - If a tuple is deleted, then there cannot be a new version of that tuple after the newest version, no write-write conflicts / first-writer wins.
+        - We need a way to denote a tuple has been logically deleted at some point in time.
+        - Approaches:
+          - Deleted Flag.
+            - Maintain a flag to indicate that the logical tuple has been delted after the newest physical version.
+            - Can either be in tuple header or a separate column.
+          - Tombstone Tuple.
+            - Create an empty physical version to indicate that a logical tuple is deleted.
+            - Use a separate pool for tombstone tuples with only a special bit pattern in version chain pointer to reduce the storage overhead.
+  - Transaction-level
+    - Txns keep track of their old versions os the DBMS does not have to scan tuples to determine visibility
     
 
 ## Database Logging and Shadow Paging
 
 - Crash Recovery
-  - Recovery algorithms are techniques to ensure database consistency, transaction atomiticy and durability despite dailures     
+  - Recovery algorithms are techniques to ensure database consistency, transaction atomiticy and durability despite failures     
   - Recovery algorithms have two parts
     - Actions during normal txn processing to ensure that the DBMS can recover from a failure.
     - Actions after a failure to recover the database to a state that ensures atomicity, consistency and durability.
 
-- DBMS is divided into different components based on the underlying storage device
+- DBMS is divided into different components based on the underlying storage device.
+- We want high performance hence want to write to volatile storage.
+- Allow dirty pages in the buffer pool for performance with buffer pool replacement policy dictating flush to non-volatile storage.
+  
   - Volatile
-    - data does not persist after power loss or program exit
+    - Data does not persist after power loss or program exit
     - DRAM, SRAM
   - Non-volatile
-    - data persists after power loss and program exit
+    - Data persists after power loss and program exit
     - HDD, SDD
   - Stable Storage
-    - a non-existent form of non-volatile storage that survives all possible failure scenarios
-  - We must also classify the different types of failures that the DBMS needs to handle.
+    - A non-existent form of non-volatile storage that survives all possible failure scenarios
+- We must also classify the different types of failures that the DBMS needs to handle.
 
 - Failure Classification
   - Transaction Failures
     - Logical Errors
-      - txn cannot complete due to internal error condition(integrity constraint violation)
+      - Txn cannot complete due to internal error condition(integrity constraint violation)
     - Internal State Errors
       - DBMS must terminate an active transaction due to an error condition(deadlock)
+  
   - System Failures
     - Software Failures
-      - problem with the OS or DBMS implementation(divide-by-zero exception)
+      - Problem with the OS or DBMS implementation(divide-by-zero exception)
     - Hardware Failure
       - Computer hosting the DBMS crashes.
       - Fail-stop Assumption: Non-volatile storage contents assumed to not be corrupted by system crash.
+  
   - Storage media Failures
     - Non-repairable Hardware Failure
-      - a head crash or similar disk failure destroys all or part of non-volatile storage
-      - destruction is assumed to be detectable, (disk controller use checksums to detect failures)
+      - A head crash or similar disk failure destroys all or part of non-volatile storage
+      - Destruction is assumed to be detectable, (disk controller use checksums to detect failures)
     - No DBMS can recover from this! Database must be restored from archived versions.
+
 - Observation
   - The DBs primary storage location is on volatile storage but it is slower than volatile storage.Use volatile memory for faster access
     - First copy target record into memory
@@ -3051,9 +3080,11 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - The DBMS needs to ensure the following
     - The changes for any txn are durable once the DBMS has said its committed.
     - No partial changes are durable if the txn aborted.
+
 - Undo vs Redo
   - Undo: Process of removing the effects of an incomplete or aborted txn.
   - Redo: Process of re-applying the effects of a committed txn for durability.
+
 - How the DBMS supports this functionality depends on how it manages the buffer pool.
   - Steal Policy
     - Whether the DBMS allows an uncommitted txn to overwrite the most recent committed value of an object in non-volatile storage.
@@ -3064,118 +3095,131 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Never have to undo changes of an aborted txn because the changes were not written to disk
       - Never have to redo changes of a committed txn because all changes are guaranteed to be written to disk at commit time
     - Cannot support write sets that excedd the amount of physical memory available.
-  - Shadow Paging
-    - Instead of copying the entire database, the DBMS copies pages on write to create two versions:
-      - Master: contains only changes form committed txns
-      - Shadow: Temporary db with chnages made form uncommitted txns
-    - Buffer Pool Policy: No-steal + Force
-    - To install updates when a txn commits, overwrite the root so it points to the shadow, thereby swapping the master and shadow.
-    - Supporting rollbacks and recovery is easy.
-    - Disadvantages:
-      - Copying the entire page tbale is expensive
-        - use a page table structured like a B+ TREE
-        - No need to copy entire tree, only need to copy path in the tree that lead to updated leaf nodes
-      - Commit overhead is high
-        - Flush every updated page, page table and root
-        - Data gets fragmented(bad for sequential scsns)
-        - Need garbage collections
-        - Only supports one writer txn at a time or txns in a batch. 
-    - SQLITE(PRE-2010)
-      - rollback mode.
-      - use a journal file
-  - We need a way for the DBMS convert random writes into sequential writes
-  - Write-Ahead Log
-    - maintain a log file separate from data files that contains the changes that txns make to database
-      - assume the log is on stable storage
-      - log contains enough information to perform the necessary undo and redo actions to restore the database
-    - DBMS must write to disk the log file records that correspond to changes made to a db object before it can flush that object to disk
-    - Buffer Pool Policy: Steal + No-force
-    - WAL Protocol
-      - DBMS stages all a txns log records in volatile storage(backed by buffer pool)
-      - All log records pertaining to an updated page are written to non-volatile storage before the page itself is over-written in no-volatile storage
-      - A txn is not considered committed until all its log records have been written to stable storage.
-      - Write a begin record to the log for each txn to mark its starting point.
-      - When a txn finishes, DBMS will:
-        - Write a commit record on the log
-        - Make sure that all log records are flushed before it returns an ack to application.
-      - Each log entry contains information about the change to a single object
-        - Transaction ID
-        - Object ID
-        - Before Value(UNDO)
-        - After Value(REDO)
-    - Flushing the walog buffer to disk every time a txn commits will become a bottleneck
-    - DBMS can use the group commit optimization to batch multiple log flushes together to amortize overhead.
-    - Almost every DBMS uses No-force+Steal.
-    - Logging Schemes
-      - Physical Logging
-        - Record the byte-level changes made to a specific page
-        - e.g git diff
-      - Logical Logging
-        - Record the high-level operations executed by txns
-        - e.g UPDATE, DELETE and INSERT
-      - Physiological Logging
-        - Hybrid approach with byte-level changes for a single tuple identified by page id+slot number
-        - Does not specify organization of the page.
-      - Logical logging requires less data written in each log record than physical loggin
-      - Difficult to implement recovery with logical loggin if you have concurrent txns running at lower isolation levels
-        - Hard to determine whihc parts of the db may have been modified by a query beofre crash.
-        - Also takes longer to recover because you must re-execute every txn all over again.
-    - Log-structured systems
-      - Do not have dirty pages
-        - any page retrieved from disk is immutable
-      - DBMS buffers log records in in-memory ages(MemTable), If this buffer is full, it must be flushed to disk. But it may contain changes, uncommitted txns
-      - DBMS still maintain a separate WAL to recreate the MemTable on crash.
-    - Checkpoints
-      - WAL will grow forever
-      - After a crash, the DBMS must replay the entire log, which will take a long time.
-      - DBMS periodically takes a checkpoint where it flushes all buffers out to disk.
-        - Provides a hint on how far back it needs to replay the WAL after a crash.
-      - Blocking/Consistent Checkpoint Protocol
-        - Pause all queries.
-        - Flush all WAL records in memory to disk.
-        - Flush all modified pages in buffer pool to disk
-        - Write a CHECKPOINT entry to WAL and flush to disk.
-        - Resume queries.
-      - Scanning the log to find uncommitted txns can take a long time.
-      - How often the DBMS should take checkpoints depends on many different factors.
-        - Frequency
-        - Tunable option that depends on application recovery time requirements
+  
+- Shadow Paging
+  - Instead of copying the entire database, the DBMS copies pages on write to create two versions:
+    - Master: contains only changes form committed txns
+    - Shadow: Temporary db with chnages made form uncommitted txns
+  - Buffer Pool Policy: No-steal + Force
+  - To install updates when a txn commits, overwrite the root so it points to the shadow, thereby swapping the master and shadow.
+  - Supporting rollbacks and recovery is easy.
+  - Disadvantages:
+    - Copying the entire page tbale is expensive
+      - use a page table structured like a B+ TREE
+      - No need to copy entire tree, only need to copy path in the tree that lead to updated leaf nodes
+    - Commit overhead is high
+      - Flush every updated page, page table and root
+      - Data gets fragmented(bad for sequential scsns)
+      - Need garbage collections
+      - Only supports one writer txn at a time or txns in a batch. 
+  - SQLITE(PRE-2010)
+    - rollback mode.
+    - use a journal file
+
+- We need a way for the DBMS convert random writes into sequential writes
+- Write-Ahead Log
+  - Maintain a log file separate from data files that contains the changes that txns make to database
+    - Assume the log is on stable storage
+    - Log contains enough information to perform the necessary undo and redo actions to restore the database
+  - DBMS must write to disk the log file records that correspond to changes made to a db object before it can flush that object to disk
+  - Buffer Pool Policy: Steal + No-force
+  - WAL Protocol
+    - DBMS stages all a txns log records in volatile storage(backed by buffer pool).
+    - All log records pertaining to an updated page are written to non-volatile storage before the page itself is over-written in no-volatile storage
+    - A txn is not considered committed until all its log records have been written to stable storage.
+    - Write a begin record to the log for each txn to mark its starting point.
+    - When a txn finishes, DBMS will:
+      - Write a commit record on the log
+      - Make sure that all log records are flushed before it returns an ack to application.
+    - Each log entry contains information about the change to a single object.
+      - Transaction ID
+      - Object ID
+      - Before Value(UNDO)
+      - After Value(REDO)
+  - Flushing the walog buffer to disk every time a txn commits will become a bottleneck
+  - DBMS can use the group commit optimization to batch multiple log flushes together to amortize overhead.
+  - Almost every DBMS uses No-force+Steal.
+  
+- Logging Schemes
+  - Physical Logging
+    - Record the byte-level changes made to a specific page
+    - e.g git diff
+  - Logical Logging
+    - Record the high-level operations executed by txns
+    - e.g UPDATE, DELETE and INSERT
+  - Physiological Logging
+    - Hybrid approach with byte-level changes for a single tuple identified by page id+slot number
+    - Does not specify organization of the page.
+  - Logical logging requires less data written in each log record than physical loggin
+  - Difficult to implement recovery with logical loggin if you have concurrent txns running at lower isolation levels
+    - Hard to determine whihc parts of the db may have been modified by a query beofre crash.
+    - Also takes longer to recover because you must re-execute every txn all over again.
+  
+- Log-structured systems
+  - Do not have dirty pages
+    - any page retrieved from disk is immutable
+  - DBMS buffers log records in in-memory ages(MemTable), If this buffer is full, it must be flushed to disk. But it may contain changes, uncommitted txns
+  - DBMS still maintain a separate WAL to recreate the MemTable on crash.
+
+- Checkpoints
+  - WAL will grow forever
+  - After a crash, the DBMS must replay the entire log, which will take a long time.
+  - DBMS periodically takes a checkpoint where it flushes all buffers out to disk.
+    - Provides a hint on how far back it needs to replay the WAL after a crash.
+  - Blocking/Consistent Checkpoint Protocol
+    - Pause all queries.
+    - Flush all WAL records in memory to disk.
+    - Flush all modified pages in buffer pool to disk
+    - Write a CHECKPOINT entry to WAL and flush to disk.
+    - Resume queries.
+  - Scanning the log to find uncommitted txns can take a long time.
+  - How often the DBMS should take checkpoints depends on many different factors.
+    - Frequency
+    - Tunable option that depends on application recovery time requirements
           
 ## Database Recovery
   
 - ARIES: Algorithms for Recovery and Isolation Exploiting Semantics.
 *look and read paper by the same name*
-- Main Ideas
+
+### Main Ideas
+
 - Write-Ahead Logging
-- Any chnage is recorded in log on stable storage before the database change is written to disk
-- Must use STEAL+NO-FORCE buffer pool policies.
+  - Any chnage is recorded in log on stable storage before the database change is written to disk
+  - Must use STEAL+NO-FORCE buffer pool policies.
 - Repeating History during Redo
-- On DBMS restart, retrace actions and restore database to exact state before crash.
+  - On DBMS restart, retrace actions and restore database to exact state before crash.
 - Logging Changes During Undo
-- Record undo actions to log to ensure actions is not repeated in the event of repeated failures.
+  - Record undo actions to log to ensure actions is not repeated in the event of repeated failures.
+
 - WAL Records
-- We need to extend our log record format from last class to include additional info
-- Every log record now includes a gloablly unique log sequence number(LSN)
-- LSN represent the physical order that txns make chnages to the database
-- Various components in the system keep track of LSNs that pertain to them.
+  - We need to extend our log record format from last class to include additional info
+  - Every log record now includes a gloablly unique log sequence number(LSN)
+  - LSN represent the physical order that txns make chnages to the database
+  - Various components in the system keep track of LSNs that pertain to them.
+
 - Log Sequence Number
-- flushedLSN - Memory - Last LSN in log on disk
-- pageLSN - page(x) - Newest update to page(x)
-- recLSN - page(x) - Oldest update to page(x) since it was last flushed.
-- lastLSN - T(i) - Latesst record  of txn
-- MasterRecord - Disk - LSN of latest checkpoint.
-- Before the DBMS can write page X to disk, it must flush the log at least to the point where: pageLSN <= flushedLSN
+  - It is uniwue and monotonically increasing.
+  - System keeps track of flushedLSN - Memory - Last LSN in log on disk, max LSN flushed so far.
+  - Each data page contains a pageLSN - page(x) - LSN of the most newest log record that updated the page(x)
+  - recLSN - page(x) - Oldest update to page(x) since it was last flushed.
+  - lastLSN - T(i) - Latest record  of txn.
+  - MasterRecord - Disk - LSN of latest checkpoint.
+  - Before the DBMS can write page X to disk, it must flush the log at least to the point where: pageLSN <= flushedLSN
+
 - Writing Log records
-- All log records have an LSN.
-- Update the pageLSN every time a txn modifies a record in the page.
-- Update the flushedLSN in memory every time the DBMS writes out the WAL buffer to disk.
+  - All log records have an LSN.
+  - Update the pageLSN every time a txn modifies a record in the page.
+  - Update the flushedLSN in memory every time the DBMS writes out the WAL buffer to disk.
+
 - Normal Execution
-- Each txn invokes a sequence of reads and writes, followed by commit or abort.
-- Assumptions
-  - All log records fit within a single page.
-  - Disk writes are atomic
-  - Single-versioned tuples with strong strict 2PL.
-  - STEAL + NO-FORCE buffer management with WAL
+  - Each txn invokes a sequence of reads and writes, followed by commit or abort.
+  - Assumptions
+    - All log records fit within a single page.
+    - Disk writes are atomic.
+    - Single-versioned tuples with strong strict 2PL.
+    - STEAL + NO-FORCE buffer management with WAL.
+
 - Transaction commit
   - When a txn commits, the DBMS writes a COMMIT record to log and guarantees that all log records up to txns COMMIT record are flushed to disk.
     - Log flushes are sequential, synchronous writes to disk.
@@ -3183,6 +3227,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - When the commit succeeds, write a special TXN-END record to log.
     - Indicates that no new log record for a txn will appear in the log ever again.
     - This does not need to be flushed immediately.
+
 - Transaction Abort
   - Abort a txn is a special case of the ARIES undo operation applied to only one txn.
   - We need to add another field to our log records:
@@ -3200,18 +3245,20 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Restore old value.
     - Lastly, write a TXN-END record and release locks.
     - Notice: CLRs never need to be undone.
+
 - Non-fuzzy checkpoints
-- DBMS halts everything when it takes a checkpoint to ensure a consistent snapshot
-  - Halt the start of any new txns
-  - Wait until all active txns finish executing
-  - Flushes dirty pages on disk.
-- This is bad for runtime performance but makes recovery easy.
-- Btter way to checkpoints
-- pause modifying txns while the DBMS takes the checkpoint.
-  - prevent queries from acquiring write latch on table/index pages
-  - dont have to wait until all txns finish beofre taking the checkpoint
-- to prevent torn pages
-  - we must record internal state as of the beginning of the checkpoint
+  - DBMS halts everything when it takes a checkpoint to ensure a consistent snapshot
+    - Halt the start of any new txns
+    - Wait until all active txns finish executing
+    - Flushes dirty pages on disk.
+  - This is bad for runtime performance but makes recovery easy.
+
+- Better way to checkpoints
+- Pause modifying txns while the DBMS takes the checkpoint.
+  - Prevent queries from acquiring write latch on table/index pages
+  - Dont have to wait until all txns finish before taking the checkpoint
+- To prevent torn pages
+  - We must record internal state as of the beginning of the checkpoint
     - Active Transaction Table(ATT)
       - One entry per currently active txn
         - txnId: Unique txn identifier
@@ -3226,6 +3273,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Keep track of which pages in the buffer pool contain changes that have not been flushed to disk.
       - One entry per dirty page in the buffer pool
         - recLSN: The LSN of the log record that first caused the page to be dirty.
+
 - Fuzzy Checkpoints 
 - A fuzzy checkpoint is where the DBMS allows active txns to continue the run while the system writes the log records for checkpoint
   - No attempt to force dirty pages to disk.
@@ -3234,69 +3282,80 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - CHECKPOINT-END:   Contains ATT + DPT
   - Any txn that begins after the checkpoint start is excluded form the ATT in the CHECKPOINT-END record
   - The LSN of the CHECKPOINT-BEGIN record is written to the MasterRecord when it completes.
-- ARIES - Recovery Phases
-  - Analysis
-    - Examine the WAL in forward direction starting at MasterRecord to identify dirty pages in the buffer pool and active txns at the time of the crash.
-    - Figure out which txns committed or failed since last successful checkpoint
-      - If DBMS finds a TXN-END record, remove its corresponding txn from ATT.
-      - All other records:
-        - If txn not in ATT, add it with status UNDO.
-        - On commit, change txn status to COMMIT.
-      - For update log records
-    - At end of Analysis Phase
-      - ATT identifies which txns were active at time of crash
-      - DPT identifies which dirty pages might not have made it to disk.
-  - Redo
-    - Repeat all actions starting from an appropriate point in the log(even txns that will abort)
-    - Goal is to repeat history to recnstruct the database state at the moment of the crash
-      - reapply all updates, even aborted txns and redo CLRs
-    - There are techniques that allow the DBMS to avoid unnecessary reads/writes.....*look into this*
-    - Scan forward form the log record containing smallest recLSN in DPT.
-    - For each update log record or CLR with a given LSN redo the action unless
-      - Affected page is not in DPT or
-      - Affected page is in DPT but that record's LSN is less than the page's recLSN.
-    - To redo an action
-      - Reapply logged uodate
-      - Set pageLSN to log records LSN.
-      - No additional logging, no forced flushes
-    - At the end of Redo Phase, write TXN-END log records for all txns with status C and remove them from the ATT.
-  - Undo
-    - Reverse the actions of txns that did not commit before the crash.
-    - Undo all txns that were active at the time of crash and therefore will never commit
-      - these are all the txns with U status in the ATT after the Analysis Phase
-    - Process them in reverse LSN order using the lastLSN to speed up traversal
-    - Write a CLR for every modification.
+  
+### ARIES - Recovery Phases
+
+- Analysis
+  - Examine the WAL in forward direction starting at MasterRecord to identify dirty pages in the buffer pool and active txns at the time of the crash.
+  - Figure out which txns committed or failed since last successful checkpoint
+    - If DBMS finds a TXN-END record, remove its corresponding txn from ATT.
+    - All other records:
+      - If txn not in ATT, add it with status UNDO.
+      - On commit, change txn status to COMMIT.
+    - For update log records
+  - At end of Analysis Phase
+    - ATT identifies which txns were active at time of crash
+    - DPT identifies which dirty pages might not have made it to disk.
+
+- Redo
+  - Repeat all actions starting from an appropriate point in the log(even txns that will abort)
+  - Goal is to repeat history to recnstruct the database state at the moment of the crash
+    - reapply all updates, even aborted txns and redo CLRs
+  - There are techniques that allow the DBMS to avoid unnecessary reads/writes.....*look into this*
+  - Scan forward form the log record containing smallest recLSN in DPT.
+  - For each update log record or CLR with a given LSN redo the action unless
+    - Affected page is not in DPT or
+    - Affected page is in DPT but that record's LSN is less than the page's recLSN.
+  - To redo an action
+    - Reapply logged uodate
+    - Set pageLSN to log records LSN.
+    - No additional logging, no forced flushes
+  - At the end of Redo Phase, write TXN-END log records for all txns with status C and remove them from the ATT.
+
+- Undo
+  - Reverse the actions of txns that did not commit before the crash.
+  - Undo all txns that were active at the time of crash and therefore will never commit
+    - these are all the txns with U status in the ATT after the Analysis Phase
+  - Process them in reverse LSN order using the lastLSN to speed up traversal
+  - Write a CLR for every modification.
+
 - What does the DBMS do if it crashes during recovery in the Analysis Phase?
   - Nothing. Just run recovery again.
 - What does the DBMS do if it crashed during recovery in the Redo Phase?
-  - Agian nothing. Redo everything again.
+  - Again nothing. Redo everything again.
 - How can the DBMS improve performance during recovery in the Redo Phase?
   - Assume that it is not going to crash again and flush all changes to disk asynchronously in the background.
 - How can the DBMS improve performance during recovery in the Undo Phase?
-  - Lazily rollback changes before new txns access pages
-  - Rewrite the application to avaoid long-runnig txns.
+  - Lazily rollback changes before new txns access pages.
+  - Rewrite the application to avoid long-running txns.
           
 ## Distributed Databases
 
 - Characteristics
   - Nodes can be far from each other.
-  - Nodes connected using public netwrok.
+  - Nodes connected using public network.
 - Use the building blocks that are covered in single node DBMS to now support transaction processing and query execution in distributed environments.
-- A distributed DBMS system arcitecture specifies what shared resources are directly accessible to CPUs
+  - Optimizations and Planning.
+  - Concurrency Control.
+  - Logging and Recovery.
+- A distributed DBMS system architecture specifies what shared resources are directly accessible to CPUs
 - This affects how the CPUs coordinate with each other and where they retrieve/store objects in the database.
 
-- System Architectures
+### System Architectures
+
 - Shared Everything
 - Shared Memory
   - CPUs have access to common memory address space via a fast interconnect
     - each processor has a global view of all the in-memory data structures
     - each DBMS instance on a processor must "know" about the other instances
+
 - Shared Disk*
   - CPUs can access a single logical disk directly via an interconnect, but each have their own private memories
-    - can scal execution layer independently form storage layer
+    - can scale execution layer independently form storage layer
     - must send messages between CPUs to learn about their current state.
+    - facilitates data lakes and serveless systems.
   - Any OLAP DB in use now.
-
+  
 - Shared Nothing*
   - Each DBMS instance has its own CPU, memory and local disk
   - Node only communicate with each other via network  
@@ -3305,49 +3364,61 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - Better performance and efficiency.
 
 - Design Issues
-- How does the application find data?
-- Where does the application send queries?
-- How to execute queries on distributed data?
-  - Push query to data.
-  - Pull data to query.
-- How does the DBMS ensure correctness?
-- How do we divide the database across resources?
+  - How does the application find data?
+  - Where does the application send queries?
+  - How to execute queries on distributed data?
+    - Push query to data.
+    - Pull data to query.
+  - How does the DBMS ensure correctness?
+  - How do we divide the database across resources?
+
 - Homogenous Nodes
-- Every node in the cluster can perform the same set of tasks(albeit on potentially different partitions of data)
-- Makes provisioning and failover easier.
+  - Every node in the cluster can perform the same set of tasks(albeit on potentially different partitions of data)
+  - Makes provisioning and failover easier.
+
 - Heterogenous Nodes
-- Nodes are assigned specific tasks
-- Can allow a single physical node to host multiple "virtual" node types for dedicated tasks.
+  - Nodes are assigned specific tasks
+  - Can allow a single physical node to host multiple "virtual" node types for dedicated tasks.
+
 - Data Transperancy
-- Apps should not be required to know where data is physically located in a distributed DBMS
-  - query on a single node should have same results as distributed db.
+  - Apps should not be required to know where data is physically located in a distributed DBMS
+    - query on a single node should have same results as distributed db.
+  - In practice, developers need to be aware of the communication costs of queries to avoid excessively expensive data movement.
+  
 - Database Partitioning
-- Split database across multiple resources
-  - Disks, nodes, processors
-  - Often called "Sharding"
-- DBMS executes query fragments on each partition and then combines the results to produce a single answer.
-- DBMS can partition physically(shared nothing) or logically(shared disk)
-- Naive TABLE pARTITIONING
+  - Split database across multiple resources
+    - Disks, nodes, processors
+    - Often called "Sharding"
+  - DBMS executes query fragments on each partition and then combines the results to produce a single answer.
+  - DBMS can partition physically(shared nothing) or logically(shared disk)
+
+- Naive TABLE Partitioning
   - Assign an entire table to a single node.
   - Assume that each node has enough storage space for an entire table
   - Ideal if queries never join data across tables stored on different nodes and access patterns are uniform.
+
 - Vertical Partitioning
   - Split a table's attributes into separate partitions.
-  - Must store tuple information to reconstruct the original record
+  - Must store tuple information to reconstruct the original record.
+
 - Horizontal Partitioning
   - Split a table's tuples into disjoint subsets based on some partitioning key and scheme
-    - choose column that divided the datase equally in terms of size, load, usage
+    - Choose column that divided the database equally in terms of size, load, usage
   - Partitioning schemes
     - Hashing
     - Ranges
     - Predicates
+
 - Logical Partitioning vs Physical Partitioning
+
 - Consistent Hashing*
   - Solution to rehashing on mod change.
   - Learn more about this.
+  
 - Single Node vs Distributed
-  - A distributed txn accesses data at one or more partitions
-    - Requires expensive coordination.
+  - A single node txn only accesses data that is contained on one partition so DBMS doesn't need to check behaviour of concurrent txns running on other nodes.
+  - A distributed txn accesses data at one or more partition and therefore requires expensive coordination.
+
 - Transaction Coordination
   - Need a way to coordinate their execution on the system if our DBMS supports multi-operation and distributed txns.
   - Two different approaches
@@ -3356,118 +3427,151 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Middleware: Vitess, planetscale, mongoDB
     - Decentralized: Nodes organize themselves.
       - Leader election type.
+  - Most distributed DBMSs use a hybrid approach where they periodically elect some node to be a temporary coordinator.
+
+- An assumption stands that the nodes in our distributed systems are running the same DBMS s/w but rganizations often run many different DBMSs in their applications hence the need
+  for a single interface for all our data.
+- Federated Databases
+  - Distributed arch that connects disparate DBMSs into a single logical system, expose a single query interface that can access data at any location.
+  - It is hard and nobody does it well
+    - Different data models. query languages, limitations.
+    - No easy way to optimize queries.
+    - Lots of data copying(bad)
+    
 - Distributed Concurrency Control
   - Need to allow multiple txn to execute simultaneously across multiple nodes.
-    - many of the same protocols from single node DBMSs can be adapted 
+    - Many of the same protocols from single node DBMSs can be adapted 
   - This is harder because of
     - Replication
     - Network Communication Overhead
-    - Node failures
+    - Node failures(permanent+ephemeral)
     - Clock Skew
         
 ## OLAP VS OLTP
  
 - On-line Transaction Processing(OLTP)
-  - Short-lived read/write txns
-  - Small footprint
-  - Repetitive operations
+  - Short-lived read/write txns, 50ms.
+  - Small footprint.
+  - Repetitive operations.
 
 - On-line Analytical Processing   
-  - Long-running read-only queries
-  - Complex joins
+  - Long-running read-only queries.
+  - Complex joins.
   - Exploratory queries.
 
 ### OLTP
           
+- Our goal is to have multiple physical nodes appear as a single logical DBMS.
 - How to ensure that all nodes agree to commit a txn and then make sure it does commit if we decide that it should.
-- What happends if a node fails?
-- What happens if our messages show up late?
-- What happens if we dont wait for every node to agree?
+  - What happends if a node fails?
+  - What happens if our messages show up late?
+  - What happens if we dont wait for every node to agree?
 
 - Assume all nodes in a distributed DBMS are well-behaved and under the same administrative domain
 - If we tell a node to commit a txn, then it will commit the txn(if there is no failure)
-- If you dont trust the other nodes in a distributed DBMS you need to use a BYzantine Fault Tolerant protocol for txns.
+- If you dont trust the other nodes in a distributed DBMS you need to use a BYzantine Fault Tolerant protocol for txns(blockchain).
 
 - Atomic Commit Protocol
-- when a multinode txn finishes, the DBMS needs to ask all the nodes involved whether it is safe to commit
-- Examples:
-  - Two-Phase commit*
-    - Each node records the inbound/outbound messages and outcome of each phase in a non-volatile storage log
-    - On recovery examine the log for 2PC messages
-      - if txn is in prepared state, contact coord.
-      - if txn is not in prepared, abort it.
-      - if txn was committing and node is cood, send COMMIT message to nodes.
-    - 2PC Optimizations
-      - Early Prepare Voting
-        - nide return query result if it knows no other query will run there.
-      - Early Acknowledge After Prepare
-        - if all nodes vote to commit a txn, coord can send client an ack that their txn was successful before the commit phase finishes.
-  - Three-Phase commit
-  - Paxos*
-    - Consensus protocol where a coord proposes an outcome(commit or abort) and then the participants vote on whether that outcome should succeed.
-    - Does not block if a majority of participants are available and has provably minimal mesasge delays in the best case.
-    - *PAXOS MADE LIVE*
-    - K-safety - minimal number of required partitions.
-    - Multi-Paxos
-      - if the system elects a single leader that oversees proposing changes for some period then it can skip the propose phase.
-        - fall back to full Paxos whenever there is a failure
-      - The system periodically renews the leader(known as a lease) using another Paxos round
-        - Nodes must exchange log entries during leader election to make sure that everyone is up-to-date.
-    - 2PC vs Paxos
-      - 2PC
-        - Blocks if coord fails after the prepapre message is sent, until coodinator recovers.
-      - Paxos
-        - Non-blocking if a majority participants are alive. provided there is a sufficiently long period without further failures.
-  - Raft
-  - ZAB(Zookeeper)
-  - Viewstamped Replication
+  - When a multinode txn finishes, the DBMS needs to ask all the nodes involved whether it is safe to commit
+  - Coordination of commit order of txns across nodes in a distributed DBMS regardless of whether data is replicated or partitioned.
+  - Commit order = State machine
+  
+### Examples
+
+- Two-Phase commit*
+  - Each node records the inbound/outbound messages and outcome of each phase in a non-volatile storage log
+  - On recovery examine the log for 2PC messages
+    - if txn is in prepared state, contact coord.
+    - if txn is not in prepared, abort it.
+    - if txn was committing and node is cood, send COMMIT message to nodes.
+  - If coordinator crashes, participants must decide what to do after a timeout.
+  - If participant crashes, co-od assumes abort response and again a timeout is used to decide if a participant is dead.
+  - 2PC Optimizations
+    - Early Prepare Voting
+      - node return query result if it knows no other query will run there.
+    - Early Acknowledge After Prepare
+      - if all nodes vote to commit a txn, coord can send client an ack that their txn was successful before the commit phase finishes.
+
+- Three-Phase commit
+
+- Paxos*
+  - Consensus protocol where a coord proposes an outcome(commit or abort) and then the participants vote on whether that outcome should succeed.
+  - Does not block if a majority of participants are available and has provably minimal mesasge delays in the best case.
+  - *PAXOS MADE LIVE, Consensus on Transaction Commit*
+  - K-safety - minimal number of required partitions.
+  - Multi-Paxos
+    - If the system elects a single leader that oversees proposing changes for some period then it can skip the propose phase.
+      - fall back to full Paxos whenever there is a failure
+    - The system periodically renews the leader(known as a lease) using another Paxos round
+      - Nodes must exchange log entries during leader election to make sure that everyone is up-to-date.
+  - 2PC vs Paxos
+    - 2PC
+      - Blocks if coord fails after the prepapre message is sent, until coodinator recovers.
+    - Paxos
+      - Non-blocking if a majority participants are alive. provided there is a sufficiently long period without further failures.
+
+- Raft
+  - Similar to Paxos but with fewer node types.
+  - Only nodes with most up-to-date log can become leaders
+  
+- ZAB(Zookeeper)
+- Viewstamped Replication
 
 - Replication
-- The DBMS can replicate data across redundant nodes to increase availability.
+  - The DBMS can replicate a database across redundant nodes to increase availability.
+  - Partitioned vs Non-Partitioned
+  - Shared-Nothing vs Shared-Disk
 
-- Design decisions:
-  - Replica configuration
-    - Approach:
-      - Primary-Replica
-        - All updates go to a designated primary for each object.
-        - The primary propagates updates to its replicas without an atomic commit protocol.
-        - Read-only txns may be allowed to access replicas.
-        - If the primary goes down, then hold an election to select a new primary.
-      - Multi-Primary
-        - Txns can update data objects at any replica.
-        - Replicas must synchronize with each other using an atomic commit protocol.
-    - K-Safety
-      - Threshold for determining the fault tolerance of the replicated database.
-      - The value K represents the number of replicas per data object that must always be available.
-      - If the number of replicas goes below thos threshold then DBMS halts execution and takes itself offline.
-  - Propagation scheme
-    - When a txn commits on a replicated database, the DBMS decides whether it must wait for that txn changes to propagate to other nodes before it can send ack to application
-    - Propagation Levels:
-      - Synchronous (Strong Consistency)
-        - The primary sends updates to replicas and then waits for them to ack that they fully applied(logged) the changes.
-      - Asynchronous (Eventual Consistency)
-        - The primary immediately returns the ack to the client without waiting for replicas to apply the changes.
-        - Mostly used.
-  - Propagation Timing
-    - Approach
-      - Continuous
-        - DBMS sends log messages immediately as it generates them.
-        - Also need to send a commit/abort message.
-      - On Commit
-        - DBMS only sends the log messages for a txn to the replicas once the txn is commits
-        - Do not waste time sending log records for aborted txns
-        - Assumes that a txn log record fits entirely in memory.
-  - Update Method
-    - Approach
-      - Active-Active
-        - a txn executes at each replica independently
-        - need to check at the end whether the txn ends up with the same result at each replica
-      - Active-Passive
-        - each txn executes at a single location and propagates the changes to the replica
-        - either do physical or logical replication.
-        - not the same as primary-replica vs multi-primary
+### Design decisions
+
+- Replica configuration
+  - Approaches
+    - Primary-Replica
+      - All updates go to a designated primary for each object.
+      - The primary propagates updates to its replicas without an atomic commit protocol.
+      - Read-only txns may be allowed to access replicas.
+      - If the primary goes down, then hold an election to select a new primary.
+    
+    - Multi-Primary
+      - Txns can update data objects at any replica.
+      - Replicas must synchronize with each other using an atomic commit protocol.
+  
+  - K-Safety
+    - Threshold for determining the fault tolerance of the replicated database.
+    - The value K represents the number of replicas per data object that must always be available.
+    - If the number of replicas goes below thos threshold then DBMS halts execution and takes itself offline.
+  
+- Propagation scheme
+  - When a txn commits on a replicated database, the DBMS decides whether it must wait for that txn changes to propagate to other nodes before it can send ack to application
+  - Propagation Levels:
+    - Synchronous (Strong Consistency)
+      - The primary sends updates to replicas and then waits for them to ack that they fully applied(logged) the changes.
+    - Asynchronous (Eventual Consistency)
+      - The primary immediately returns the ack to the client without waiting for replicas to apply the changes.
+      - Mostly used.
+  
+- Propagation Timing
+  - Approach
+    - Continuous
+      - DBMS sends log messages immediately as it generates them.
+      - Also need to send a commit/abort message.
+    - On Commit
+      - DBMS only sends the log messages for a txn to the replicas once the txn is commits
+      - Do not waste time sending log records for aborted txns
+      - Assumes that a txn log record fits entirely in memory.
+  
+- Update Method
+  - Approach
+    - Active-Active
+      - a txn executes at each replica independently
+      - need to check at the end whether the txn ends up with the same result at each replica
+    - Active-Passive
+      - each txn executes at a single location and propagates the changes to the replica
+      - either do physical or logical replication.
+      - not the same as primary-replica vs multi-primary
+
 - Google Spanner
-  - Google geo-replicated DBMS
+  - Google Geo-replicated DBMS
   - Schematized, semi-relational data model
   - Decentralized shared-disk architecture
   - Log-structured on disk storage
@@ -3481,52 +3585,63 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Use Paxos to elect leader in tablet group
       - Use 2PC for txns that span tablets.
   - Transaction Ordering
-      - DBMS orders transations based on physical "wall clock" time.
+      - DBMS orders transactions based on physical "wall clock" time.
       - Guarantee strict serializability.
       - If T1 finishes before T2 then T2 should see the result of T1.
 
 - CAP Theorem
   - Consistent, Always Available, Network Partition Tolerant.
-  - How a DBMS handles failures determines whoch elements of the CAP theorem they support
+  - How a DBMS handles failures determines which elements of the CAP theorem they support.
     - Traditional/Distributed Relational DBMS
       - stop allowing updates until a majoruty of nodes are reconnected.
     - NoSQL DBMSs
       - provide mechanisms to resolve conflicts after nodes are reconnected.
 - PACELC Theorem
 
-**OLTP --> EXTRACT, TRANSFORM, LOAD --> OLAP**
+**OLTP ->EXTRACT, TRANSFORM, LOAD ->OLAP**
+
 ### OLAP
   
 - Decision Support Systems
   - Applications that serve the management, operations and planning levels of an organization to help people make decisions about future issues and problems by analyzing historical data
+
 - Star schema vs Snowflake Schema
-  - Fat tables
-  - Issues
+  - Fat tables used in star schemas.
+  - Schema issues:
     - Normalization
       - Snowflake schemas take up less storage space.
+      - Denormalized data models may incur integrity and consistency violations.
     - Query Complexity
       - Snowflake schemas require more joins to get the data needed for a query
-      - Queries on star schemas will be faster
-        
+      - Queries on star schemas will usually be faster.
+      
+- Executing an OLAP query in a distributed DBMS is roughly the same as on a single-node DBMS.        
+- For each operator, the DBMS considers where input is coming from and where to send output; Table scans, Joins, Aggregations, Sorting.
+- A distributed DBMS system architecture specifies the location of the db data files. This affects how nodes coordinate with each other and where they retrieve/store objects in the database.
+
 - Push vs Pull
   - Approach:
     - Push query to data
-      - send the query to the node that contains the data.
-      - perfomr as mush filtering and processing as possible where data resides before transmitting over network.
+      - Send the query to the node that contains the data.
+      - Perform as much filtering and processing as possible where data resides before transmitting over network.
     - Pull data to query
-      - bring the data to the node that is executing a query that needs it for processing.
+      - Bring the data to the node that is executing a query that needs it for processing.
+      - This is necessary when there is no compute resources available where database files are located.
+
 - The data that a node reveives from remote sources are cached in the buffer pool
-  - allows DBMS to support interndiate results that are large than the amount of memory availabel
-  - ephemeral pages are not persisted after a restart.
+  - Allows DBMS to support intermediate results that are large than the amount of memory available
+  - Ephemeral pages are not persisted after a restart.
+  
 - What happens to a long-running OLAP query if a node crashes during execution??
 - Query Fault Tolerance
-  - Most shared nothing distributed OLAP DBMSs are designed to assume that nodes do not fail during query execution
-    - if one node fails during query execution, then the whole query fails
+  - Most shared nothing distributed OLAP DBMSs are designed to assume that nodes do not fail during query execution.
+    - If one node fails during query execution, then the whole query fails.
   - DBMS could take a snapshot of the intermediate results for a query during execution to allow it to recover of nodes fail.
-    - be strategic about this
+    - Be strategic about this.
+  - Shared disk.
 
 - Query Planning
-  - All the optimizations fro mabove are still applicable
+  - All the optimizations from above are still applicable in a distributed environments.
     - Predicate pushdown
     - Early projections
     - Optimal Join Orderings
@@ -3534,11 +3649,11 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Query plan fragments
     - Approach:
       - Physical operators
-        - generate a single query plan and then break it up into partition specific fragments
-        - most systems implement this
+        - Generate a single query plan and then break it up into partition specific fragments
+        - Most systems implement this
       - SQL
-        - rewrite the original query into partition-specific queries
-        - allows for local optimization at each node.
+        - Rewrite the original query into partition-specific queries
+        - Allows for local optimization at each node.
         - *SingleStore* + *Vitess* use this.
     - The efficiency of a distributed join depends on the target tables partitioning schemes
     - One approach is to put entire tables on a single node and then perform the join
@@ -3546,163 +3661,185 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Costly data transfer over the network.
       - Does not scale.
 
+- The efficiency of a distibuted join depends on the target tables' partitioning schemes with one approach being to put entire tables on a single node and then performing the join,
+  however you lose parallelism of a distributed DBMS and suffer costly data transfer over the network.
+  
 - Distibuted Join Algorithms
   - To join table R and S, the DBMS needs to get the proper tuples on the same node.
-  - Once the data is at the node, the DBMS then executes the same join algorithms that we discussed earlier in the semester.
-  - Hard to find optimal partition key
+  - Once the data is at the node, the DBMS then executes the same join algorithms that we discussed earlier in the semester, need to avoid false negatives due to missing tuples when running
+    local join on each node.
+  - Variations on partitioning
+    - Both tables are partitioned on different keys, if one of the tables is small, then DBMS "broadcasts" that table to all nodes.
+    - Both tables are not partitioned on the join key, DBMS copies the tables by shuffling them across nodes.
+  - Hard to find optimal partition key.
   - Semi-Join
-    - Join type where the result only contains columns from the left tbale.
+    - Join type where the result only contains columns from the left table.
     - Distributed DBMSs use semi-join to minimize the amount of data sent during joins
       - This is like a projection pushdown.
-    - Some DBMSs support SEMI-JOIN OR fakes it as EXISTS  
+    - Some DBMSs support SEMI-JOIN or fake it with EXISTS  
 
-- Cloud Systems
-  - DBaaS - manages DBMS environments
-  - Newer systems are starting to blur the lines between shared-nothing and shared-disk.
-    - You can do sinple filtering on Amazon S3 before copying data to compute nodes.
-  - Approach 
-    - Manages DBMS
-      - No significant modification to the DBMS to be aware that is running in a cloud environment.
-    - Cloud-Native DBMS 
-      - Explicitly designed to run ina cloud environment
-      - Shred-disk architecture.
-      - E.G: *Snowflake, Google BigQuery, Amazon Redshift, Ms SQL Azure*
-  - Serverless Dbs
-    - rather than always maintaining compute resources for each customer a serverless DBMS evicts tenants when they become idle.
-    - page in buffer pool and page table or restart.
-    - *Neon, Fauna, Planetscale, CockroachDB*
-  - Data Lakes
-    - Repository for stroing large amounts of structured, semi-structured and unstructured data without having to define a schema or ingest the data into proprietary internal formats
-    - *Trino, Redshift, Presto, Databricks, Hive, Snowflake*
+### Cloud Systems
 
-- Universal Formats
-  - Most DBMSs use proprietary on-disk binary file format for their databases.
-  - The only way to share data between systems is to convert data into a common text-based format
-    - CSV, JSON, XML
-  - There are new open-source binary file fomrats that make it easier to access data across systems
-  - Benefits:
-    - High-levels languages can make calls into lower-level languages for compute-intensive tasks by passing pointers to data rather than making copies in different formats.
-    - Data can be transferred between processes efficiently without much serialization overhead because memory format is also network format.
-    - It is also easier to build connectors,drivers and integrations between various open source and commercial projects.
-  - Examples:
-    - Apache Parquet
-      - compressed columnar storage from cloudera/twitter
-      - writeonce read many
-    - Apache ORC
-      - compressed columnar storage from Apache Hive
-    - Apache CarbonData
-      - compressed columnar storage with indexes from Huawei
-    - Apache Iceberg
-      - flexible data format that supports schema evolution from Netflix
-    - HDF5
-      - multi-dimensional arrays for scientific workloads
-    - Apache Arrow 
-      - in-memory compressed storage from Pandas/Dremio
-      - It is efficient for vectorised processing on modern h/w.
-      - IPC format is defined for exchanging metadata such as schema information, Google Flatbuffers.
-      - Flight protocol is used for efficiently streaming Arrow data over the network.
+- DBaaS; managed DBMS environments.
+- Newer systems are starting to blur the lines between shared-nothing and shared-disk i.e you can do simple filtering on Amazon S3 before copying data to compute nodes.
 
-- Disaggreagated Components
-  - System catalogs
-    - store metadata about the data.
-    - HCatalog, Google Data Catalog, Amazon Glue Data Catalog
-  - Node management
-    - K8S, Apache YARN
-  - Query Optimizers
-    - Apache Calcite, Greenplum Orca
+- Approach 
+  - Manages DBMS
+    - No significant modification to the DBMS to be aware that is running in a cloud environment.
+  - Cloud-Native DBMS 
+    - Explicitly designed to run ina cloud environment
+    - Shared-disk architecture.
+    - example: *Snowflake, Google BigQuery, Amazon Redshift, Ms SQL Azure*
+
+- Serverless Dbs
+  - rather than always maintaining compute resources for each customer a serverless DBMS evicts tenants when they become idle.
+  - page in buffer pool and page table or restart.
+  - example: *Neon, Fauna, Planetscale, CockroachDB*
+
+- Data Lakes
+  - Repository for storing large amounts of structured, semi-structured and unstructured data without having to define a schema or ingest the data into proprietary internal formats
+  - example: *Trino, Redshift, Presto, Databricks, Hive, Snowflake*
+
+
+### Universal Formats
   
+- Most DBMSs use proprietary on-disk binary file format for their databases.
+- The only way to share data between systems is to convert data into a common text-based format
+  - CSV, JSON, XML
+- There are new open-source binary file fomrats that make it easier to access data across systems
+- Benefits:
+  - High-levels languages can make calls into lower-level languages for compute-intensive tasks by passing pointers to data rather than making copies in different formats.
+  - Data can be transferred between processes efficiently without much serialization overhead because memory format is also network format.
+  - It is also easier to build connectors,drivers and integrations between various open source and commercial projects.
+
+- Examples:
+  - Apache Parquet
+    - compressed columnar storage from cloudera/twitter
+    - writeonce read many
+  - Apache ORC
+    - compressed columnar storage from Apache Hive
+  - Apache CarbonData
+    - compressed columnar storage with indexes from Huawei
+  - Apache Iceberg
+    - flexible data format that supports schema evolution from Netflix
+  - HDF5
+    - multi-dimensional arrays for scientific workloads
+  - Apache Arrow 
+    - in-memory compressed storage from Pandas/Dremio
+    - It is efficient for vectorised processing on modern h/w.
+    - IPC format is defined for exchanging metadata such as schema information, Google Flatbuffers.
+    - Flight protocol is used for efficiently streaming Arrow data over the network.
+
+### Disaggreagated Components
+
+- A recent trend has been the breakout OLAP sub-systems into standalone open-source components, typically done by organizations not in the business of selling DBMS s/w.
+
+- System catalogs
+  - store metadata about the data.
+  - HCatalog, Google Data Catalog, Amazon Glue Data Catalog
+- Node management
+  - K8S, Apache YARN
+- Query Optimizers
+  - Extendible search engine framework for heuristic and cost-based query optimization where DBMS provides transformation rules and cost estimates and framework returns either
+    a logical or physical query plan.
+  - Apache Calcite, Greenplum Orca
+- Execution engines
+  - Standalone libraries for executing vectorised query operators on columnar data, input is a DAG of physocal operators and require external scheduling and orchestration.
+  - example: Velox, Datafusion, Intel OAP.
+
+    
 ## Embedded Database Logic
   
-  - The application has a conversation with the DBMS to store/retrieve data.
-    - each DBMS has its own network protocol.
-    - client side APIs: JDBC, ODBC.
-  - Conversational Database API.
-  - Moving application logic into the DBMS can potentially provide sevaral benefits
-    - Fewer network round-trips
-    - immdiate notification of changes
-    - DBMS spends less time waiting during transactions
-    - Developers dont have to reimplement functionality
-  - User-defined functions
-    - A UDF is a functon written by the application developer that extends the system's functionality beyond its built-in operations
-      - it takes in input arguments(scalars)
-      - perform some computations
-      - return a result(scalars, tables)
-    - UDF Defn
-      - Return Types
-        - scalar functions: return single data value
-        - table functions: return a single result table.
-      - Computation definition
-        - sql functions
-        - external programming language
-      - a SQL-based UDF contains a list of queries that the DBMS executes in order when invoked
-        - the function returns the result of the last query executed.
-        - SQL standard provides the ATOMIC keyword to tell the DBMS to track dependencies UDFs.
-      - also use external programming language
-        - sandbox vs non-sandbox
-    - Advantages
-      - encourage modularity and code reuse
-        - different queries can reuse the same application logic without having to reimplement it each time.
-      - fewer network round-trips between application server and DBMS for complex operations
-      - some types of application logic are easier to express and read as UDFs than SQL.
-    - Disavantages
-      - Query optimzers treat UDFs as black boxes
-        - unable to estimate cost of you dont know that a UDF is going to do when run.
-      - It is difficult to parallelize UDFs due to correlated queries inside of them
-        - some DBMS will only execute queries with a single thread if they contain a UDF.
-        - some UDFs incrementally construct queries.
-      - complex UDFs in SLECT/WHERE clauses force the DBMS to execute iteratively
-        - RBAR = row by agonizing row
-        - things get worse if UDF invokes queries doe to implicit joins that the optimzer coannot see.
-      - since the DBMS executes the commands in the UDF one-by-one, its unable to perform cross-statement optimizations.
-  - Stored Procedures
-    - A stored procedure is a self-contained function that perfroms more complex logic inside of the DBMS
-      - cna have many input/output parameters
-      - can modify the database table/structures
-      - not normally used within a SQL query
-    - Some DBMS distinguish UDFs vs stored procedures, but not all.
-      - A UDF is meant to perform a subset of a read-only computations within a query.
-      - A stored procedure is meant to perform a complete computations that is independent of a query.
-  - Database Triggers
-    - A trigger instructs the DBMS to invoke a UDF when some event occurs in the database.
-    - The developer has to define
-      - What type of event will cause it to fire
-      - The scope of the event
-      - When it fires relative to that event.
-    - Event Type: INSERT, UPDATE, DELETE, TRUNCATE, CREATE, ALTER, DROP
-    - Event Scope: TABLE, DATABASE, VIEW, SYSTEM
-    - Timing: Before, After query, row
-  - Change Notifications
-    - A chnage notification is like a trigger except that the DBMS sends a message to an external entity that something notable has happened to the db.
-      - think pub/sub system
-      - can be chained with a trigger to pass along whenever a change occurs
-      
-    - SQL STANDARD: LISTEN + NOFITY
-  - All DBMSs support the basic primitive types in the SQL standard, basic arithmetic and string manipulation on them.
-  - if we want to store data that doesnt match any of the built-in types?
-  - Complex Types
-    - Attribute splitting
-    - Application serialization
-  - User-defined Types
-    - is a special data type that is defined by the application developer that the DBMS can store natively
-      - introduced by Postgres in 1980
-      - added to SQL:1999 
-    - also referred to as structured user-defined types or structured types.
-    - each DBMS exposes apis to create UDT.
-  - Views
-    - Creates a virtual table containing the putput from a SELECT query. The view can then be accessed as if it was a real table.
-    - This allows programmers to simplify a complex query that is executed often
-      - wont make it run faster
-    - Often used a mechanism for hiding a subset of table's attributes from certain users.
-  - Select...into 
-    - creates static table that does no get updated when student gets updated.
-  - Materialized Views
-    - creates a view containing the output from a SELECT query that is reatined(not recomputed)
-      - some DBMSs automatically update matviews when the underlying tables chage
-      - other DBMSs(postgresql) require manual refresh.
-  - Disavantages:
-    - Not portable
-    - DBSs dont like change
-    - Potentially need tomaintain different versions.
+- The application has a conversation with the DBMS to store/retrieve data.
+  - each DBMS has its own network protocol.
+  - client side APIs: JDBC, ODBC.
+- Conversational Database API.
+- Moving application logic into the DBMS can potentially provide sevaral benefits
+  - Fewer network round-trips
+  - immdiate notification of changes
+  - DBMS spends less time waiting during transactions
+  - Developers dont have to reimplement functionality
+- User-defined functions
+  - A UDF is a functon written by the application developer that extends the system's functionality beyond its built-in operations
+    - it takes in input arguments(scalars)
+    - perform some computations
+    - return a result(scalars, tables)
+  - UDF Defn
+    - Return Types
+      - scalar functions: return single data value
+      - table functions: return a single result table.
+    - Computation definition
+      - sql functions
+      - external programming language
+    - a SQL-based UDF contains a list of queries that the DBMS executes in order when invoked
+      - the function returns the result of the last query executed.
+      - SQL standard provides the ATOMIC keyword to tell the DBMS to track dependencies UDFs.
+    - also use external programming language
+      - sandbox vs non-sandbox
+  - Advantages
+    - encourage modularity and code reuse
+      - different queries can reuse the same application logic without having to reimplement it each time.
+    - fewer network round-trips between application server and DBMS for complex operations
+    - some types of application logic are easier to express and read as UDFs than SQL.
+  - Disavantages
+    - Query optimzers treat UDFs as black boxes
+      - unable to estimate cost of you dont know that a UDF is going to do when run.
+    - It is difficult to parallelize UDFs due to correlated queries inside of them
+      - some DBMS will only execute queries with a single thread if they contain a UDF.
+      - some UDFs incrementally construct queries.
+    - complex UDFs in SLECT/WHERE clauses force the DBMS to execute iteratively
+      - RBAR = row by agonizing row
+      - things get worse if UDF invokes queries doe to implicit joins that the optimzer coannot see.
+    - since the DBMS executes the commands in the UDF one-by-one, its unable to perform cross-statement optimizations.
+- Stored Procedures
+  - A stored procedure is a self-contained function that perfroms more complex logic inside of the DBMS
+    - cna have many input/output parameters
+    - can modify the database table/structures
+    - not normally used within a SQL query
+  - Some DBMS distinguish UDFs vs stored procedures, but not all.
+    - A UDF is meant to perform a subset of a read-only computations within a query.
+    - A stored procedure is meant to perform a complete computations that is independent of a query.
+- Database Triggers
+  - A trigger instructs the DBMS to invoke a UDF when some event occurs in the database.
+  - The developer has to define
+    - What type of event will cause it to fire
+    - The scope of the event
+    - When it fires relative to that event.
+  - Event Type: INSERT, UPDATE, DELETE, TRUNCATE, CREATE, ALTER, DROP
+  - Event Scope: TABLE, DATABASE, VIEW, SYSTEM
+  - Timing: Before, After query, row
+- Change Notifications
+  - A chnage notification is like a trigger except that the DBMS sends a message to an external entity that something notable has happened to the db.
+    - think pub/sub system
+    - can be chained with a trigger to pass along whenever a change occurs
+    
+  - SQL STANDARD: LISTEN + NOFITY
+- All DBMSs support the basic primitive types in the SQL standard, basic arithmetic and string manipulation on them.
+- if we want to store data that doesnt match any of the built-in types?
+- Complex Types
+  - Attribute splitting
+  - Application serialization
+- User-defined Types
+  - is a special data type that is defined by the application developer that the DBMS can store natively
+    - introduced by Postgres in 1980
+    - added to SQL:1999 
+  - also referred to as structured user-defined types or structured types.
+  - each DBMS exposes apis to create UDT.
+- Views
+  - Creates a virtual table containing the putput from a SELECT query. The view can then be accessed as if it was a real table.
+  - This allows programmers to simplify a complex query that is executed often
+    - wont make it run faster
+  - Often used a mechanism for hiding a subset of table's attributes from certain users.
+- Select...into 
+  - creates static table that does no get updated when student gets updated.
+- Materialized Views
+  - creates a view containing the output from a SELECT query that is reatined(not recomputed)
+    - some DBMSs automatically update matviews when the underlying tables chage
+    - other DBMSs(postgresql) require manual refresh.
+- Disavantages:
+  - Not portable
+  - DBSs dont like change
+  - Potentially need tomaintain different versions.
 
 ## IN-MEMORY DATABASES
 
