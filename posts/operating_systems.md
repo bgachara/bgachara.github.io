@@ -6,7 +6,7 @@ tags:
   - operating system
   - linux
 ref:
-  - Modern Operating Tanenbaum
+  - Modern Operating Systems Tanenbaum
 ---
 
 ref:
@@ -42,12 +42,10 @@ ref:
     - It states rules relating desired behaviour of the output devices to all possible behaviour of input devices, as well as any rules that other parts of the problem domain must obey.
     - Interface design with constraints for the problem domain to follow.
     - Careful to ensure implementation details do not leak in.
-``
+
 - Abstraction is a technique for hiding complexity that is irrelevant to the problem in context.
-  - A lower layer has a recurring pattern, this pattern is taken out and built a language on top of it.
-  - A higher layer strips away layer-specific(non-recurring) details to focus on the recurring details.
-  - The recurring details are given a new and simpler language than the languages of the lower layers.
-  - Every layer is just a more convenient language to describe the lower layer.
+  - A lower layer has a recurring pattern, this pattern is taken out and built a language on top of it. A higher layer strips away layer-specific(non-recurring) details to focus on the recurring details.
+  - The recurring details are given a new and simpler language than the languages of the lower layers. Every layer is just a more convenient language to describe the lower layer.
 
 ## Computational Structures
 
