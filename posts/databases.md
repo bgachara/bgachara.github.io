@@ -205,30 +205,36 @@ Databases are the core component of most computer applications and among the rea
 
 ### Relational Algebra
 
-- It defines the ordering of the high-level steps of how to compute a query.
-- A better approach is to state the high-level answer that you want the DBMS to compute.
-- The relational model is independent of any query language implementations
+- It defines the ordering of the high-level steps of how to compute a query. A better approach of which is to state the high-level answer that you want the DBMS to compute.
+- The relational model is independent of any query language implementations.
 - The DBMS is responsible for efficient evaluation of the query with high-end systems having a sophisticated query optimzer that can rewrite queries and search for optimal execution strategies.
 - Fundamental operations to retrieve and manipulate tuples in a relation based on set algebra(unordered lists with no duplicate)
 - Each operator takes one or more relations as its inputs and outputs a new relation and we can chain operators together to create more complex operations.
 
-- Operations
-  - Select 
-    - choose a subset of the tuples from a relation that satisfies a selection predicate.
-      - predicate acts as a filter to retain only tuples that fulfill its qualifying requirements.
-      - can combine multiple predicataes using conjuctions/disjunctions.
-  - Projection
-    - generate a relation with tuples that contains only the specified attributes, can rearrange attributes ordering, remove unwanted attributes and can manipulate the values.
-  - Union 
-    - generate a relation that contains all tuples that appear in either only one or both input relations.
-  - Intersection
-    - generate a relation that contains only tuples that appear in both of the input relations.
-  - Difference
-    - generate a relation that contains only tuples that appear in the first and not the second of the input relations.
-  - Product
-    - generate a relation that contains all possible combinations of tuples from the input relations.
-  - Join
-    - generate a relation that contains all tuples that are a combination of two tuples(one form each relation) with a common value for one or more attributes.
+#### Operations
+
+- Select 
+  - Choose a subset of the tuples from a relation that satisfies a selection predicate with the predicate acting as a filter to retain only tuples that fulfill its qualifying 
+    requirements and we can combine multiple predicataes using conjuctions/disjunctions.
+    
+- Projection
+  - Generate a relation with tuples that contains only the specified attributes, can rearrange attributes ordering, remove unwanted attributes and can manipulate the values.
+  
+- Union 
+  - Generate a relation that contains all tuples that appear in either only one or both input relations.
+  
+- Intersection
+  - Generate a relation that contains only tuples that appear in both of the input relations.
+  
+- Difference
+  - Generate a relation that contains only tuples that appear in the first and not the second of the input relations.
+  
+- Product
+  - Generate a relation that contains all possible combinations of tuples from the input relations.
+  
+- Join
+  - Generate a relation that contains all tuples that are a combination of two tuples(one form each relation) with a common value for one or more attributes.
+  
 - Extra operators
   - Rename, Assignment, Duplicate Elimination, Aggregation, Sorting, Division
 
@@ -1004,16 +1010,14 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 
 ## Storage Model
 
-- A DBMS storage model specifies how it physically organizes tuples on disk and in memory.
-  - It can have different perfromance characteristics based on the target workload (OLTP vs OLAP).
-  - This also influences the design choices of the rest of the DBMS.
+- A DBMS storage model specifies how it physically organizes tuples on disk and in memory. It can have different perfromance characteristics based on the target workload (OLTP vs OLAP).
+  This also influences the design choices of the rest of the DBMS.
   
 ### N-ary storage model (NSM)
 
-- It is ideal for OLTP workloads where queries tend to access individual entities and execute write-heavy workloads.
-  - use the tuple-at-a-time iterator processing model.
+- It is ideal for OLTP workloads where queries tend to access individual entities and execute write-heavy workloads, use the tuple-at-a-time iterator processing model.
 - The DBMS stores all the attributes for a single tuple contiguously in a single page, also known as a "row store".
-- NSM db page size are typically some constant multiple of 4KB h/w page.
+- NSM db page size are typically some constant multiple of 4KB h/w page i.e Oracle(4KB), Postgres(8KB), MySQL(16KB)
 - A disk oriented NSM system stores a tuple's fixed-length and variable-length attributes contiguously in a single slotted page.
 - The tuple's record id(page#, slot#) is how the DBMS uniquely identifies a physical tuple.
 - header + slot array.
@@ -1029,7 +1033,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 ### Decomposition storage model (DSM)
 
 - The DBMS stores the values of a single attribute for all tuples contiguously in a page, also known as a column store.
-- It is ideal for OLAP workloads where read-only queries perform large scans over a subset of the table's attrbutes.
+- It is ideal for OLAP workloads where read-only queries perform large scans over a subset of the table's attrbutes, use a batched vectorized processing model.
 - DBMS is responsible for combining/splitting a tuple's attributes when reading/writing.
 - It stores attributes and meta-data in separate arrays of fixed-length values.
   - most systems identify unique physical tuples using offsets into these arrays
@@ -1038,8 +1042,8 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - better approach is to use dictionary compression to convert repetitive variable-length data into fixed-lenght values(typically 32-bit integers)
 - Maintain a separate file per attribute with a dedicated header area for metadata about entire column.
 - Tuple identification across pages, i.e in queries that access more than one column.
-  - Fixed-length offsets, each value is the same length for an attribute.
-  - Embedded tuple ids, value is stored with it tuple id in a column.
+  - Fixed-length offsets, each value is the same length for an attribute, use simple arithmetic to jump to an offset to find a tuple. Need to convert variable-length data into fixed-length values.
+  - Embedded tuple ids, value is stored with it tuple id in a column. Need auxiliary data structures to find offset within a column for a given tuple id.
 - Advantages: 
   - Reduces amount wasted i/o because DBMS only reads data it needs.
   - Better query processing and data compression because of increased locality and cached data reuse.
@@ -1056,15 +1060,16 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   
 ### PAX storage model
 
+- ref paper: `data page layouts for relational databases on deep memory hierarchies`
 - Partition Attributes Across(PAX) is a hybrid storage model that vertically partitions attributes within a database page
   - Parquet and Orc
 - The goal is to get the benefit of faster processing on columnar storage while retaining the spatial locality benefits of row storage.
-- Horizontally partition row into groups. Then vertically partition their attributes into columns.
+- Horizontally partition data into row groups. Then vertically partition their attributes into column chunks.
 - Global header contains directory with the offsets to the file's row groups
   - This is stored in the footer if the file is immutable(Parquet, Orc)
 - Each row group contains its own meta-data header about its contents.
 
-- Transaparent Huge Pages(THP)
+- Transparent Huge Pages(THP)
   - Instead of always allocating memory in 4KB pages, linux supports creating larger pages.
   - reduced the # of TLB entries.
 
@@ -1098,88 +1103,90 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - tree-based indexes are meant for queries with low selectivity predicates
   - also need to accomodate incremental updates
 - OLAP don't necessarily need to find individual tuples and data files are read-only.
-- How to increase sequential scans performance
-  - Data prefetching
-  - Task parallelization/Multi-threading
-  - Clustering / Sorting.
-  - Late Materialization
-  - Materialized Views / Result Caching
-  - Data Skipping
-    - Approaches:
-      - Approximate Queries(Lossy)
-        - Execute queries on a sampled subset of the entire table to produce approximate results
-        - Examples: BlinkDB, Redshift, Snowflake, BigQuery, DataBricks.
-      - Data Pruning(Loseless)
-        - use auxiliary data structure for evaluating predicates to quickly identify portions of a tbale that the DBMS can skip instead of examining tuples individually
-        - DBMS must consider tradeoffs between scope(size) vs filter efficacy, manual vs automatic
-        - Considerations
-          - Predicate Selectivity
-            - How many tuples will satisfy a query's predicates
-          - Skewness
-            - Whether an attribute has all unique values or contain repeated values
-          - Clustering/Sorting
-            - Whether the table is pre-sorted on the attributes accessed in a query's predicates.
+
+### Sequential scans optimizations
+
+- Data prefetching
+- Task parallelization/Multi-threading
+- Clustering / Sorting.
+- Late Materialization
+- Materialized Views / Result Caching
+- Data Skipping
+  - Approaches:
+    - Approximate Queries(Lossy)
+      - Execute queries on a sampled subset of the entire table to produce approximate results
+      - Examples: BlinkDB, Redshift, Snowflake, BigQuery, DataBricks.
+    - Data Pruning(Loseless)
+      - use auxiliary data structure for evaluating predicates to quickly identify portions of a tbale that the DBMS can skip instead of examining tuples individually
+      - DBMS must consider tradeoffs between scope(size) vs filter efficacy, manual vs automatic
+      - Considerations
+        - Predicate Selectivity
+          - How many tuples will satisfy a query's predicates
+        - Skewness
+          - Whether an attribute has all unique values or contain repeated values
+        - Clustering/Sorting
+          - Whether the table is pre-sorted on the attributes accessed in a query's predicates.
+      
+      - Zone Maps
+        - ref paper:`small materialized aggregates: a lightweight index structure for data warehousing`
+        - pre-computed aggregates for the attribute values in a block of tuples.
+        - DBMS checks the zone map first to decide whether it wants to access the block.
+          - originally called small materialized aggregates.
+          - DBMS automatically creates/maintains this meta-data.
+        - Zone Maps are only useful when the target attribute's position and values are correlated.
+          - if scope is too large, then the zone maps will be useless.
+          - if scope is too small, DBMS will spend too much time checking zone maps.
+      
+      - BitMap Indexes
+        - ref paper:`model 204 architecture and performance`
+        - store a separate Bitmap for each unique value for an attribute where an offset in the vector corresponds to a tuple.
+          - the i-th position in the Bitmap corresponds to the i-th tuple in the table.
+        - typically segmented into chucks to avoid allocating large blocks of contiguous memory
+          - one row per group in PAX.
+        - Design decisions
+          - Encoding scheme
+            - How to represent and organize data in a Bitmap.
+            - Approaches
+              - Equality encoding
+                - basic scheme with one bitmap per unique value.
+              - Range encoding
+                - use one bitmap per interval instead of one per value.
+              - Hierarchial encoding
+                - ref paper:`Hierarchical bitmap index:an efficient and scalable indexing technique for set-valued attributes`
+                - use a tree to identify empty key ranges.
+                - high cost overhead.
+              - Bit-sliced encoding
+                - use a bitmap per bit location across all values
+                - Bit-slices can also be used for efficient aggregate computations.
+                - can use Hamming Weight.
+              - Bitweaving
+                  - ref paper:`bitweaving: fast scans for main memory data processing`
+                  - Alternative storage layout for columnar databases that is designed for efficient predicate evaluation on compressed data using SIMD.
+                    - Order-preserving dictionary encoding
+                    - Bit-level parallelization
+                    - Only require common instructions(no scatter/gather)
+                  - alternate to Bit-Slicing.
+                  - Approaches:
+                    - Horizontal
+                      - Row-oriented storage at the bit-level.
+                    - Vertical 
+                      - Column-oriented storage at the bit-level.
         
-        - Zone Maps
-          - ref paper:`small materialized aggregates: a lightweight index structure for data warehousing`
-          - pre-computed aggregates for the attribute values in a block of tuples.
-          - DBMS checks the zone map first to decide whether it wants to access the block.
-            - originally called small materialized aggregates.
-            - DBMS automatically creates/maintains this meta-data.
-          - Zone Maps are only useful when the target attribute's position and values are correlated.
-            - if scope is too large, then the zone maps will be useless.
-            - if scope is too small, DBMS will spend too much time checking zone maps.
+        - Column Imprints
+          - ref paper:`column imprints: a secondary index structure.`
+          - Store a bitmap that indicated whether there is a bit set at a bit-slice of cache-line values.
         
-        - BitMap Indexes
-          - ref paper:`model 204 architecture and performance`
-          - store a separate Bitmap for each unique value for an attribute where an offset in the vector corresponds to a tuple.
-            - the i-th position in the Bitmap corresponds to the i-th tuple in the table.
-          - typically segmented into chucks to avoid allocating large blocks of contiguous memory
-            - one row per group in PAX.
-          - Design decisions
-            - Encoding scheme
-              - How to represent and organize data in a Bitmap.
-              - Approaches
-                - Equality encoding
-                  - basic scheme with one bitmap per unique value.
-                - Range encoding
-                  - use one bitmap per interval instead of one per value.
-                - Hierarchial encoding
-                  - ref paper:`Hierarchical bitmap index:an efficient and scalable indexing technique for set-valued attributes`
-                  - use a tree to identify empty key ranges.
-                  - high cost overhead.
-                - Bit-sliced encoding
-                  - use a bitmap per bit location across all values
-                  - Bit-slices can also be used for efficient aggregate computations.
-                  - can use Hamming Weight.
-                - Bitweaving
-                    - ref paper:`bitweaving: fast scans for main memory data processing`
-                    - Alternative storage layout for columnar databases that is designed for efficient predicate evaluation on compressed data using SIMD.
-                      - Order-preserving dictionary encoding
-                      - Bit-level parallelization
-                      - Only require common instructions(no scatter/gather)
-                    - alternate to Bit-Slicing.
-                    - Approaches:
-                      - Horizontal
-                        - Row-oriented storage at the bit-level.
-                      - Vertical 
-                        - Column-oriented storage at the bit-level.
-          
-          - Column Imprints
-            - ref paper:`column imprints: a secondary index structure.`
-            - Store a bitmap that indicated whether there is a bit set at a bit-slice of cache-line values.
-          
-          - Column Sketches
-            - ref paper:`column sketches: a scan accelration for rapid and robust predicate evaluation`
-            - a variation of range-encoded bitmaps that uses a smaller sketch cdes to indicate that a tuple's value exists in a range.
-            - DBMS must automatically figure out the best mapping of codes.
-              - trade-off between distribution of values and compactness.
-              - assign unique codes to frequent values to avoid false positives.
-                    
-            - Compression
-              - How to reduce the size of sparse Bitmaps
-  - Data Parallelization / Vectorization
-  - Code Specialization / Compilation
+        - Column Sketches
+          - ref paper:`column sketches: a scan accelration for rapid and robust predicate evaluation`
+          - a variation of range-encoded bitmaps that uses a smaller sketch cdes to indicate that a tuple's value exists in a range.
+          - DBMS must automatically figure out the best mapping of codes.
+            - trade-off between distribution of values and compactness.
+            - assign unique codes to frequent values to avoid false positives.
+                  
+          - Compression
+            - How to reduce the size of sparse Bitmaps
+- Data Parallelization / Vectorization
+- Code Specialization / Compilation
   
 ## Database Compression
 
@@ -1260,87 +1267,72 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   
 ## Memory management and Buffer Pool
 
-- Spatial Control
-  - where to write pages on disk.
-  - goal: keep pages used together often as physically close as possible on disk.
+- Spatial Control 
+  - This refers to where to write pages on disk.The goal is to keep pages used together often as physically close as possible on disk.
 
 - Temporal Control 
-  - when to read into memory and when to write them to disk.
-  - goal: minimise number of stalls from having to read data from disk.
+  - This refers to when to read into memory and when to write them to disk.The goal is to minimise number of stalls from having to read data from disk.
 
 - Buffer Pool 
-  - This is a memory region organized as an array of fixed size pages.
-  - An array entry is called a frame(name is to distinguish it from other components).
-  - When DBMS requests a page, an exact copy is placed into one of these frames.
-  - Dirty pages are buffered and not written to disk immediately: write back cache.
+  - This is a memory region organized as an array of fixed size pages used to store pages fetched from disk. An array entry is called a frame(name is to distinguish it from other components).
+  - When DBMS requests a page, an exact copy is placed into one of these frames. Dirty pages are buffered and not written to disk immediately.(write back cache)
   - A page table keeps track of pages that are currently in memory, usually a fixed-size hash table protected with latches to ensure thread-safe access.
-  - It also maintains metadata per page: 
-    - Dirty flag. 
-    - Pin(prevent swap)/reference counter.
+  - It also maintains metadata for efficiency per page: 
+    - Dirty flag(set by a thread when it modifies a page, indicated to storage manager that page must be written back to disk) 
+    - Pin(prevent swap)/reference counter.(tracks number of threads accessing the page)
     - Access tracking information.
   
 ### Locks vs Latches
   
 - Locks
-  - protects the db's logical contents form other transactions
-  - held for transation duration
-  - need to be able to rollback changes
+  - This is a high-level logical primitive that protects the db's logical contents(tuples, tables, databases) from other transactions. They are held for entire transation duration.
+    Databases need to expose to user which locks are held and also be able to rollback changes.
   
 - Latches
-  - protects critical sections of the DBMS internal ds from other threads
-  - held for operation duration
-  - do not need to be able to rollback changes
+  - This is a low-level protection primitive that DBMS uses to protect critical sections of the DBMS internal ds(hash tables, memory regions) from other threads. They are held for 
+    duration of operation being made. They do not need to be able to rollback changes.
   
 ### Page Table vs Page Directory
 
 - Page directory
-  - This is the mapping from page ids to page locations in the database files.
-  - All changes must be recorded on disk to allow the dbms to find on restart.
+  - This is the mapping from page ids to page locations in the database files. All changes must be recorded on disk to allow the dbms to find on restart.
 
 - Page table
-  - This is the mapping from page ids to a copy of the page in buffer pool frames.
-  - Its an in-memory data structure that does not need to be stored on disk.
+  - This is the mapping from page ids to a copy of the page in buffer pool frames. Its an in-memory data structure that does not need to be stored on disk.
   
 
-## Allocation policies
+## Memory Allocation Policies
 
 - Global policies
-  - make decisions for all active queries
+  - DBMS should make decisions for the benefit of all active queries/workload. It considers all active transactions to find an optimal decision for allocating memory.
   
 - Local policies
-  - Allocate frames to a specific queries without considering the behaviour of concurrent queries.
-  - still need to support sharing pages.
+  - DBMS makes decisions for the benefit of one query/transaction running faster. It allocates frames to specific queries without considering the behaviour of concurrent queries. It still needs to support sharing pages.
+  
+- Most systems use a combination of both global and local allocation.
   
 ### Buffer Pool Optimizations
 
 - Multiple Buffer Pools
-  - per-database buffer pool.
-  - per-page type buffer pool
-- Partitioning memory access across multiple pools helps reduce latch contention and improve locality
-  - Approach:
+  - DBMS can maintain multiple buffer pools for different purposes i.e per-database buffer pool, per-page type buffer pool, with each adopting local policies for data inside it.
+  - This partitioning of memory access across multiple pools helps reduce latch contention and improve locality
+  - The two approaches to mapping desired pages to a buffer pool are object IDs and hashing.
     - Object id, embed an object identifier in record ids and then maintain a mapping from objects to specific buffer pools.
     - Hashing, hash the page id to select which buffer pool to access.
     
 - Pre-Fetching
-  - DBMS can prefetch pages based on a query plan: sequential scans, index scans. 
+  - DBMS can also optimize by prefetching pages based on a query plan. This method is commonly used by DBMS when accessing many pages sequentially. 
   
-- Scan Sharing
-  - Queries can reuse data retrieved from storage or operator computations
-  - Also called synchronized scans.
-  - different fromm result caching.
-  - cursor sharing.
-  - Variant, continuous scan sharing.
+- Scan Sharing(Synchronized scans)
+  - Queries cursors can reuse data retrieved from storage or operator computations. This allows multiple queries to attach to a single cursor that scans a table. This is different from result caching with variant being continuous scan sharing.
+  - The DBMS keeps track of where the second query joined with the first so that it can finish the scan when it reaches the end of the data structure.
 
 - Buffer Pool Bypass
-  - The sequential scan operator will not store fetched pages in the buffer pool to avoid overhead.
-  - Memory is local to running query
-  - It works well if operator needs to read a large sequence of pages that are contiguous on disk
-  - It can be used for temporary data(sorting, joins).
-  - light scans
+  - The sequential scan operator will not store fetched pages in the buffer pool to avoid overhead. Instead memory is local to running query.
+  - It works well if operator needs to read a large sequence of pages that are contiguous on disk. It can be used for temporary data(sorting, joins). Light scans.
 
 - OS page cache
-  - Most disk ops go through the OS API.
-  - Unless DBMS tells it not to, the OS maintains its own filesystem cache(page cache, buffer cache)
+  - Most disk ops go through the OS API. Unless DBMS tells it not to, the OS maintains its own filesystem cache(page cache, buffer cache)
   - Most DBMS use direct I/O(O_DIRECT) to bypass the OS's cache.
     - Redundant copies of pages
     - Different eviction policies
@@ -1350,67 +1342,50 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 
 ### Buffer replacement policies
 
-- When DBMS needs to free up a frame to make room for a new page, it must decide which page to evict from buffer pool.
-- Goals:
-  - Correctness
-  - Accuracy
-  - Speed
-  - Meta-data overhead
+- When DBMS needs to free up a frame to make room for a new page, it must decide which page to evict from buffer pool. A replacement policy is an algorithm that the DBMS implements that makes
+  a decision on which pages to evict from buffer pool when it needs space.
+- Implementation goals of replacement policies are improved correctness, accuracy, speed, meta-data overhead.
   
 - Least Recently Used
-  - Maintain a single timestamp of when each page was last accessed.
-  - When eviction comes, select the one with the oldest timestamp.
-  - Keep pages in sorted order to reduce the search time on eviction.
+  - This rp maintains a single timestamp of when each page was last accessed. When eviction comes, select the one with the oldest timestamp. This timestamp stored in separate data structure
+    to allow for sorting and improve efficiency by reducing sort time on eviction.
   
 - Clock 
-  - Approximation of LRU that does not need a separate timestamp per page.
-  - Each page has a reference bit, when accessed set to 1.
-  - Organize pages in a circular buffer with a clock hand
-  - Upon sweeping, check if a page bit is set to 1, if yes, set to zero, if no, evict.
+  - This is an approximation of LRU without needing a separate timestamp per page. Each page has a reference bit, when accessed set to 1.
+  - Organize pages in a circular buffer with a clock hand. Upon sweeping, check if a page bit is set to 1, if yes, set to zero, if no, evict.
   - *common mechanism* - read more.
   
-- Clock and LRU are susceptible to sequential flooding.
-  - A query performs a sequential scan that reads every page.
-  - This pollutes the buffer pool with pages that are read once and then never again.
-  - In OLAP workloads, the most recently used page is often the best page to evict.
+- Clock and LRU are susceptible to sequential flooding, where buffer pool contents are corrupted due to a sequential scan. Since seq scans read many pages, 
+  this pollutes the buffer pool with pages that are read once and then never again. In OLAP workloads, the most recently used page is often the best page to evict.
+  
 - Clock and LRU only tracks when a page was last accessed but not how often a page is accessed.
 
 - Better policies: 
   - LRU-K
-    - Track history of last K references to each page as timestamps and compute the interval between subsequent accesses.
-    - DBMS then uses history to estimate the next time that page is going to be accessed.  
-      - Maintain an ephemeral in-memory cache for recently evicted pages to prevent them from always being evicted.
-      - Can also track who is accessing pages.
+    - It tracks history of last K references to each page as timestamps and compute the interval between subsequent accesses. DBMS then uses history to estimate the next time that page is going to be accessed.  
+    - It maintains an ephemeral in-memory cache for recently evicted pages to prevent them from always being evicted. It can also track who is accessing pages.
       
   - Localization
-    - The dbms chooses which pages to evict a per query basis.
-    - This minimizes pollution of the buffer pool from each query.
+    - The DBMS chooses which pages to evict a per transaction/query basis. This minimizes pollution of the buffer pool from each query.
     - Postgres maintain small ring buffer that is private to the query.
     
   - Priority Hints
-    - The dbms knows about the context of each page during query execution.
-    - It provides hints to the buffer pool on whether a page is important or not.
+    - The DBMS knows about the context of each page during query execution and thus provides hints to the buffer pool on whether a page is important or not.
 
 
 ### Dirty pages
 
-- Fast Path:
-  - If a page in the buffer pool is not dirty then the DBMS can simply drop it.
+- There are two methods to handling pages with dirty bits, Fast Path: If a page in the buffer pool is not dirty then the DBMS can simply drop it and Slow Path: If a page is 
+  dirty then the DBMS must write back to disk to ensure that its changes are persisted.
 
-- Slow Path
-  - If a page is dirty then the DBMS must write back to disk to ensure that its changes are persisted.
+- These two methods illustrate trade-off between fast evictions versus dirty writing pages that will not be read again in the future.
 
-- Trade-off between fast evictions versus dirty writing pages that will not be read again in the future.
-
-- Background writing
-  - DBMS can periodically walk through the page table and write dirty pages to disk
-  - When dirty page is written, DBMS can either evict or unset dirty flag.
-  - A careful system doesnt write dirty pages before their log records are written.
+- Background writing is one way to avoid having to write out pages unnecessarily where the DBMS can periodically walk through the page table and write dirty pages to disk. When dirty 
+  page is written, DBMS can either evict or unset dirty flag. A careful system doesnt write dirty pages before their log records are written.
   
 ### Other Memory Pools
 
-- DBMS needs memory for things other than indexes and tuples
-- May not be always backed by disk
+- The DBMS needs memory for things other than just indexes and tuples. They may not be always backed by disk depending on implementations
 - e.g:
   - Sorting + Join buffers
   - Query caches.
@@ -1418,134 +1393,121 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Log buffers
   - Dictionary caches.
 
-- DBMS can almost always manage memory better than the OS.
-- Leverage semantics about the query plan to make better decisions.
+- DBMS can almost always manage memory better than the OS as it can leverage semantics about the query plan to make better decisions.
+
+### Disk I/O Scheduling
 
 - OS/HW tries to maximize disk bandwidth by reordering and batching I/O requests, but they do not know which I/O requests are more important.
-- The dbms maintain internal queue to track page read/write requests from entire system.
-- It computes priorities based on several factors;
+- The DBMS maintain internal queue to track page read/write requests from entire system computing priorities based on several factors:
   - Sequential vs Random I/O.
   - Critical path task vs Background Task.
   - Table vs Index vs Log vs Ephemeral Data.
   - Transaction information.
   - User-based SLAs
 
+
 ## Hash Tables
 
-- How to support the DBMS execution engine to read/write data from pages.
-- Data structures:
-  - Hash Tables
-  - Trees
+- Data structures that support the DBMS execution engine to read/write data from pages, hash tables and trees.
 
-- Use cases:
-  - Internal Meta-data
-  - Core data storage
-  - Temporary data structures  
-  - Table Indexes.
+- DBMS uses various data structures for many different parts of the system internals.
+  - Internal Meta-data (data that keeps track of the information about the database and system state)
+  - Core data storage (data structures are used as the base storage for tuples in the database)
+  - Temporary data structures (ephemeral ds built by DBMS to speed up execution)  
+  - Table Indices (auxilliary ds used to easily find tuples)
   
 - Design decisions
   - Data Organisation
     - How we layout data structure in memory/pages and what information to store to support efficient access.
   - Concurrency
-    - how to enable multiple threads to access the data structure at the same time without causing problems.
+    - How to enable multiple threads to access the data structure at the same time without causing problems.
 
-- Hash Table
-  - implements an unordered associative array that maps keys to values.
-  - uses a hash function to compute an offset into this array for a given key, from which the desired value can be found.
-  - space complexity o(n), Time complexity: average O(1), worst O(n)
-  
-- Static Hash Table:
-  - allocate a giant array that has one slot for every element you need to store.
-  - to find an entry, mod the key by the number of elements to find offset in the array.
-  - Assumptions:
-    - number of elements is known ahead of time and fixed.
-    - each key is unique
-    - perfect hash function
+- A hash table implements an unordered associative array abstract data type that maps keys to values. It uses a hash function to compute an offset into this array for a given key, 
+  from which the desired value can be found. It has space complexity O(n), Time complexity: average O(1), worst O(n).
 
-- Design Decisions:
-  - Hash Function
-    - how to map a large key space into a smaller domain
-    - trade-off between being fast vs collision rate.
-  - Hashing Scheme
-    - how to handle key collisions after hashing
-    - trade-off between allocating a large hash table vs additional instructions to get/put keys.
-  
+- A hash table implementation is comprised of two parts:
+  - Hash function: It tell us how to map a large key space into a smaller domain via computing an index into an array of buckets or slots keeping in mind trade-off between fast execution and collision rate.
+  - Hashing scheme: It tells us how to handle key collisions after hashing, tradeoff between allocating a large hash table to reduce collisions and having to execute additional instructions on collisions.
+     
 - Hash Functions
-  - For any input key, return an integer representation of that key.
-  - We dont want to use a cryptograhic hash function for DBMS hash tables
-  - desire fast and low collision rates
+  - For any input key, return an integer representation of that key, with the output being deterministic. We dont want to use a cryptograhic hash function for DBMS hash tables because 
+    we dont want to worry about protecting contents of keys. Its desirable state is it being fast and low collision rates.
   - Namely:
     - CRC-64 (1975) - used in networking for error detections
     - MurmurHash (2008) - fast, general purpose hash function
     - Google CityHash (2011) - faster for shorter keys
     - *FB XXHash (2012) - creator of zstd compression
     - Google FarmHash (2014) - newer version of CityHash with better collision rates
+    
+- Static Hash Table:
+  - A static hashing scheme is one where the size of the hash table is fixed, if the DBMS runs out of storage space in the hash table, it rebuilds a larger one from scratch which is expensive.
+  - Typically the new hash table is twice the size of the original hash table. Its important to avoid collisions of hashed keys to reduce the number of wasteful comparisons, typically using twice 
+    the number of slots as the number of expected elements.
+  - The following assumptions don't hold in reality:
+    - Number of elements is known ahead of time and fixed.
+    - Each key is unique
+    - Existence of perfect hash function
+
+### Static Hashing Schemes
+
+- Linear Probe Hashing(open addressing)
+  - This is the most basic hashing scheme, typically the fastest and uses a circular buffer of array slots. The hash function maps keys to slots, linearly searching adjacent slots for open slots
+    on collision. To determine whether an element is present, hash to a location in the index and scan for it. We store the key in the index to know when to stop scanning. Insertions and deletions
+    are generalizations of lookups. Solution to deletions are use of tombstones or shifting the adjacent data after deleting an entry to fill the now empty slot.
+  - In the case of non-unique keys,
+    - Separate Linked List
+      - We store a pointer to a separate storage area that contains a linked list of values. These value lists can overflow to multiple pages if the number of duplicates is large.
+    - Redundant Keys
+      - We store duplicate keys entries together in the hash table. This is what most systems do.
       
-- Static Hashing Schemes
-  - Linear Probe Hashing
-    - Also known as open addressing
-    - Single giant table of slots
-    - It resolve collisions by linearly searching for the next free slot in the table.
-      - To determine whether an element is present, hash to a location in the index and scan for it.
-      - Store the key in the index to know when to stop scanning.
-      - Insertions and deletions are generalizations of lookups.
-    - Non-unique Keys
-      - Separate Linked List
-        - Store values in separate storage area for each key.
-        - Value lists can overflow to multiple pages if the number of duplicates is large.
-      - Redundant Keys
-        - Store duplicate keys entries together in  the hash table.
-        - This is what most systems do.
-        
-  - Robin Hood Hashing
-    - Variant of linear probe hashing that steals slots from rich keys and give them to poor keys.
-    - difference from initial position and move the rest to equidistant position.
-  
-  - Cuckoo Hashing
-    - Use multiple hash tables awith different hash function seeds.
-    - Use multiple hash functions to find multiple locations in the hash table to insert records.
-    - One insert, check every table and pick anyone that has a free slot, if no table has a free slot, evict element from one of them and     re-hash it to find a new location.
-    - Look-ups and deletions are always 0(1) because only one location per hash table is checked.
+- Robin Hood Hashing
+  - Variant of linear probe hashing that steals slots from rich keys and give them to poor keys.
+  - difference from initial position and move the rest to equidistant position.
+
+- Cuckoo Hashing
+  - Instead of one hash table, we use multiple hash tables a with different hash function seeds. Use multiple hash functions to find multiple locations in the hash table to insert records.
+  - On insert, check every table and pick anyone that has a free slot, if no table has a free slot, evict element from one of them and re-hash it to find a new location. Look-ups and deletions 
+    are always 0(1) because only one location per hash table is checked, insertions however are more expensive.
 
 - Optimizations
   - Specialized hash table implementations based on key type and sizes, i.e maintain multiple hash tables for different string sizes for a set of keys.
   - Store metadata separate in a seprate array, packed bitmap tracks whether a slot is empty/tombstone.
   - Use table + slot versioning metadata to quickly invalidate all entries in the hash table, i.e if the table version does not match slot version then treat slot as empty.
 
-- *Above hash tables require the DBMS to know the number of elements it wants to store, otherwise needs to rebuild the table if it needs to grow.shrink in size*.
+- Above hash tables require the DBMS to know the number of elements it wants to store, otherwise needs to rebuild the table if it needs to grow/shrink in size. Dynamic hashing schemes
+  are able to resize the hash table on demand without needing to rebuild the entire table, with the schemes used resizing in different ways that either maximize reads or writes.
   
-- Dynamic Hashing Schemes
-  - Chained Hashing
-    - Maintain a linked list of buckets for each slot in the hash table.
-    - Resolve collisions by placing all elements with the same hash key into the same bucket.
-      - To determine whether an element is present, hash to its bucket and scan for it.
+### Dynamic Hashing Schemes
 
-  - Extendible Hashing 
-    - Chained-hashing approach that splits buckets incrementally instead of letting the linked list grow forever.
-    - Multiple slot locations can point to the same bucket chain.
-    - Reshuffle bucket entries on split and increase the number of bits to examine.
-      - Data movement is localized to just the split chain.
+- Chained Hashing
+  - This is the most common dynamic hashing scheme. The DBMS maintains a linked list of buckets for each slot in the hash table. It resolves collisions by placing all elements with 
+    the same hash key into a linked list for that bucket.
+  - To determine whether an element is present, we hash to its bucket and scan for it. This can be optimised by additionally storing bloom filters in the bucket pointer list, which would tell us
+    if a key does not exist and avoid a lookup.
 
-  - Linear Hashing
-    - The hash table maintains a pointer that tracks the next bucket to split.
-      - When any bucket overflows, split the bucket at the pointer location.
-    - Use multiple hashes to find the right bucket for a given key.
-    - It can use different overflow criterion:
-      - Space Utilization.
-      - Average length of overflow chains.
-    - Splitting buckets based on the split pointer will eventually get to all overflowed buckets.
-      - When the pointer reaches the last slot, remove the first hash function and move pointer back to the beginning.
-    - If the highest bucket below the split pointer is empty, the hash table could remove it and move the splinter pointer in reverse direction.
+- Extendible Hashing 
+  - This is an improved version of chained-hashing approach that splits buckets incrementally instead of letting the linked list grow forever. This approach allows multiple slot 
+    locations in the hash table to point to the same bucket chain.
+  - The core idea is to reshuffle bucket entries on split and increase the number of bits to examine to find entries in the hash table. This means data movement is localized to just
+     the split chain wiht all other buckets left untouched.
+  - The DBMS maintains a global and local depth bit counts that determine the number bits needed to find buckets in the slot array. When a bucket is full, DBMS splits the bucket and 
+    reshuffle its elements. If the local depth of the split bucket is less than global depth, then the new bucket is just added to the existing slot array, otherwise DBMS doubles size of slot
+    array to accomodate the new bucket and increments the global depth counter.
+
+- Linear Hashing
+  - Instead of immediately splitting a bucket when it overflows, this scheme maintains a split pointer that tracks the next bucket to split. No matter whether this pointer points to the 
+    bucket that overflowed it still split with the specific overflow criterion being left to implementation i.e space utilization, average length of overflow chains.
+  - Use multiple hashes to find the right bucket for a given key. Splitting buckets based on the split pointer will eventually get to all overflowed buckets. When the pointer reaches the last slot, remove the first hash function and move pointer back to the beginning.
+  - If the highest bucket below the split pointer is empty, the hash table could remove it and move the splinter pointer in reverse direction, reducing hash table size.
     
 
 ## B+ Trees
   
-- This is a self-balancing, ordered tree data structure that keeps data sorted and allows searches, sequential access, insertions and deletions always in 0(log n).
+- Due to the unordered nature of hash tables, table indexes which involve queries with range scans are ideal and as such Indexes are preferred. A table index is a replica of a subset of
+  a table's columns that is organized and/or sorted for efficient access using a subset of those attributes. DBMS ensures the contents of the table and index are always logically in sync.
+- This is a self-balancing, ordered tree data structure that keeps data sorted and allows searches, sequential access, insertions and deletions always in 0(log n). It is optimized for disk oriented systems that read and write large blocks of data.
 - Generalization of a binary search tree, since a node can have more than two children.
-- It is optimized for systems that read and write large blocks of data.
 - It is mostly used for table indexes.
-- A table index is a replica of a subset of a table's attributes that are organised and/or sorted for efficient access using those attributes.
-- DBMS ensure that contents of the table and the index are logically synchronized.
 - It's the DBMS job to figure out the best indexes to use to execute each query.
 - There is a trade-off regarding the number of indexes to creaeper database
   - Storage overhead
@@ -3779,15 +3741,56 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - System catalogs
   - store metadata about the data.
   - HCatalog, Google Data Catalog, Amazon Glue Data Catalog
+- Intermediate Representation.
 - Node management
   - K8S, Apache YARN
 - Query Optimizers
   - Extendible search engine framework for heuristic and cost-based query optimization where DBMS provides transformation rules and cost estimates and framework returns either
     a logical or physical query plan.
   - Apache Calcite, Greenplum Orca
-- Execution engines
+- File Formats/ Access Libraries.
+- Execution engines / Fabrics.
   - Standalone libraries for executing vectorised query operators on columnar data, input is a DAG of physocal operators and require external scheduling and orchestration.
   - example: Velox, Datafusion, Intel OAP.
+
+
+#### Architecture Overview
+
+- Query ->FRONTEND(parser) ->PLANNER(binder,rewriter,optimizer+cost models) ->CATALOG(metadata,data locations, statistics, data discovery) ->SCHEDULER(plan fragments) ->EXECUTION ENGINE(block requests) ->I/O SERVICE
+
+
+#### Data categories
+
+- ref paper:`Building an elastic query engine on disaggregated storage`
+- Persistent Data
+  - These are "Source of record" for the database, modern systems assume that these data files are immutable but can support updates by rewriting them.
+
+- Intermediate Data
+  - Short-lived artifiacts produced by query operators during execution and then consumed by other operators, it however has no correlation to the amount of persistent data that it reads
+    or the execution time.
+    
+#### Distributed System Architecture
+
+- ref paper:`The case of shared nothing`
+- A distributed DBMS system architecture specifies the location of the database persisten data files and this affects how nodes coordinate with each other and where 
+  they retrive/store objects in the database.
+- Approaches;
+
+- Push Query to Data
+  - This involves sending the query to the node that contains the data and performing as much filtering and processing as possible where data resides before transmitting over network.
+
+- Pull Data to Query
+  - This involves bringing the data to the node that is executing a query that need it for processing, ideal for when there is no compute resources available where persistent
+    data files are located.
+    
+- Shared Nothing vs Shared Disk
+
+#### Object Stores
+
+- Database tables are partitioned into large, immutable files stored in an object store where all attributes for a tuple are stored in the same file in a columnar layout(PAX),
+  and the header(or footer) contains meta-data about columnar offsets, compression schemes, indexes and zone maps.
+- The DBMS retrieves a block's header to determine what byte ranges it needs to retrieve.
+- Each cloud vendor provides their own proprietary API to access data(PUT, GET, DELETE)
 
     
 ## Embedded Database Logic
@@ -3911,3 +3914,43 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - ref paper:`dali:a high performance main memory storage manager`
 - P* Time
 - ref paper:`p*time:highly scalable oltp dbms for managing update-intensive stream workload`
+
+
+## DATA FORMATS AND ENCODING
+
+- OLAP workloads perform sequential scans on large segments of read-only data as the DBMS only needs to find individual tuples to stitch them back together while OLTP workloads
+  use indexes to find individual tuples without performing sequential scans i.e tree based indexes are meant for queries with low selectivity predicates and the need to accomodate
+  incremental updates. 
+  
+### Format Design Decisions
+
+- File Meta-data
+  - Files are self-contained to increase portability as they contain all the necessary information to interpret their contents without external data dependencies with each file
+    maintaining global meta-data about its contents, i.e table schema, row group offsets/length, tuple counts/zone maps.
+
+- Format layout
+  - The most common formats use the PAX storage models that splits data row groups that contain one or more column chunks, the size of row groups varies per implementation and makes
+    compute/memory trade-offs, i.e Parquet(1m tuples), Orc(250mb), Arrow(1024*1024 tuples)
+    
+- Type system
+  - It defines the data types that the format supports, physical(low level byte representation), logical(auxiliary types that map to physcial types). Formats vary in the complexity
+    of their type systems that determine how much upstream producer/consumers need to implement.
+    
+- Encoding schemes
+  - It specifies how the format stores the bytes for contiguous/related data, can apply multiple encoding schemes on top of each other to further improve compression. i.e bitpacking,
+    run-length encoding, dictionary encoding, delta encoding and frame-of-reference.
+    
+- Block compression
+  - Compress data using a general-purpose algorithm with the scope of compression being absed on the data provided as input.Notable considerations include computational overhead, 
+    compress vs decompress speed and data opaqueness. i.e LZO, LZ4, Snappy and Zstd.
+    
+- Filters
+  - Zone maps, maintain min/max values per column at the file-level and row group-level.
+  - Bloom filters, track existence of values for each column in a row group, more effective if values are clustered.
+  
+- Nested data
+  - Real world data sets often contain semi-structured objects(JSON, protobufs)., a file format will want to encode the contents of these objects as if they were regular columns.
+    This can either be through record shredding(store paths in nested structure as separate columns) or length+presence encoding(same as shredding but maintain additional columsn to track
+    number of entries at each path level and whether a key exists at that level for a record).
+
+- ref paper: `Procella: Unifying serving and analytical data at Youtube`,`Dremel: A decade of interactive sql analysis at web scale`
