@@ -51,11 +51,9 @@ create role le login password 'king' superuser;
 
 ## Tablespaces
 
- - determine physical data layout.
- - virtually a directory in a file system
- - can distribute data across tablespaces per access i.e archive or active data.
- - can be used by more than one database and DB can store across TSs.
- - each db has a default tablespace.
+ - Unlike database and schemas that define logical data layout, tablespaces determine physical data layout. It is virtually a directory in a file system.
+ - One can distribute data across tablespaces per access i.e archive or active data while also it can be used by more than one database and DB can store across TSs.
+ - Each db has a default tablespace where all database objects are created, system catalogs included unless another one is specified. 
 
 ## Files and Forks
 
@@ -148,43 +146,55 @@ GRANT some_privilege to some_role;
 ### Under-the-hood
 
 - psql, doesnt know about the database.
+
 - Libpq 
   - Abstract network connections.
   - Each connection is handled by a different PID(backend).
   - Each backend is responsible for its own authentication.
   - Each backend process plus auxiliary processes are responsible for handling all queries and database maintenance tasks.
+
 - Frontend/backend protocol
   - Custom protocol.
   - Message based.
   - Asynchronous notification: LISTEN/NOTIFY
   - Native SSL support
   - Implements bulk import and export via COPY.
+
 - Lexical analysis 
   - yylex(), scan.l, gram.y
   - Parse tree is an in memory representation of your query structures.
+
 - Parsing 
   - yyparse()
+
 - Parse analysis 
   - Syntax checks, tables and columns exist, types match, system catalogs, error checking, aware about extensions. 
   - Result is modified parse tree.
+
 - Rewriting 
   - Expand views and rules.
+
 - Planning/Optimizing 
   - How/Why/When of data retrieval
   - Decodes the parse tree to give out execution plan.
   - Parse tree(table's statistics + cost parameters) = Execution Plan Tree.
+
 - Plan tree
   - Command EXPLAIN allow us to observe the Plan Tree.
   - EXPLAIN ANALYZE get real data after a real execution.
+
 - Execution
   - Responsible for execute the query based on the executor plan tree(read-only and can be used for caching and reuse).
+
 - Access methods 
   - Accessing the tuples.
   - Executor does not know how indexes work.
   - Sequential scans implemented by an access method.
+
 - Storage management 
   - There is a directory for each database inside the data directory and a file for each object i.e index, table.
   - 8k pages.
+
 - Auxiliary processes
   - Background writer.
   - WAL writer.
@@ -192,9 +202,12 @@ GRANT some_privilege to some_role;
   - Stats collector
   - Logger
   - Checkpointer
+
 - Shared memory will glue auxiliary process together.
+
 - Backend processes 
   - temp_buffers, work_mem, maintenance_work_mem.
+
 - Shared memory 
   - shared buffer pool, WAL buffer, commit log.
 

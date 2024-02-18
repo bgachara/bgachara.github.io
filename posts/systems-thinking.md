@@ -9,7 +9,13 @@ tags:
 
 - Much of the art of system dynamics modeling is discovering and representing the feedback processes which along with stocks and flows structures, time delays and
   nonlinearities, determine the dynamics of the system.
-- The fundamental principle of ystem dynamics states that the structure of the system gives rise to its behaviour,the lack of this leads to the fundamental attribution error.
+- The fundamental principle of system dynamics states that the structure of the system gives rise to its behaviour,the lack of this leads to the fundamental attribution error.
+- Dynamics: This is the subject that deals with change, with systems that evolve in time, whether the system settles in equilibrium, keeps repeating in cycles or does something more complicated.
+- Data-driven discovery on systems that typically nonlinear, dynamic, multi-scale in space and time and high-dimensional with dominant underlying patterns that should be characterized
+  and modeled for the eventual gola of sensing, prediction, estimation and control.
+- Many complex systems exhibit dominant low-dimensional patterns in the data, despite rapidly increasing resolution of measurements and computations, this underlying structure enables
+  efficient sensing and compact representations for modeling and control.
+- Pattern extraction can be defined as finding coordinate transforms that simplify the system.
 
 ## Need for system dynamics simulation model
 

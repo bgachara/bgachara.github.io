@@ -32,12 +32,15 @@ ref:
   domain might not be in another, i.e application nature vs user/company constraints.
 - At a minimum, a software engineer should be knowledgable enough to understand the documents prepared by hardware engineers for using their devices.
 - Documents are essential for learning a problem domain since information can be passed down in a reliable way.
+- The bulk of software design and implementation depends upon the knowledge of the problem domain. The better understood the domain the higher the quality of software. 
+- Code that is difficult to understand is usually due to author's ignorance of the problem domain.
 
-- Most important for software engineers
+- Most important documents for software engineers
   - Software requirement document
     - Includes list of requirements(i.e from customer) and a description of the problem domain.
     - It should not be a high level description of the implementation, rather of the problem domain.
     - A good way to test it's quality is to provide it to a domain expert for proofreading.
+  
   - Software specification
     - It states rules relating desired behaviour of the output devices to all possible behaviour of input devices, as well as any rules that other parts of the problem domain must obey.
     - Interface design with constraints for the problem domain to follow.
@@ -46,6 +49,7 @@ ref:
 - Abstraction is a technique for hiding complexity that is irrelevant to the problem in context.
   - A lower layer has a recurring pattern, this pattern is taken out and built a language on top of it. A higher layer strips away layer-specific(non-recurring) details to focus on the recurring details.
   - The recurring details are given a new and simpler language than the languages of the lower layers. Every layer is just a more convenient language to describe the lower layer.
+  - Complexity emerges when high level ideas are expressed in low level language, a language is expressive if its syntax is designed to express the problem domain it is trying to solve.
 
 ## Computational Structures
 
@@ -55,14 +59,14 @@ ref:
 
 ## Introduction
 
-- Primary job is provide user programs with a better, simpler, cleaner model of the computer and handle all the resources.
-- Resources include: processors, main memory, disks, printers, display, network interfaces and other i/o devices.
+- Primary job is provide user programs with a better, simpler, cleaner model of the computer and handle all the resources which include processors, main memory, disks, printers, display, network interfaces and other i/o devices.
 - Most computers have two modes of operation: Kernel mode and User mode.
 - OS runs in kernel mode(supervisor mode): has access to all h/w and can execute any instruction.
 - Abstraction is the key to managing complexity.
 - Good abstraction turn nearly impossible tasks into two manageable ones
     - First one is defining and implementing the abstractions.
     - Second one is using abstractions to solve the problem at hand.
+- CMOS ->Logic gates ->Machine Language ->Assembly Language ->High Level Language
 - One abstraction every computer user understands is the file.
 - The job of the OS is to create good abstractions and then implement and manage the abstract objects thus created.
 - The trick in resolving tension between simple and complex interfaces is rely on mechanisms that can be combined to provide generality.
@@ -73,7 +77,9 @@ ref:
 - Unix
 - Posix 
   - standard of Unix that defines a minimum system call interface that conformant Unix systems must support.
-
+- Machine language is a collection of unique bit patterns that a device can identify and perform a corresponding action. A machine instruction is a unique bit pattern that a device 
+  can identify, and from which results an action because underlying each instruction is a small circuit that implements it.
+- Instruction Set Architecture is the design of an environment that implements an instruction set, which is the basic set of commands and instructions that a microprocessor understands and can carry out
 
 ## Computer Hardware
 
@@ -176,13 +182,14 @@ ref:
   - What type and size of operands are supported? byte, int, float, double, string, vector,
 
 - Objdump
-  - Programs that displays information about object files
+  - This a program that displays information about object files, used to examine how high level source code maps to assembly.
   - -d option only displays assembled contents of executable sections.
-  - section is a block of memory that either contains program code or data.
+  - A section is a block of memory that either contains program code or data, non-executable sections such as .data and .bss, debug sections are not displayed.
   - -D displays assembly contents of all sections.
   - default syntax is the AT&T, can change it to Intel.
   - format
     - instruction address:: assembly instruction in raw hex:: assembly instruction:: comment(appears when there is a reference to an address)
+  - It may also be called labels, name given to an assembly instruction, makes it easier to understand to a human reader.
 
 - Linux file structure
   - /home -> user home directories

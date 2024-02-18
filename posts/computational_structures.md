@@ -25,17 +25,21 @@ ref:
 - Look backward(to the past)
   - Understand tradeoffs and designs, upsides/downsides, past workloads.
   - Analyze and evaluate the past.
+
 - Look forward(to the future)
   - Be the dreamer and create new designs, listen to dreamers.
   - Push the state of the art.
   - Evaluate new design choices.
+
 - Look up(towards problems in the computing stack)
   - Understand important problems and their nature.
   - Develop architectures and ideas to solve important problems.
+
 - Look down(towards device/circuit technology)
   - Understand the capabilities of the underlying technology.
   - Predict and adapt to the future of technology(you are designing for N years ahead).
   - Enable the future technology.
+
 - One needs to consider many things in designing a new system + have good intuition/insight into ideas/tradeoffs
 - Problem ->Algorithm ->Program/Language ->Runtime System(VM,OS,MM) ->ISA(Architecture) ->Microarchitecture ->Logic ->Circuits ->Electrons
 - Breaking the abstraction layers(between components and transformation hierarchy levels)and knowing what is underneath enables you to solve problems and 
@@ -59,7 +63,7 @@ ref:
   - continuous signals vs discrete symbols
   - digital tolerate noise while analog noise accumulate
 - Noise margins
-  - a digital device accepts marginal inputs and provides unquestionable outputs(to leave room for noise)
+  - A digital device accepts marginal inputs and provides unquestionable outputs(to leave room for noise)
   - digital systems are restorative.
   - cancelling nose requires active components, components that inject energy into the system.
   - noise margins should be positive.
@@ -88,7 +92,7 @@ ref:
   - each circuit element is combinational
   - every input is connected to exactly one output or to a constant(0 or 1)
   - the circuit contains no directed cycles.
-- Functinal specifications
+- Functional specifications
   - Systematic approaches
     - Truth tables - enumerateoutput values for all possible combinations of input values.
       - Equivalence and normal form

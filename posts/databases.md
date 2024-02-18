@@ -3734,6 +3734,21 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - IPC format is defined for exchanging metadata such as schema information, Google Flatbuffers.
     - Flight protocol is used for efficiently streaming Arrow data over the network.
 
+#### Apache Arrow
+
+- Arrow is a collection of libraries and specifications that make it easier to build high performance software utilities for processing and transporting large 
+  datasets.
+- It consists of a collection of libraries related to in-memory data processing(processing of data in RAM) including specs for memory layouts and protocols
+  for sharing and efficiently transporting data between systems and processes. This means that third-party projects that depend on Arrow don't need to use the entirety
+  of the project and instead can only link against, embed or only include the portions that they need. 
+- On-disk formats tend to focus more on increasing I/O throughput such as compressing the data to make it smaller and faster to read into memory, i.e Parquet. 
+- Apache Arrow focus is the in-memory format case which targets CPU efficiency as the goal with numerous tactics such as cache locality and vectorization of computation, 
+  common formats encourage systems interoperability.
+- Arrow's raw wire data format is the same as it is in memory, allowing you to directly reference network memory buffers without deserialization.
+
+- Parquet and Arrow are two different flavors of column-based storage with different trade-offs made in their designs.
+  
+       
 ### Disaggreagated Components
 
 - A recent trend has been the breakout OLAP sub-systems into standalone open-source components, typically done by organizations not in the business of selling DBMS s/w.

@@ -9,14 +9,14 @@ tags:
   - interpreters
 ---
 
-`Notes from Language Implementation Patterns: Create your own DSL and General Programming Languages`
+## Language Implementation Patterns: Create your own DSL and General Programming Languages
 
-*This is any program that processes, analyzes or translates an input file*
-*Implementing a language means building an application that executes or performs tasks according to sentences in that language*
+- This is any program that processes, analyzes or translates an input file.
+- Implementing a language means building an application that executes or performs tasks according to sentences in that language.
 
-By relieving the brain of all unnecessary work, a good notation sets it free to concentrate on 
-more advanced problems. . . . Civilization advances by extending the number of important operations 
-which we can perform without thinking about them.
+- By relieving the brain of all unnecessary work, a good notation sets it free to concentrate on 
+  more advanced problems. . . . Civilization advances by extending the number of important operations 
+  which we can perform without thinking about them.
 
 A.N Whitehead
 
@@ -34,12 +34,11 @@ A.N Whitehead
   - i.e object to relational mapping tools, object serializers, source code generators, web page generators.
 
 - Translators or Rewriter
-  - combined reader and generator.
-  - reads text or binary and emits output conforming to same or different language.
+  - It is essentially a combined reader and generator that reads text or binary and emits output conforming to same or different language.
   - i.e language translators from extinct to modern languages, refactorers, log file report generators, pretty printers, macro preprocessors. 
 
 - Interpreters
-  - reads, decodes and executes instructions
+  - It reads, decodes and executes instructions, i.e programming language impelementations.
 
 ## Implementation Patterns
 
