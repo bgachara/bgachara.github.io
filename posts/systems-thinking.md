@@ -1,7 +1,7 @@
 ---
 title: Systems Thinking
 description: Dynamical systems.
-date: 2024-02-01.
+date: 2024-02-01
 tags:
   - Dynamical systems.
   - Chaos. 
