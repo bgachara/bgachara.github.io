@@ -1716,15 +1716,14 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 ## Sorting and Aggregation Algorithms
 
 - Query Plan
-  - Operators are arranged in a tree.
-  - Data flows from the leaves of the tree up towards the root.
-  - The output of the root node is the result of the query.
+  - A query plan is a DAG of operators. An operator instance is an invocation of an operator on a unique segment of data. A task is a sequence of one or more operator instances. A 
+    task set is the collection of executable tasks for a logical pipeline. 
+  - Operators are arranged in a tree. Data flows from the leaves of the tree up towards the root. The output of the root node is the result of the query.
+
 - Disk-oriented DBMS.
-  - A disk-oriented DBMS cannot assume that query results fit in memory, just like it assumes a table cannot fit in memory.
-  - Use the buffer pool to implement algorithms that need to spill to disk.
-  - We are also going to prefer algorithms that maximize the amount of sequential I/O.
-- Queries may request that tuples are sorted in a specific way (ORDER BY), and even when a query does not specify an order, we may still want to sort to do other things.
-  - i.e Aggregations(GROUP BY), Duplicate elimination (DISTINCT)
+  - A disk-oriented DBMS cannot assume that query results fit in memory, just like it assumes a table cannot fit in memory. Use the buffer pool to implement algorithms that need to 
+    spill to disk. We are also going to prefer algorithms that maximize the amount of sequential I/O.
+- Queries may request that tuples are sorted in a specific way (ORDER BY), and even when a query does not specify an order, we may still want to sort to do other things. i.e Aggregations(GROUP BY), Duplicate elimination (DISTINCT)
 - If data fits in memory, then we can use a standard sorting algorithm like Quicksort.
 
 - Include: 
@@ -1734,18 +1733,14 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   
   - External Merge Sort
     - Divide and conquer algo that splits data into separate runs, sorts them individually and then combines then into longer sorted runs.
-    - Sorting
-      - Sort chunks of data that fit in memory and then write back the sorted chunks to a file on disk.
-    - Merging
-      - Combine sorted runs into larger chunks.
+    - Sorting: Sort chunks of data that fit in memory and then write back the sorted chunks to a file on disk.
+    - Merging: Combine sorted runs into larger chunks.
     - A run is a list of Key(attr to compare to compute the sort order)/Value(Tuple(early materialization), Record ID(late materialization)) pairs.
     - 2-way external merge sort.
       - Pass #0
-        - Read one page of the table into memory, sort page into a "run" and write it back to disk.
-        - Repeat until the whole table has been sorted into runs.
+        - Read one page of the table into memory, sort page into a "run" and write it back to disk. Repeat until the whole table has been sorted into runs.
       - Pass #1,2,3
-        - Recursively merge pairs of runs into runs twice as long.
-        - Need at least 3 buffer pages(2 for input, 1 for output)
+        - Recursively merge pairs of runs into runs twice as long. Need at least 3 buffer pages(2 for input, 1 for output)
       - Can be improved by increasing number of pages and also increasing number of K-way merges.
       - Double buffering
         - Prefetch the next run in the background and store it in a second buffer while the system is processing the current run, overlapping CPU and I/O operations.
@@ -1866,86 +1861,101 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Difficult to get right.
 
 *Integrate a profile for project*
+
 ## Query Execution and Processing Models
 
-- DBMS engineering is an orchestration of a bunch of optimizations that seek to make full use of hardware.
-- There is not a single technique that is more important than others.
- 
+- DBMS engineering is an orchestration of a bunch of optimizations that seek to make full use of hardware. No one technique is more important than others.
+- Top 3 optimizations
+  - Data parallelization.(Vectorization)
+  - Task parallelization.(Multi-threading)
+  - Code specialization.(Pre-compiled/JIT)
+
 - Optimization goals
-  - Reduce Instruction Count
-    - use fewer instructions to do the same amount of work.
-  - Reduce cycles per instruction
-    - execute more CPU instructions in fewer cycles.
-  - Paralleliza execution
-    - use multiple threads to compute each query in parallel.
-    
+  - Reduce instruction count, use fewer instructions to do the same amount of work.
+  - Reduce cycles per instruction, execute more CPU instructions in fewer cycles.
+  - Parallelize execution, use multiple threads to compute each query in parallel.
+
 - Processing Models
-  - It defines how the system executes a query plan.
-  - different trade-offs for different workloads
+  - It defines how the system executes a query plan and moves data from one operator to the next. There are different trade-offs for different workloads, OLTP vs OLAP.
+  - Each processing model is comprised of two types of execution paths;
+    - Control Flow: How the DBMS invokes an operator.
+    - Data Flow: How an operator sends its results.
+  - The output of an operator can be wither whole tuples(NSM) or subsets of columns(DSM).
   
 ### Approaches:
 
 - Iterator Model
   - Its also known as Volcano or Pipeline model.
-  - Each query plan operator implements a Next() function, where on each invocation, the operator returns either a single tuple or a eof marker if there are no more tuples.
-  - Each operator implementation also has Open() and Close() functions.
-  - It is used in almost every DBMS, allows for tuple pipelining.
-  - Some operators must block until their children emit all their tuples, joins, subqueries, order by.
+  - Each query plan operator implements a Next() function, where on each invocation, the operator returns either a single tuple or a eof marker if there are no more tuples. The operator
+    implements a loop that calls next on its children to retrieve their tuples and then process them, some operators must block until their children emit all their tuples, joins, subqueries, order by.
+  - Each operator implementation also has Open() and Close() functions, analogous to constructors/destructors, but for operators.
+  - It is used in almost every DBMS as it's easy to implement and debug while output control works easily with this approach. It also allows for pipelining where the DBMS tries to process 
+    each tuple via as many operators as possible before retrieving the next tuple.
+  - A pipeline breaker is an operator that cannot finish until all its children emit all their tuples, i.e Joins, Subqueries, Order By.
 
 - Materialization Model
-  - Each operator processes its input all at once and then emits its output all at once.
-  - Better for OLTP workloads because queries only access a small number of tuples at a time as they have lower execution/coordination overhead and result in fewer function calls. 
-  - Not good for OLAP queries with large intermediate results.
+  - Each operator processes its input all at once and then emits its output all at once as a single result. The DBMS can push down hints to avoid scanning too many tuples, can also send
+    either a materialized row or a single column.
+  - Better for OLTP workloads because queries only access a small number of tuples at a time as they have lower execution/coordination overhead and result in fewer function calls, not good for OLAP queries 
+    with large intermediate results.
   - The output can be either whole tuples (NSM) or subsets of columns(DSM).
 
 - Vectorized / Batch Model
   - It is like the iterator model where each operator implements a Next() function, but now each operator emits a batch of tuples instead of a single tuple.
-  - The size of the batch can vary based on hardware or query properties.
-  - Ideal for OLAP / data warehouses because it greatly reduces the number of invocations per operator.
-  - Allows for opearators to more easily use SIMD to process batches of tuples.
+  - The operator's internal loop processes multiple tuples at a time with the size of the batches varying based on hardware or query properties and also each batch containing one or more
+    columns each their own null bitmaps.
+  - It is ideal for OLAP / data warehouses because it greatly reduces the number of invocations per operator while also allowing for out-of-order CPU to more easily use SIMD to execute operators over batches of tuples, i.e 
+    operators perform work in tight for-loops over arrays which compilers know how to optimize/vectorize, no data or control dependencies and hot instruction cache.
+  - It however may contain some tuples that do not satisfy some filters which can be overcome by;
+    - Selection vectors; dense sorted list of tuple identifiers that indicate which tuples in a batch are valid. pre-allocate selection vector as the max-size of the input vector. 
+      ref paper: `Filter representation in vectorized query execution`
+    - Bitmaps; positionally-aligned bitmap that indicates whether a tuple is valid at an offset. Some SIMD instructions natively use these bitmaps as input masks.
   
 - Plan Processing Direction
   - ref paper:`push vs pull-based loop fusion in query engines`
-  - Top-to-Bottom
-    - Start with the root and pull data up from its children
-    - Tuples are always passed with function calls.
-  - Bottom-to-Top
-    - Start with lead nodes and push data to their parents
-    - It allows for tighter control of caches/registers in pipelines.
+  - Top-to-Bottom (Pull)
+    - Start with the root and pull data up from its children. Tuples are always passed between operators using function calls.
+    - Easy to control output via LIMIT, parent operator blocks until child returns with a tuple.
+    - Additional overhead because operators' Next() functions are implemented as virtual functions and branching costs on each Next() invocation.
+  - Bottom-to-Top (Push)
+    - Start with leaf nodes and push data to their parents. It can fuse operators together within a for-loop to minimize intermediate result staging. It allows for tighter control of caches/registers in pipelines.
+    - May not have exact control of intermediate result sizes, difficult to implement some operators(Sort-Merge Join).
 
 ### Access Methods
   
-- This is the way DBMS access the data stored in a table
-- Approaches
-  - Sequential Scan
-    - For each page in the table, retrieve it from the buffer pool, iterate over each tuple and check whether to include it.
-    - The DBMS maintains an internal cursor that tracks the last page/slot it examined.
-    - Optimizations
-      - Prefetching
-      - Buffer Pool Bypass
-      - Parallelization
-      - Heap Clustering
-      - Late Materialization
-      - Data Skipping
-        - Approximate Queries (Lossy)
-          - execute queries on a sampled subset of the entire table to produce approxiate results
-        - Zone Maps (Loseless)
-          - pre-computed columnar aggregates for the attribute values in a page. DBMS checks zone map first to decide whether it wants to access the page
-          - ref paper:`Small materialiazed Aggreagtes; A lightweight index structure for Data warehousing`
-          - In large OLAP systems they can eliminate need to for indexes.
-  
-  - Index Scan
-    - DBMS picks an index to find the tuples that the query needs.
-    - Depends on:
-      - What attributes the index contains
-      - What attributes the query references
-      - Attribute's value domains
-      - Predicate composition
-      - Whether the index has unique or non-unique keys
-  
-  - Multi-Index Scan
-    - multiple indexes that the DBMS can use for a query.
-    - Compute sets of Record IDs using each matching index, combine these sets based on the query predicates(union vs intersect), retrieve the records and apply any remaining predicates.
+- This is the way DBMS access the data stored in a table.
+
+#### Approaches
+
+- Sequential Scan
+  - For each page in the table, retrieve it from the buffer pool, iterate over each tuple and check whether to include it.
+  - The DBMS maintains an internal cursor that tracks the last page/slot it examined.
+  - Optimizations
+    - Prefetching
+    - Buffer Pool Bypass
+    - Parallelization
+    - Heap Clustering
+    - Late Materialization
+    - Data Skipping
+      - Approximate Queries (Lossy)
+        - execute queries on a sampled subset of the entire table to produce approxiate results
+      - Zone Maps (Loseless)
+        - pre-computed columnar aggregates for the attribute values in a page. DBMS checks zone map first to decide whether it wants to access the page
+        - ref paper:`Small materialiazed Aggreagtes; A lightweight index structure for Data warehousing`
+        - In large OLAP systems they can eliminate need to for indexes.
+
+- Index Scan
+  - DBMS picks an index to find the tuples that the query needs.
+  - Depends on:
+    - What attributes the index contains
+    - What attributes the query references
+    - Attribute's value domains
+    - Predicate composition
+    - Whether the index has unique or non-unique keys
+
+- Multi-Index Scan
+  - multiple indexes that the DBMS can use for a query.
+  - Compute sets of Record IDs using each matching index, combine these sets based on the query predicates(union vs intersect), retrieve the records and apply any remaining predicates.
 
 - Modification Queries
   - Operators that modify the database(INSERT, UPDATE, DELETE) are responsible for modifying the target table and its indexes.
@@ -2320,25 +2330,21 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - If only a small portion of the process uses AVX-512, then it is not worth the downclock penalty.
 - Vectorization is essential for OLAP queries
 - We can combine all the intra-query parallelism optimizations we've talked about in a DBMS
-  - Multiple threads processinf the same query.
+  - Multiple threads processing the same query.
   - Each thread can execute a compiled plan
   - The compiled plan can invoke vectorized operations.
     
 ## Query Planning and Optimization
 
-- For a given query find the correct execution plan that has the lowest "cost".
-- This is the part of a DBMS that is the hardest to implement well(proven to be NP-complete)
+- For a given query find the correct execution plan that has the lowest "cost". This is the part of a DBMS that is the hardest to implement well(proven to be NP-complete)
 - No optimizer truly produces the "optimal" plan.
   - Use estimation techniques to guess real plan cost
   - Use heuristics to limit the search space.
-- A query plan is a DAG of operators
-- An operator instance is an invocation of an operaotr on a unique segment of data.
-- A task is a sequence of one or more operator instances (pipelines).
+- A query plan is a DAG of operators. An operator instance is an invocation of an operaotr on a unique segment of data. A task is a sequence of one or more operator instances (pipelines).
 
 - Monetdb/*100
   - ref paper:`monetdb/*100: hyper-pipelining query execution`
-  - low-level analysis of execution bottlenecks for in-memory DBMSs on OLAP workloads
-    - show how DBMS are designed incorrectly for modern CPU architectures.
+  - Low-level analysis of execution bottlenecks for in-memory DBMSs on OLAP workloads, show how DBMS are designed incorrectly for modern CPU architectures.
     
 - **This is the hardest part of any database**
 
@@ -2355,17 +2361,13 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Cost model -> Estimates.
 
 - Query Optimization
-  - Identify candidate equivalent trees(logical. It is an NP-hard problem so the space is large.
-  - For each candidate, find the execution plan tree (physical). We need to estimate the cost of each plan.
-  - Choose the best overall (physical) plan.
+  - Identify candidate equivalent trees(logical. It is an NP-hard problem so the space is large. For each candidate, find the execution plan tree (physical). We need to estimate the cost of each plan 
+    and choose the best overall (physical) plan.
   - Heuristics / Rules
-    - Rewrite the query to remove inefficient things.
-    - The techniques may need to examine catalog but they do not need to examine data.
-    - Predicate pushdown, replace cartesian product, projection pushdown.
+    - Rewrite the query to remove inefficient things. The techniques may need to examine catalog but they do not need to examine data, i.e Predicate pushdown, replace cartesian produc and projection pushdown.
   - Cost based search
-    - Use a model to estimate the cost of executing a plan.
-    - Enumerate multiple equivalent plans for a query, estimate their costs and implement the one with the lowest cost.
-    - I.e Single relation, Multiple relations, Nested sub-queries.
+    - Use a model to estimate the cost of executing a plan. Enumerate multiple equivalent plans for a query, estimate their costs and implement the one with the lowest cost, i.e Single relation, 
+      Multiple relations, Nested sub-queries.
     - It chooses the best plan it has seen for the query after exhausting all plans or some timeout.
 
 - Logical Query Optimization
@@ -3965,7 +3967,52 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   
 - Nested data
   - Real world data sets often contain semi-structured objects(JSON, protobufs)., a file format will want to encode the contents of these objects as if they were regular columns.
-    This can either be through record shredding(store paths in nested structure as separate columns) or length+presence encoding(same as shredding but maintain additional columsn to track
+    This can either be through record shredding(store paths in nested structure as separate columns with additional meta-data about paths.) or length+presence encoding(same as shredding but maintain additional columsn to track
     number of entries at each path level and whether a key exists at that level for a record).
 
 - ref paper: `Procella: Unifying serving and analytical data at Youtube`,`Dremel: A decade of interactive sql analysis at web scale`
+
+- Critiques of existing formats
+  - Variable-sized runs, not SIMD friendly.
+  - Eager decompression, no random access if using block compression.
+  - Dependencies between adjacent values, i.e RLE, delta encoding.
+  - Vectorization portability, ISAs have different SIMD capabilities.
+  
+### BTRBLOCKS
+
+- ref paper: `Btrblocks: Efficient columnar compression for data lakes`
+- PAX-based file format with more aggressive nested encoding schemes than Parquet/ORC.
+- Uses a greedy algorithm to select the best encoding for a column chunk(based on sample) and then recursively tries to encode outputs of that encoding, no naive block compression(snappy, zstd).
+- Store a file's meta-data separately from the data.
+- Encoding schemes: RLE/One value, Frequency encoding, FOR+ Bitpacking, Dictionary encoding, Pseudodecimals, Fast Static Symbol Table(FSST), Roaring Bitmaps.
+- ref paper: `FSST: Fast random access string compression.`
+- ref paper: `Better bitmap performance with roaring bitmaps`
+- Encoding selection: collect a sample from the data and then try out all viable encoding schemes, repeat for three rounds.
+
+### FASTLANES
+
+- ref paper: `The fastlanes compression layout: Decoding 100 billion integers per second with scalar code`
+- Suite of encoding schemes that achieve better data parallelism through clever reordering of tuples to maximize ueseful work in SIMD operations. Similar nested encoding as BtrBlocks;
+  Dictionary, FOR, Delta, RLE.
+- To future proof format they define a virtual ISA with 1024-bit SIMD registers.
+- Unified transposed layout: reorder values in a column in a manner that improves the DBMS's ability to process them in an efficient, vectorized manner via SIMD.
+
+- The previous encoding schemes scan data by examining the entire value of each attribute(all the bits at the same time), DBMS cannot "short-circuit" comparisons integer types because 
+  CPU instructions operate on entire words.
+- What if you could only examine a subset of the each value's bit and then only check the rest of the bits if needed?
+
+### BIT-SLICED ENCODING.
+
+- Store bit-slices that represent original data and then gradually compare bits as need be.
+- They can also be used for efficient aggregate computations, i.e SUM(attr) using Hamming Weight. Use the POPCNT instruction to efficiently count the number of bits set to 1 in a register.
+
+### BITWEAVING
+
+- ref paper: `Bitweaving: Fast scans for main memory data processing`
+- Alternate encoding scheme for columnar databases that supports efficient predicate evaluation on compressed data using SIMD with order-preserving dictionary encoding, bit-level parallelization and 
+  only require common instructions(no scatter/gather)
+
+## EXECUTION OPTIMIZATION
+
+- CPUs organize instructions into pipeline stages and the goal is to keep all parts of the processor busy at each cycle by masking delays from instructions that cannot complete in a single cycle.
+- Super-scalar CPUs support multiple pipelines, execute multiple instructions in parallel in a single cycle if they are independent.
