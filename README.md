@@ -1,15 +1,11 @@
-# Lume base blog example
+# Personal blog
 
-A starter repository showing how to build a blog with the
-[Lume](https://github.com/lumeland/lume) static site generator.
-
-This project started as a fork of
-[eleventy-base-blog](https://github.com/11ty/eleventy-base-blog) but adapted to
-Lume and with the NetlifyCMS.
+A personal blog used for references and education purposes.
 
 ## Technical Notes
 
 - Scope of areas covered by the documentation.
+
    - PL Cheat Sheets i.e Rust, Javascript.
    - Programming Language Theory.
    - Databases.
