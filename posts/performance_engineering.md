@@ -1,43 +1,28 @@
 ---
-title: System Performance
+title: System Performance Enterprise and the Cloud
 description: Understanding system performance
 date: 2023-08-01
 tags:
-  - performance
+  - system performance
+  - Brendan Gregg
 ---
-
-`Systems performance enterprise and the cloud`
-
-Performance issues can originate from anywhere, including areas of the system that you know nothing about and are therefore not checking.
 
 ## System performance
 
-- Studies the performance of an entire computer system, including major software and hardware systems, anything in the data path from storage devices to application s/w.
-- For distributed systems this means multiple servers and applications.
-- Have a diagram of your environment data path, helps understand relationships between components and ensure you don't overlook entire areas.
+- Performance issues can originate from anywhere, including areas of the system that you know nothing about and are therefore not checking, studies the performance of an entire computer system, 
+  including major software and hardware systems, anything in the data path from storage devices to application s/w, for distributed systems this means multiple servers and applications.
+- Have a diagram of your environment data path, helps understand relationships between components and ensure you don't overlook areas as they all affect performance.
 - Performance is a field where the more you learn about systems, the more unknown-unknowns you become aware of, which are then known-unknowns that you can check on.
+- Durable skills, i.e models, architecture and methodologies vs fast changing skills, tools and tuning.
 
 ## Goals
 
-- Improve end user experience by reducing latency.
-- Reduce computing cost by eliminating inefficiencies, improving system throughput and general tuning.
+- Improve end user experience by reducing latency and reduce computing cost by eliminating inefficiencies, improving system throughput and general tuning.
 
 ## System s/w stack
 
-- User level
-  - Application
-  - Database
-  - System libraries
-  - Compilers
-
-- Kernel-level
-  - System calls
-  - Thread Scheduler
-  - File systems
-  - Network stack
-  - Virtual memory
-  - Device drivers
-  - Devices
+- User level: Application, Database, System libraries, Compilers.
+- Kernel-level: System calls, Thread Scheduler, File system, Network stack, Virtual memory, Device drivers, Devices.
 
 ## Performance engineer
 
@@ -58,9 +43,9 @@ Performance issues can originate from anywhere, including areas of the system th
 - Incident reviews of production issues.
 - Performance tool development to enhance production analysis. 
 
-- Canary testing - vary the production workload on an instance during testing.
-- Blue-green deployment - move traffic gradually to new instances leaving old one online as backup.
-- Capacity planning - studying resource footprint against the target needs.
+- Canary testing: vary the production workload on an instance during testing.
+- Blue-green deployment: move traffic gradually to new instances leaving old one online as backup.
+- Capacity planning: studying resource footprint of development software against the target needs, after deployment, it includes monitoring resource usage to predict problems before they occur.
 
 ## Perspectives
 
@@ -68,68 +53,64 @@ Performance issues can originate from anywhere, including areas of the system th
   - Application down.
 
 - Resource analysis
-  - H/w up.
+  - Hardware up.
+  
+- Performance problems are highly subjective, complex and there might not be one single issue, often it is multiple issues. Some issues also don't have a single root cause, but instead have multiple contributing
+  factors. The existence of multiple issues poses difficulty when analyzing performance, the real task isn't finding an issue, it's identifying which issue or issues matters the most.
+- A performance analyst must quantify the magnitude of issues, some issues may or may not apply to workload or when they do, do so to a very small degree, hence the need to not only qunatify the issues but also the 
+  potential speedup to be gained for each one. This information is valuable when justifying resource expenditure to management.
 
-## Latency
+## Latency.
 
-- This is a measure of time spent waiting and is an essential performance metric, broadly means time for any operation to complete.
-- It allows maximum speedup to be estimated.
-- Since it can be measured from different locations, it is often expressed with the target of the measurement, i.e for a website it may composed of
+- This is a measure of time spent waiting and is an essential performance metric, broadly means time for any operation to complete, i.e application request, db query or fs operation.
+- It allows maximum speedup to be estimated. Since it can be measured from different locations, it is often expressed with the target of the measurement, i.e for a website it may composed of
   DNS latency, TCP connection latency and TCP data transfer time.
-- It is an ambiguous term, it is best to include qualifying terms to explain what it measures: request latency, connection latency.
-- It is a time based metric hence perf issues can be quantified using it then ranked.
-- Predicted speedup can also be calculated, by considering when latency can be reduced or removed.
-- When posssible, converting other metrics types to latency or time allows them to be compared.
+- It is an ambiguous term, it is best to include qualifying terms to explain what it measures: request latency, connection latency. It is a time based metric hence perf issues can be quantified using it then ranked.
+- Predicted speedup can also be calculated, by considering when latency can be reduced or removed. When posssible, converting other metrics types to latency or time allows them to be compared.
 
-## Observability
+## Observability, Counters, Statistics and Metrics.
 
-- This refers to understanding the system through observation and classifies the tools that accomplish this.
-- This include tools that use counters, profiling and tracing.
-- Metric is a statistic that has been selected to evaluate or monitor a target.
-- Monitoring s/w also support creating custom alerts from these metrics.
+- This refers to understanding the system through observation and classifies the tools that accomplish this. This include tools that use counters, profiling and tracing.
+- Applications and kernels typically provide data on their state and activity: operation and byte counts, latency measurements, resource utilizations and error rates. They are typically implemented as integer variables 
+  called counters that are hard-coded in the software, some of which are cumulative and always increment. These can be read at different times by perf tools for calculating statistics.
+- A metric is a statistic that has been selected to evaluate or monitor a target. Monitoring s/w also support creating custom alerts from these metrics on top of recording and charting them.
 - Counters(applications/kernels - /proc) ->Statistics(Perf tools/agents - vmstat, collectd) ->Metrics(Perf monitoring - Grafana) ->Alerts(event processing - Prometheus)
 
 ## Profiling
 
-- This refers to the use of tools to perform sampling, to paint a coarse picture of the target, coarseness depending on the rate of sampling.
+- This refers to the use of tools to perform sampling, to paint a coarse picture of the target, coarseness depending on the rate of sampling, i.e CPU by taking timed-interval samples of on-CPU code paths.
 - It is typically performed by sampling the state of the system at timed intervals and then studying set of samples.
 - example: CPU usage can be profiled by sampling the instruction pointer or stack trace at frequent intervals to gather statistics on code paths consuming CPU resources.
-- Most common method is taking the timed-interval samples of the on-CPU code paths.
-- CPU flame graphs
-- They reveal not only CPU issues, but other types of issues as well, found by the CPU footprints they leave behind.
+- CPU flame graphs can reveal not only CPU issues, but other types of issues as well, found by the CPU footprints they leave behind.
 
 ## Tracing
 
 - This is event-based recording, where event data is captured and saved for later analysis or consumed on-the-fly for custom summaries and other actions.
-- System calls - strace, network packets - tcpdump.
-- General purpose tools - ftrace, bcc, bpftrace.
+- System calls: strace, network packets - tcpdump. General purpose tools: ftrace, bcc, bpftrace.
 - They use a variety of event sources, static or dynamic instrumentation and BPF for programmability.
 
-- Static instrumentation
-  - Describes hard-coded instrumentation points added to the code.
-  - There are hundreds of these points in the kernel that instrument disk I/O, scheduler events, system calls and more.
-  - Tracepoints - static instrumentation for kernel-space.
-  - User statically defined tracing - user-space static instrumentation, used to instrument library calls and service requests
+### Static instrumentation
 
-- Dynamic instrumentation
-  - It creates instrumentation points after software is running, by modifying in-memory instruction to insert instrumentation routines.
-  - This allows custome performance statistic to be created from any running s/w.
-  - Dtrace, kprobes, BPF(generic in-kernel execution environment)
+- This is hard-coded software instrumentation points added to the code, i.e disk I/O, scheduler events, system calls and more.
+- Tracepoints are the technology for kernel static instrumentation, user statically defined tracing on the other hand are user-space static instrumentation, used to instrument library calls and service requests
+
+### Dynamic instrumentation
+
+- It creates instrumentation points after software is running, by modifying in-memory instruction to insert instrumentation routines, similar to how debuggers can insert a breakpoint on any function in running software. While debuggers pass on execution flow to an
+  interactive debugger when a breakpoint is hit, dynamic instrumentation runs a routine and then continues the target software.
+- This allows custom performance statistics to be created from any running s/w with issues that were previously impossible or prohibitively difficult to solve due to a lack of observability can now be fixed.
+- Example of dynamic instrumentation technologies include, Dtrace, kprobes, BPF(generic in-kernel execution environment)
 
 ## Experimentation
 
-- Most of this are benchmarking tools.
-- They perform an experiment by applying a synthetic workload to the system and measuring its performance.
-- This should be done carefully since experimentation tools can perturb the performance of systems under test.
-- Macro and micro benchmark.
+- Most of this are benchmarking tools. They perform an experiment by applying a synthetic workload to the system and measuring its performance, this should be done carefully since experimentation tools can perturb the performance of systems under test.
+- Macro benchmarks simulate a real-world worload while micro benchmark tools test a specific component, i.e CPU, disks or network.
 
 ## Methodologies
 
-- They are a way to document the recommended steps for performing various tasks in systems performance.
-- Working without one can easily turn into a fishing expedition, time consuming and ineffective.
+- They are a way to document the recommended steps for performing various tasks in systems performance, working without one can easily turn into a fishing expedition, time consuming and ineffective while allowing important areas to be overlooked.
 - `Linux perf analysis in 60 seconds`
-- Given an issue X, procedures on how to move quickly through tools and metrics to find the root cause, knowing which ones are important and when they point to an issue,
-  and also how to use them to narrow down an investigation.
+- Given an issue X, procedures on how to move quickly through tools and metrics to find the root cause, knowing which ones are important and when they point to an issue, and also how to use them to narrow down an investigation.
 
 ## Terminologies
 

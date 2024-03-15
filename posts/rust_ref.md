@@ -17,7 +17,7 @@ Ref:
 `Rust 101 - www.ralfj.de`
 `Rust Training - learn.microsoft`
 
-## General Features
+## Rust Language General Features
 
 - Inherent memory safety of the language.
 - Memory Safe: Manual management of memory, all pointer/references always point to valid memory.
@@ -35,56 +35,51 @@ Ref:
 
 ## Rust Toolchain
 
-- A toolchain is a combination of a release channel and a host and optionally also has an assoiated archive date
-
-- Rustc - is the rust compiler.
-
+- A toolchain is a combination of a release channel and a host and optionally also has an associated archive date.
+- Rustc is the rust compiler.
 - Rustup 
-  - manages rust version, installs compiler, cargo, std lib and other core tools.
-  - determines toolcahin depending on the host platform.
+  - It manages rust version, installs compiler, cargo, std lib and other core tools.
+  - It determines toolcahin depending on the host platform.
   - It is a tool multiplexer as it installs and manages toolchains.
-  - There are two ABIs in use in windows
+  - There are two ABIs in use in windows, controlled by `rustup set-default host xxx`, `rustup toolchain install stable-gnu`
     - Msvc abi by vs, provides best interop with other Windows s/w.
     - GNU ABI by GCC.
-    - controlled by `rustup set-default host xxxx`, `rustup toolchain install stable-gnu`
 
 - Cargo 
-  - Official build and dependency management tool during development.
-  - i.e compiles code, download and compile dependent libraries, linking libraries and building development and release binaries.
-  - Also performs incremental builds of code to reduce compilation time as programs evolve.
-  - Also guides idiomatic project structure.
-  - Integrated toolchain for creating and building projects, manage external dependencies, Debugging, Testing, Generate documentation and release management.
+  - Official build and dependency management tool during development, i.e compiles code, download and compile dependent libraries, linking libraries and building development and release binaries.
+  - It performs incremental builds of code to reduce compilation time as programs evolve while also guiding idiomatic project structure.
+  - It is the integrated toolchain for creating and building projects, manage external dependencies, debugging, testing, generate documentation and release management.
 
 - Binary types: standalone executables, static libraries and dynamic libraries.
 - Release channels: nightly, beta and stable channel.
 - With Cargo, projects are called packages and can consist of one or more **crates**.
 
-- Two basic projects in Rust: 
-  - Libraries(lib crate)
-    - This can either be static and dynamic.
-    - Self contained code intended for use by other programs to speed up devt cycle and encourage code reuse.
-    - Can be published to a public package repository such as crates.io.
-    - program execution begins in the src/lib.rs.
-  
-  - Binaries(bin crate) 
-    - Standalone executable that may download and link other libraries into a single binary.
-    - program execution starts in the main() function present in the src/main.rs file.
+### Basic projects in Rust: 
+
+- Libraries(lib crate)
+  - This can either be static and dynamic, self contained code intended for use by other programs to speed up devt cycle and encourage code reuse.
+  - It can be published to a public package repository such as crates.io.
+  - Program execution begins in the src/lib.rs.
+
+- Binaries(bin crate) 
+  - Standalone executable that may download and link other libraries into a single binary.
+  - Program execution starts in the main() function present in the src/main.rs file.
 
 - `cargo new project_name`
 
-- Cargo.toml 
-  - serves as the config file for our crate.
-  - also called the manifest.
-  - At minimum have the main [package] section but can have subsections
-    - specifying output targets for the package.
-      - i.e [[bin]], [[lib]], [[example]], [[test]], [[bench]] - benchmark functions compiled into separate executables.
-    - specifying the dependencies of the package.
-      - i.e [dependencies], [dev-dependencies], [build-dependencies], [target] - cross-compilation targets.
-    - specifying build profiles
-      - [dev] - optimised for compile-time speed, [release], [test], [bench].
-    - specifying the package as a workspace.
-      - unit of organization around multiple packages where they are shared dependencies, useful for disk space and compilation time. 
-  - For each of the targets, configuration can be specified
+### Cargo.toml 
+
+- Serves as the config file for our crate and is also called the manifest.
+- At minimum have the main [package] section but can have subsections
+  - specifying output targets for the package.
+    - i.e [[bin]], [[lib]], [[example]], [[test]], [[bench]] - benchmark functions compiled into separate executables.
+  - specifying the dependencies of the package.
+    - i.e [dependencies], [dev-dependencies], [build-dependencies], [target] - cross-compilation targets.
+  - specifying build profiles
+    - [dev] - optimised for compile-time speed, [release], [test], [bench].
+  - specifying the package as a workspace.
+    - unit of organization around multiple packages where they are shared dependencies, useful for disk space and compilation time. 
+- For each of the targets, configuration can be specified
 
 - `--lib` flag used when creating a library.
 
@@ -96,10 +91,10 @@ Ref:
 - Modules - code within have their own unique namespace, can be nested within one another.
 - Crate - unit of code sharing across Rust., either a binary or library, made up of multiple modules.
 - Workspace - set of packages that share a Cargo.lock file.
-- Comes with a standard library consisting of language primitives and commonly used functions, but it is small compared to other languages.
+- Rust comes with a standard library consisting of language primitives and commonly used functions, but it is small compared to other languages.
 - Thus need to rely on external libraries: *dependencies*
 - *crates.io* - is the central public package registry. used by cargo as the default package registry.
-- On running cargo build, cargo looks for the crate, downloads it and its dependencies , compiles them all and updates Cargo.lock with exact versions.
+- On running cargo build, cargo looks for the crate, downloads it and its dependencies, compiles them all and updates Cargo.lock with exact versions.
 - Each dependency takes form of <crate-name> = <semantic-version-number>.
 - Semantic Version has the format X.Y.Z = Major-version-number.Minor-version.Patch version
 
@@ -111,30 +106,27 @@ Ref:
   - Multiple locations - specify both registry/ Git/ path location.
 
 - Rust also has built-in support for writing automated tests.
-  - other functions that verify whether other non-test functions work as intended.
-  - invoke functions with specified data and assert return values are as expected.
+  - These are other functions that verify whether other non-test functions work as intended, invoked with specified data and assert return values are as expected.
   - Unit and Integration tests.
   - Idiomatic in Rust to group test functions in a test module to allow conditional compilation of test code.
-  - In integration tests, creation of tests folder in package root,with individual tests in their own files, only compiled with cargo test.
-  - Integration only available for lib crates not binary crates.
+  - In integration tests, which are only available for lib crates not binary crates, creation of tests folder in package root,with individual tests in their own files, only compiled with cargo test.
   - Control test execution:
     - running them by name.
     - Ignore some tests.
     - running them sequentially or in parallel.
 
-- Rust also ships with rustdoc, generate documentation.
-  - Important to think through WHAT to document and HOW to document it.
-    - WHAT:
-      - short description of what library does.
-      - list of modules and public functions.
-      - traits, macros, structs, enums and typdefs.
-      - binary crates: installation instrutions, command-line parameters.
-      - examples on how to use the crate.
-      - design details of the crate(optional)
-    - HOW:  
-      - inline documentation comments within the crate.use /// - item-level documentation and //! - crate-level documentation.
-      - separate markdown files.
-  - Rustdoc will generate HTML,CSS and JS viewed via the browser.
+- Rust also ships with rustdoc, generate documentation, it's important to think through WHAT to document and HOW to document it.
+  - WHAT:
+    - short description of what library does.
+    - list of modules and public functions.
+    - traits, macros, structs, enums and typdefs.
+    - binary crates: installation instrutions, command-line parameters.
+    - examples on how to use the crate.
+    - design details of the crate(optional)
+  - HOW:  
+    - inline documentation comments within the crate.use /// - item-level documentation and //! - crate-level documentation.
+    - separate markdown files.
+- Rustdoc will generate HTML,CSS and JS viewed via the browser.
         
 
 ## Naming conventions
@@ -169,8 +161,7 @@ homepage = "/url"
 
 ## Rust Standard Library
 
-- This is the primary interface for Rust programs into the kernel functions of an OS.
-- It uses libc internally to invoke system calls.
+- This is the primary interface for Rust programs into the kernel functions of an OS which uses libc internally to invoke system calls.
 - Notable features
   - Cross-platform, provides functionality that hides differences among underlying platform architectures.
   - Available to all crates by default via the `use` statement, i.e use::fs
@@ -184,8 +175,7 @@ homepage = "/url"
     - std includes the primitives and build on top of them.
     
   - Core crate
-    - foundation the std.
-    - It acts as the link between the Rust language and standard library.
+    - foundation the std and acts as the link between the Rust language and standard library.
     - It provides types, traits, constants and functions implemented on top of Rust primitives and provides foundational building blocks for all Rust code.
     - core crate can be used independently, is not platform-specific and does not have any links to the OS libraries or other external dependencies.
     - #![no_std] instructs compiler to compile without std, using core crate
@@ -201,26 +191,29 @@ homepage = "/url"
     - libraries that are directly part of the standard library(and not re-exported from core or alloc crates) include rich functionality for operations around concurrency,
       I/O, file system access, networking, async I/O, errors and OS-specific functions.
             
-- Rust std modules
-    - Syscalls-oriented
-      - modules that either manage system h/w resources directly or require the kernel for other privileged operations.
-      - Include
-        - Concurrency - env, process, sync, thread.
-        - File system - fs, path
-        - Memory management - alloc, convert, ptr, borrow, default, rc, cell, mem, clone, pin
-        - Async - future, task
-        - Networking - net
-        - IO - io
-        - OS-specific - os
-        - Time - time
-    - Computation-oriented
-      - modules that are oriented towards data representation, computation and instructions to the compiler.
-      - Include
-        - Data processing - ascii, fmt, num, cmp, hash, ops, iter
-        - Error handling - error, panic, option, result
-        - Compiler - hint, primitive, prelude
-        - Ffi - ffi
-        - Data types - string, char, array, collections, slice, vec, f32, i8, u8, usize.
+### Rust std modules
+  
+- Syscalls-oriented
+  - modules that either manage system h/w resources directly or require the kernel for other privileged operations.
+  - Include
+    - Concurrency - env, process, sync, thread.
+    - File system - fs, path
+    - Memory management - alloc, convert, ptr, borrow, default, rc, cell, mem, clone, pin
+    - Async - future, task
+    - Networking - net
+    - IO - io
+    - OS-specific - os
+    - Time - time
+
+- Computation-oriented
+  - modules that are oriented towards data representation, computation and instructions to the compiler.
+  - Include
+    - Data processing - ascii, fmt, num, cmp, hash, ops, iter
+    - Error handling - error, panic, option, result
+    - Compiler - hint, primitive, prelude
+    - Ffi - ffi
+    - Data types - string, char, array, collections, slice, vec, f32, i8, u8, usize.
+
 ```rust
 
 use std::prelude::v1::*              
@@ -229,8 +222,7 @@ use std::prelude::v1::*
               
 ## Statement 
 
-- This is a segment of code that does not return any value.
-- End with a semicolon to denote nothing returned
+- This is a segment of code that does not return any value and ends with a semicolon to denote nothing returned.
 
 ```rust
 
@@ -254,8 +246,7 @@ fn say_answer() {
 
 ## Expressions
 
-- This is a code segment that returns a value.
-- Rust being a "expression-oriented" language, all code blocks will implicitly return their value unless we utilize a semicolon to terminate the expression.
+- This is a code segment that returns a value and with rust being a "expression-oriented" language, all code blocks will implicitly return their value unless we utilize a semicolon to terminate the expression.
 
 ```rust
 
@@ -275,8 +266,7 @@ println!("{}", give_answer());
 
 ## Patterns
 
-- special syntax rules that are useful in certain situations.
-- help make language more readable and allow us to do things otherwise not easily accomplished.
+- These are special syntax rules that are useful in certain situations and help make language more readable and allow us to do things otherwise not easily accomplished.
 
 ```rust
 /* pattern to declare more than one variable with let */
@@ -290,7 +280,7 @@ let (x, y) = (5, 10);
 
 ### Blocks
 
-- block of code is a collection of statements and an optional expression contained within {}
+- A block of code is a collection of statements and an optional expression contained within {}
 
 ```rust
 
@@ -312,7 +302,8 @@ let (x, y) = (5, 10);
 
 
 ```
-- Blocks can be treated as the single statement or expression they evaluate to. This means we can assign variabels to a block of code.
+
+- Blocks can be treated as the single statement or expression they evaluate to. This means we can assign variables to a block of code.
 
 ```rust
 
@@ -339,9 +330,8 @@ fn sum() -> u32 {
 
 ## Scope
 
-- concept of whether or not a particular item exists in memory and is accessible at a certain location in our codebase
-- In Rust, scope of any particular item is limited to the block it is contained in.
-- When a block is closed, all of its values are released from memory and are then considered *out-of-scope*, else *in-scope*
+- This is the concept of whether or not a particular item exists in memory and is accessible at a certain location in our codebase
+- In Rust, scope of any particular item is limited to the block it is contained in. When a block is closed, all of its values are released from memory and are then considered *out-of-scope*, else *in-scope*
 
 ```rust
 
@@ -359,8 +349,7 @@ println!("{number}")
 ```
 ## Visibility
 
-- We can make an item accessible outside of its normal scope by denoting it as public with the *pub* keyword.
-- All items in rust are private by default, pi only accessed within their declared module and any children modules.
+- We can make an item accessible outside of its normal scope by denoting it as public with the *pub* keyword. All items in rust are private by default, only accessed within their declared module and any children modules.
 
 ```rust
 
@@ -377,7 +366,7 @@ mod another_scope {
 }
 
 ```
-- fields of complex datatypes have their own visibility qualifiers.
+- Fields of complex datatypes have their own visibility qualifiers.
 
 ```rust
 
@@ -392,20 +381,16 @@ number.value += 1;
 println!("{}", number.value);
 
 ```
-- when crate is a library, all items denoted as public will be accessible to anyone who imports our library.
+- When crate is a library, all items denoted as public will be accessible to anyone who imports our library.
 
 ## Ownership
 
-- Scoping rules are very strict and with good reason.
-- Managing *lifetimes* and *mutability* in a memory-safe way is much easier when we disallow accessing items from parent blocks.
+- Scoping rules are very strict and with good reason. Managing *lifetimes* and *mutability* in a memory-safe way is much easier when we disallow accessing items from parent blocks.
 
 ### Rules
 
-- each value in Rust has a variable that's called it's owner.
-- there can only be one owner at a time.
-- when the owner goes out of scope, the value will be dropped.
-
-- rules have different implications depending on whether our data is stored on the stack or heap.
+- Each value in Rust has a variable that's called it's owner.There can only be one owner at a time. When the owner goes out of scope, the value will be dropped.
+- Rules have different implications depending on whether our data is stored on the stack or heap.
 
 ### Stack vs Heap
 
@@ -417,10 +402,10 @@ println!("{}", number.value);
     - easy to manage: follows function calls.
     - Great memory locality
 - Heap: 
-    - storage of values outside function calls
-    - values have dynamic sizes determined at runtime
-    - slightly slower than the stack, bookeeping needed
-    - No guarantee of memory locality
+    - storage of values outside function calls.
+    - values have dynamic sizes determined at runtime.
+    - slightly slower than the stack, bookeeping needed.
+    - No guarantee of memory locality.
         
 
 ````rust
@@ -433,8 +418,8 @@ println!("{stack_1}")
 println!("{stack_2}")
 
 ````
-- when working with datatypes that utilize the heap, such as *String*, we cannot copy values from one variable to another since heap-based types don't implement the *Copy* trait.
-- instead of copying, Rust will instead move the value out of the original variable and into the new one.
+- When working with datatypes that utilize the heap, such as *String*, we cannot copy values from one variable to another since heap-based types don't implement the *Copy* trait.
+- Instead of copying, Rust will instead move the value out of the original variable and into the new one.
 
 ```rust
 let heap_1 = String::from("Only you can!");
@@ -444,8 +429,7 @@ let heap_2 = heap_1; /*the value of heap_1 is moved to heap_2*/
 println!("{heap_2}");
 
 ```
-- We can choose to clone our data, which is equivalent to copying on the heap, unlike implicit cloning this time it must be implicitly stated.
-- We can clone any type that implements the *Clone* trait.
+- We can choose to clone our data, which is equivalent to copying on the heap, unlike implicit cloning this time it must be implicitly stated. We can clone any type that implements the *Clone* trait.
 
 ```rust
 let heap_1 = String::from("Only you can!");
@@ -456,8 +440,7 @@ println!("{heap_1}");
 println!("{heap_2}");
 
 ```
-- Cloning is only necessary when we need another copy of the data.
-- When we are not in need of a separate copy, we can instead *reference* the data.
+- Cloning is only necessary when we need another copy of the data. When we are not in need of a separate copy, we can instead *reference* the data.
 
 ## Functions
 
@@ -482,8 +465,7 @@ let finished = print_through(letters); /* letters have been moved into finished 
 
 ## References
 
-- This is a way of pointing to a particular piece of data within memory.
-- By referencing existing data, we can re-use that data without needing to allocate additional memory.
+- This is a way of pointing to a particular piece of data within memory. By referencing existing data, we can re-use that data without needing to allocate additional memory.
 - References are found everywhere in Rust since memory is forcefully managed manually.
 
 
@@ -497,8 +479,7 @@ graph TD;
 
 ### & 
 
-- Every time we declare a value with *let*, we are creating data that is stored in memory.
-- We can then create a reference to that data by prefixing our expression with *&*.
+- Every time we declare a value with *let*, we are creating data that is stored in memory. We can then create a reference to that data by prefixing our expression with *&*.
 
 ```rust
 
@@ -508,7 +489,7 @@ let funny_number = &pi;
 println!("{funny_number}")
 
 ```
-- We can also create references to references
+- We can also create references to references.
 
 ```rust
 
@@ -537,8 +518,7 @@ println!("The year is {year}");
 ```
 ## Automatic Dereferencing
 
-- Rust compiler will automatically dereference, specifically when the *.* operator is used.
-- to_uppercase() automatically does this on earth below
+- Rust compiler will automatically dereference, specifically when the *.* operator is used, i.e to_uppercase() automatically does this on earth below
 
 ```rust
 
@@ -581,8 +561,7 @@ match planet {
 }
 
 ```
-- Ref technically accomplishes the same thing as & but is placed on the other side of the assignment.
-- THought of as reciprocals of each other.
+- Ref technically accomplishes the same thing as & but is placed on the other side of the assignment. Thought of as reciprocals of each other.
 
 ```rust
 
@@ -596,8 +575,7 @@ assert_eq!(r1, r2);
 ```
 ## Slices
 
-- a reference to a range of elements from a collection is called a slice
-- We use indexed expressions on a referenced collection to get a slice.
+- A reference to a range of elements from a collection is called a slice. We use indexed expressions on a referenced collection to get a slice.
 
 ```rust
 
@@ -616,7 +594,7 @@ println!("{hello}{world}");
 
 ### Variable Declarations
 
-- we use the *let* keyword with the *=* operator taking the form
+- We use the *let* keyword with the *=* operator taking the form.
 
 ```rust
 
@@ -624,7 +602,7 @@ let variable = "this is a &str";
 
 ```
 
-- we can assign variables to any expression.
+- We can assign variables to any expression.
 
 ```rust
 
@@ -652,7 +630,7 @@ fn double(num: u128) -> u128 {
 let stars = 10; /*type of u128*/
 
 ```
-- When primitive types have no context , rust will fall back to *i32* for untyped integer literals and *f64* for untypes floating point literals.
+- When primitive types have no context, rust will fall back to *i32* for untyped integer literals and *f64* for untypes floating point literals.
 
 ```rust
 
@@ -713,8 +691,7 @@ let [noun, verb, adjective ] = [ "arrays", "are", "homogenous" ]
 ```
 ## Unused variables
 
-- Rust compiler will give us warnings when we have unused variables.
-- Prefix var names with *_* to escape check
+- Rust compiler will give us warnings when we have unused variables. Prefix var names with *_* to escape check
 
 ```rust
 
@@ -729,14 +706,12 @@ fn no_warnings(){
 
 ## Mutability
 
-- Ability of a variable's value to be altered in memory.
-- In Rust, all variables are immutable by default.
+- Ability of a variable's value to be altered in memory. In Rust, all variables are immutable by default.
 - Design is extremely useful in practice and helps avoid unitended behaviour.
 
 ### Mut keyword
 
-- Once a variable is declared with let, its value cannot change.
-- We must declare its immutability with *mut* keyword.
+- Once a variable is declared with let, its value cannot change. We must declare its immutability with *mut* keyword.
 
 ```rust
 
@@ -757,8 +732,7 @@ let mut number = 20;
 number = 80;
 
 ```
-- Although mutable use cases exist for certain problems, it is advisable to avoid mutability in Rust.
-- To change a variable's value without mutation, we can choose *shadowing* a variable instead.
+- Although mutable use cases exist for certain problems, it is advisable to avoid mutability in Rust. To change a variable's value without mutation, we can choose *shadowing* a variable instead.
 
 ```rust
 
@@ -787,8 +761,7 @@ question(&mut sentence);
 println!("{sentence}");
 
 ```
-- We can only have one mutable reference to a piece of data at a time.
-- This means we cannot immutably borrow a mutable reference outside the lifetime of the mutable reference.
+- We can only have one mutable reference to a piece of data at a time. This means we cannot immutably borrow a mutable reference outside the lifetime of the mutable reference.
 
 ## Interior Mutability
 
@@ -812,9 +785,8 @@ coord.y = 40;
 
 ## Constants
 
-- Constats are immutable data or functions that are declared at compile time, preferred when piece of data is used in many places viaout the codebase and want to avoid code duplication and ease development.
+- Constants are immutable data or functions that are declared at compile time, preferred when piece of data is used in many places viaout the codebase and want to avoid code duplication and ease development.
 - *const* keyword used and SCREAMING_SNAKE_CASE convention.
-
 - Constants require a type declaration and only types with a known size at compile time can be declared a constant
 
 ```rust
@@ -836,9 +808,8 @@ const SECONDS_IN_A_DAY: usize = 60 * 60 * 24;
 
 ## Const fn
 
-- In Rust, function pointer are a primitive data type, means we can declare functions as constants.
-- Making a function constant will enforce restrictions to validate that the function will provide the same result when evaluated both at compile-time and runtime.
-- Same concept as a mathemtically pure function and helps prevent unintended side effects.
+- In Rust, function pointer are a primitive data type, means we can declare functions as constants, making a function constant will enforce restrictions to validate that the function will provide the same result when evaluated both at compile-time and runtime.
+- It is the same concept as a mathemtically pure function and helps prevent unintended side effects.
 - const fn parameters are limited to datatypes with a known size at compile-time.
 
 ```rust
@@ -876,13 +847,11 @@ println!("{}", Caddy::BIRDIE);
 
 ## Modules 
 
-- Separation of codebase into distinct sections helps.
-- Rust has a module system that provides user-defined namespacing within our codebase.
+- Separation of codebase into distinct sections helps. Rust has a module system that provides user-defined namespacing within our codebase.
 
 ### mod
 
-- We use the mod keyword to define a module.
-- A module has its own distinct scope and visibility.
+- We use the mod keyword to define a module. A module has its own distinct scope and visibility.
 
 ```rust
 
@@ -894,8 +863,7 @@ mod cake {
 
 ```
 
-- Once declared its content can be accessed by utilising path syntax
-- A path is created by chaining any number of nested modules together with the :: operator.
+- Once declared its content can be accessed by utilising path syntax. A path is created by chaining any number of nested modules together with the :: operator.
 
 ```rust
 
@@ -926,8 +894,7 @@ println!("{}", cake::flavors::toppings::SPRINKLES);
 
 ## Importing Items
 
-- With the *use* keyword we can import any module or contained item into the current scope, followed by the path to the item we wish to import.
-- Items to be imported must be desclared public *pub*, all items are private by default.
+- With the *use* keyword we can import any module or contained item into the current scope, followed by the path to the item we wish to import. Items to be imported must be declared public *pub*, all items are private by default.
 
 ```rust
 
@@ -946,8 +913,7 @@ println!("{}", flavors::COCONUT);
 
 ## Exporting Items
 
-- When the crate is a library, making an item public with pub will expose that item to users of our library.
-- Rust allows us to limit where an item is accessible from when we make it public.
+- When the crate is a library, making an item public with pub will expose that item to users of our library. Rust allows us to limit where an item is accessible from when we make it public.
 - If we have a function we want to make public internally within the crate and not to users out of it we can use *pub(crate)*
 
 ```rust
@@ -961,10 +927,8 @@ pub(crate) fn print_lemon() -> {
 
 ## Separate files
 
-- When we add files to our src folder,we can treat those file's content as modules to be imported.
-- i.e add mod filename to define the file as a module.
-- When using separate files, we can nest our files within folders that have the same name as the module.
-- mod.rs inside a folder can take the place of a named file.
+- When we add files to our src folder,we can treat those file's content as modules to be imported, i.e add mod filename to define the file as a module.
+- When using separate files, we can nest our files within folders that have the same name as the module, mod.rs inside a folder can take the place of a named file.
 
 ### crate, super, self
 
@@ -975,20 +939,15 @@ pub(crate) fn print_lemon() -> {
 
 ## External crates
 
-- after adding as dependency to cargo.toml, import by name.
+- After adding as dependency to cargo.toml, import by name.
 
 ### Renaming Imports
 
-- using the *as* keyword.
-- avoid naming conflicts and make code readable.
+- Using the *as* keyword. It avoids naming conflicts and make code readable.
 
 ## Macros
 
-- Rust's macro system is a way of manipulating and generating source code 
-- Allow for things not possible in the normal language structure or require large amount of code repetition.
-
-### What are they
-
+- Rust's macro system is a way of manipulating and generating source code. Allow for things not possible in the normal language structure or require large amount of code repetition.
 - Procedures that expand and generate raw source code before the *rustc* compiler begins its compilation step.
 - We can spot macros in a Rust program in two different places
 
@@ -1009,9 +968,7 @@ println!("{wow:?} that is convenient!")
 
 ## Function like Macros
 
-- They look like normal functions whose name ends with a !.
-- Unlike functions, input of the body of a macro call is arbitrary.
-- We can denote the body of a macro with (), [], {}.
+- They look like normal functions whose name ends with a !. Unlike functions, input of the body of a macro call is arbitrary. We can denote the body of a macro with (), [], {}.
 
 ### std Library Macros
 
@@ -1023,12 +980,11 @@ println!("{wow:?} that is convenient!")
 ## Attributes
 
 - Macros that allow for special things such as set compilation options, conditionally compile pieces of code, ignore lints and denote tests and benchmarks.
-- Can be declared inside the scope of item it is being applied to, *inner attribute*, or before item being applied *outer attribute*
+- They can be declared inside the scope of item it is being applied to, *inner attribute*, or before item being applied *outer attribute*
 
 ### Inner attributes
 
-- declared with *#![attribute]* placed as first item declared in its scope.
-- can be used in external blocks, functions, implementationsand modules
+- They are declared with *#![attribute]* placed as first item declared in its scope and can be used in external blocks, functions, implementationsand modules
 
 ```rust
 
@@ -1077,8 +1033,7 @@ fn main() {
 
 ## Derive
 
-- defined #[derive(Trait)]
-- allows us to automatically implement a trait for a type.
+- defined #[derive(Trait)]. It allows us to automatically implement a trait for a type.
 
 ```rust
 #[Derive(Debug, Clone)]
@@ -1096,13 +1051,12 @@ let chair = Chair {
 /*we can print the debug output of our Chair type*/
 println!("{chair:#?}")
 ```
-- Debug is extremely useful trait for development purposes.
-- *PartialEq*, *Eq*, *Copy*, *Clone*
+
+- Debug is extremely useful trait for development purposes, *PartialEq*, *Eq*, *Copy*, *Clone*
 
 ## Available attributes
 
-- Remember since attributes are procedural macros, we are not limited to the ones provided by the language.
-- We can use procedural macros created by othersand even make our own.
+- Remember since attributes are procedural macros, we are not limited to the ones provided by the language, we can use procedural macros created by othersand even make our own.
 
 
 ## Control Flow
@@ -1123,31 +1077,28 @@ if is_daytime {
 ```
 ## Exhaustiveness
 
-- conditional evaluations are fully exhaustive, so every possible outcome must be accounted for
-- This means that when a block is an expression, every other block must return the same type.
+- Conditional evaluations are fully exhaustive, so every possible outcome must be accounted for. This means that when a block is an expression, every other block must return the same type.
 
 ## Conditional operators
 
-- used for conditional evaluations.
+- Used for conditional evaluations.
 
 ### Equality 
 
-- can be checked with *==* and non-equality with *!=*
-- They will work on any operators that implement the *Eq* and *PartialEq* traits
+- It is checked with *==* and non-equality with *!=*. They will work on any operators that implement the *Eq* and *PartialEq* traits
 
 ### Ordering
 
-- operators <, >, <=, >=
-- Work on any type that implements the *Ord* and *PartialOrd*
+- operators <, >, <=, >=. It works on any type that implements the *Ord* and *PartialOrd*
 
 ## If/Let
 
-- allows us to compare against data within a complex type by destructuring a type and access its inner value with a concise syntax.
-- best exemplified and most commonly encountered when accessing the values of monadic types such as Option<T> and Result<T, E>
+- It allows us to compare against data within a complex type by destructuring a type and access its inner value with a concise syntax.
+- It is best exemplified and most commonly encountered when accessing the values of monadic types such as Option<T> and Result<T, E>
 
 ### Declaring variables
 
-- since if/let is an expression, it can be used to conditionally declare a variable.
+- Since if/let is an expression, it can be used to conditionally declare a variable.
 
 ### Destructuring other types.
 
@@ -1155,10 +1106,8 @@ if is_daytime {
 
 ## Match
 
-- used to handle complex conditional matching in a concise and readable way.
-- takes in a pattern and compares it against any number of provided match arms.
-- if the body is a single statement or expression we must terminate with a ,.
-- match patterns are also exhaustive, meaning all possible patterns must be accounted for.
+- It is used to handle complex conditional matching in a concise and readable way, takes in a pattern and compares it against any number of provided match arms.
+- If the body is a single statement or expression we must terminate with a ,. Match patterns are also exhaustive, meaning all possible patterns must be accounted for.
 
 ```rust
 
@@ -1186,10 +1135,9 @@ match chosen_number {
 
 ## Loops
 
-- allows us to control flow of code execution by repeating a block of code
-- behaviour can be boundless or bounded by a conditional evaluation
+- They allow us to control flow of code execution by repeating a block of code, their behaviour can be boundless or bounded by a conditional evaluation
 
-### loop patterns
+### Loop patterns
 
 - loop
 - break, continue
@@ -1199,15 +1147,15 @@ match chosen_number {
 
 ### Loop labels
 
-- allows us to tag our loops with labels utilizing syntax `label: loop {}
+- They allow us to tag our loops with labels utilizing syntax `label: loop {}
 
 ## Functions
 
-- data + instructions for manipulating it = computer program.
+- Data + instructions for manipulating it = computer program.
 
 ### Function declarations
 
-- declare using *fn* keyword, name of fn, arguments and body
+- Declare using *fn* keyword, name of fn, arguments and body.
 
 ```rust
 
@@ -1217,7 +1165,8 @@ fn main() {
 
 say_howdy();
 ```
-- Function bodies have their own scope and cannot access variables from the local enviroments
+
+- Function bodies have their own scope and cannot access variables from the local enviroments.
 
 ```rust
 let location = "Kangemi!";
@@ -1234,9 +1183,10 @@ let new_location = "Kawangware";
 - Closures are a kind of lazy function that allow access variables from the local environment.
 
 ```
+
 ### Return values
 
-- we can specify value with -> operator followed by returned type.
+- We can specify value with ->operator followed by returned type.
 
 ```rust
 
@@ -1253,8 +1203,7 @@ println!("{integer}")
 ```
 ### Parameters
 
-- Functions take in data to operate on, input parameters and in Rust always require type signature.
-- declared with parameter name, followed by a : and type 
+- Functions take in data to operate on, input parameters and in Rust always require type signature. They are declared with parameter name, followed by a : and type. 
 
 ```rust
 
@@ -1267,8 +1216,7 @@ fn multiply(number_1: u32, number_2: u32) -> u32 {
 
 ### Functions as parameters
 
-- can pass functions as parameters with the *fn* pointer primitive
-- type signature takes the form fn(T) -> T
+- One can pass functions as parameters with the *fn* pointer primitive. Type signature takes the form fn(T) -> T
 
 ```rust
 
@@ -1276,7 +1224,7 @@ fn increment(number: u32) -> u32 {
     number + 1;
 }
 
-fn roudabout( top: fn(number: u32) -> u32, new: u32 ) -> u32 {
+fn roundabout( top: fn(number: u32) -> u32, new: u32 ) -> u32 {
     top(new)
 }
 
@@ -1286,13 +1234,11 @@ let inc = roundabout(increment, 9)
 
 ## Closures
 
-- Anonymous functions that can capture the state of the environment.
-- Entre' of functional programming in Rust.
-- Closures are called lazily which can help provide significant performance benefits under some conditions.
+- Anonymous functions that can capture the state of the environment. Entre' of functional programming in Rust. Closures are called lazily which can help provide significant performance benefits under some conditions.
 
 ### Closure syntax
 
-- same as functions but input parameters placed between | |.
+- Same as functions but input parameters placed between | |.
 
 ```rust
 /* function */
@@ -1303,6 +1249,7 @@ fn square_fun(num: u32, num2: u32 ) -> u32 { num * num2 };
 fn square_clo | num: u32, num2: u32 | -> u32 { num * num2 };
 
 ```
+
 - Rust has ability to infer parameter and return types, and also no need { }
 
 ```rust
@@ -1315,19 +1262,22 @@ let square = |a, b| a * b;
 /* no arguments */
 let nil = || 9 * 10;
 ```
+
 - When we store a closure as a variable, we can call it the same we would a function.
 
 ### Capturing Enviroment
 
-- Closures differ form functions in that they capture values from the scope they are defined in.
+- Closures differ from functions in that they capture values from the scope they are defined in.
 
 ```rust
+
 let house_number = 388;
 let print_number = || println!("{house_number}");
 
 print_number();
+
 ```
-- when we take values from the enviroment we take them by reference.
+- When we take values from the enviroment we take them by reference.
 
 ### Ownership and move
 
@@ -1341,14 +1291,13 @@ let print_ans = move |x| x === answer;
 println!("{}", print_ans(100));
 
 ```
-### Closure as Ds
+### Closure as DS
 
 - like functions can also be used as fields in structs or tuples.
 
 ### Laziness 
 
-- Closures are not computed until they are called.
-- For function that takes long to be computed, better performance by rewriting as a closure.
+- Closures are not computed until they are called. For function that takes long to be computed, better performance by rewriting as a closure.
 
 ## Function Iteration
 
@@ -1356,8 +1305,8 @@ println!("{}", print_ans(100));
 
 ### Iteration
 
-- any type that implements the Iterator trait gives us a plethora of methods that allow us to operate on collections without having to use a *for* loop.
-- we can create an iterator with the iter() method and then proceed through the collection with next()
+- Any type that implements the Iterator trait gives us a plethora of methods that allow us to operate on collections without having to use a *for* loop.
+- We can create an iterator with the iter() method and then proceed through the collection with next()
 
 ```rust
 
@@ -1377,8 +1326,7 @@ if let Some(second) = numbers.next() {
 
 ### Collect 
 
-- transform an iterator back into a collection.
-- Type annotations required for the returned type if they cannot be infered.
+- Transform an iterator back into a collection. Type annotations required for the returned type if they cannot be infered.
 
 ```rust 
 
@@ -1407,7 +1355,7 @@ println!("{nums:?}"); /* [20, 40, 60 ]*/
 
 ### Filter
 
-- Return values that satisfy a provided boolean conditional
+- Return values that satisfy a provided boolean conditional.
 
 ### Enumerate
 
@@ -1415,8 +1363,7 @@ println!("{nums:?}"); /* [20, 40, 60 ]*/
 
 ### Laziness
 
-- Iterators in rust are lazy, evaluated until they are needed.
-- When we want an operation that only has a side effect, use a for loop to ensure it is run.
+- Iterators in rust are lazy, evaluated until they are needed. When we want an operation that only has a side effect, use a for loop to ensure it is run.
 
 ```rust
 
@@ -1431,17 +1378,16 @@ for n in numbers {
     println!("for: {n}")
 }
 ```
+
 ## Primitives
 
-- Everything in Rust has a type.
-- Primitives are types baked into the language itself and not in the std library.
+- Everything in Rust has a type. Primitives are types baked into the language itself and not in the std library.
 
 ### Boolean
 
 ### Integers
 
-- Rust has multiple signed and unsigned integer primitives.
-- They are designated by their memory size in bits and whether or not they allow negative numbers.
+- Rust has multiple signed and unsigned integer primitives. They are designated by their memory size in bits and whether or not they allow negative numbers.
 - *i* signed integers and allow negative numbers, while unsigned integers begin with *u*.
 - i.e *u8* is an integer that represents form 0 to 255.
 - *isize* = *i8*,*i16*,*i32*,*i64*, *i128* / *usize* = *u8*
@@ -1449,8 +1395,7 @@ for n in numbers {
 
 ### Floating points
 
-- Two main types with differing precision. f32, f64.
-- Denoted by the bit size in memory.
+- Two main types with differing precision. f32, f64, denoted by the bit size in memory.
 
 ```rust
 
@@ -1469,20 +1414,18 @@ let annotate_float: f32 = 2.3;
 let new_postfix = 89u16;
 let large = -9787654i64
 ```
+
 ## Chars
 
-- This is unicode scalar value.
-- Defined by specifying the character within single quote characters.
+- This is unicode scalar value. It is defined by specifying the character within single quote characters.
 
 ## Arrays and Vec
 
-- used to create collections of data of the same type.
+- Used to create collections of data of the same type.
 - Array: used when the collection has fixed length.
 - Vec: used when the collection needs to grow and shrink in size.
 - For data that is of different types use a struct or tuple.
-
-- Due to their fixed size, arrays are very efficient at runtime.
-- We can initializethe values of an array from an expression rather than manually defining each value,
+- Due to their fixed size, arrays are very efficient at runtime. We can initialize the values of an array from an expression rather than manually defining each value,
 
 ```rust 
 
@@ -1498,7 +1441,7 @@ let many_e = ['e'; 20];
 
 - We can access values via the index expression syntax, can be a single value or a range by index.
 - single value: collection[2]
-- we can also utilize any expression that evaluate to type usize.
+- We can also utilize any expression that evaluate to type usize.
 
 ```rust
 
@@ -1519,7 +1462,7 @@ println!("{name:?}");
 ```
 ## Looping /Iteration
 
-- operate on any collection with for loops and iterators.
+- Operate on any collection with for loops and iterators.
 
 ```rust
 let array_of_chars = [1, 2, 3];
@@ -1535,9 +1478,8 @@ array_of_chars.iter().map(|c| println!("{c}"));
 
 ## Vec
 
-- Dynamically sized collection. Vec<T>
-- Stores data in heap which allows it to grow or shrink in size.
-- we can create new Vec using new() and from() but there also exists a vec![] macro
+- Dynamically sized collection. Vec<T>. It stores data in heap which allows it to grow or shrink in size.
+- We can create new Vec using new() and from() but there also exists a vec![] macro
 
 ```rust
 /* initialize a new, empty vec */
@@ -1550,8 +1492,7 @@ let new_vec: Vec<char> = vec![1, 2, 3];
 let mut new_vec = Vec::new();
 
 ```
-- Like arrays, we also use index syntax expressions to access values.
-- Unlike an array, access of out of bounds will compile and panic at runtime.
+- Like arrays, we also use index syntax expressions to access values. Unlike an array, access of out of bounds will compile and panic at runtime.
 - use methods get() and first().
 
 ## &str and String
@@ -1570,13 +1511,12 @@ let value: &str = "And that is it";
 let explicit: &'static str = "I am not even close";
 
 ```
-- Since &str is immutable, we cannot do anything else other than validate them and access their data.
-- When we don't know the size of string or plan on manipulating the data, use String.
+- Since &str is immutable, we cannot do anything else other than validate them and access their data. When we don't know the size of string or plan on manipulating the data, use String.
 
 ## String
 
 - This is stored on the heap and hence allow us to mutate value at will.
-- While heap is not as fast as the stack,it allows rust to automatically resize the allocated memory at when needed at runtime.
+- While heap is not as fast as the stack, it allows rust to automatically resize the allocated memory at when needed at runtime.
 - ptr, len, capacity stored on the stack.
 
 ```rust
@@ -1602,8 +1542,7 @@ permit(&privy)
 ```
 ## Tuples
 
-- To create compound types with differing contained types.
-- Declare by placing data within parenthesis ()
+- To create compound types with differing contained types, declared by placing data within parenthesis ().
 
 ```rust
 
@@ -1615,13 +1554,11 @@ let number = number.1;
 let string = number.2;
 
 ```
-- Access fields of a tuple using dot notation. 
-- We can also destructure a tuple anywhere the Rust syntax allows it.
+- Access fields of a tuple using dot notation. We can also destructure a tuple anywhere the Rust syntax allows it.
 
 ### Tuple struct
 
-- if we want to reuse a tuple across the codebase, we can define it as it's own custom type.
-- This is referred to as a Named Tuple or a Tuple Struct using the struct keyword.
+- If we want to reuse a tuple across the codebase, we can define it as it's own custom type. This is referred to as a Named Tuple or a Tuple Struct using the struct keyword.
 
 ```rust 
 /* tuple struct declarations must end with */
@@ -1637,18 +1574,15 @@ fn get_cat() -> Cat {
 
 ## () Unit Type
 
-- A tuple that does not contain any field() is its own primitive type in Rust.
-- we can think of it as a piece of data without any actual data, its value is its own existence.
+- A tuple that does not contain any field() is its own primitive type in Rust. We can think of it as a piece of data without any actual data, its value is its own existence.
 - Provide a safe way to handle certain situations while avoiding the pitfalls of a "null" type.
-
 - A function which does not return a value actually returns a ().
 - Unit Struct: we can also give names to our own custom unit types.
 
 ## Structs
 
-- Much like tuples, used to group items of different types, main difference is that here you can give names for each field.
-- declare using the struct keyword...with fields provided within its declaration block.
-- names should be snake_case and type annotated
+- Much like tuples, used to group items of different types, main difference is that here you can give names for each field, declared using the struct keyword...with fields provided within its declaration block.
+- It's names should be snake_case and type annotated
 
 ```rust
 
@@ -1662,13 +1596,11 @@ struct Persona {
 
 ### Instantiating 
 
-- All field options must have values otherwise code will not compile.
-- We can also instantiate from variables where if names are the same we can use the shorthand notation.
+- All field options must have values otherwise code will not compile. We can also instantiate from variables where if names are the same we can use the shorthand notation.
 
 ### Accessing values
 
-- Use the same dot notation with the desired field name.
-- Having the fields accessed via names provides more clarity within the codebase.
+- Use the same dot notation with the desired field name. Having the fields accessed via names provides more clarity within the codebase.
 - Multiple values can also be accessed using the ...var operator.
 
 ```rust
@@ -1686,22 +1618,17 @@ let guest_2 = Guest {
 println!("{} == {}", guest1.rsvp, guest2.rsvp);
 
 ```
-- We can also use a function to populate the remaining fields as long as the funtions resolves to the same type for each remaining field.
-- This is common on structs that implement the Default trait.
-- We can also match on structs like we do on other datatypes.
-- We may not want to match on all fields, only a subset hence the use of  _ for the value of a single field and ... for all remaining fields.
+- We can also use a function to populate the remaining fields as long as the funtions resolves to the same type for each remaining field. This is common on structs that implement the 
+  Default trait. We can also match on structs like we do on other datatypes. We may not want to match on all fields, only a subset hence the use of  _ for the value of a single field and ... for all remaining fields.
 
 ### impl Blocks
 
-- they are powerful tools in Rust because when we create a struct we are defining our own custom data type.
-- declaring a type allows us to make an impl block to create specialised functions that are specific to that type.
-- Functions declared within an impl block are called methods.
+- They are powerful tools in Rust because when we create a struct we are defining our own custom data type. Declaring a type allows us to make an impl block to create specialised functions 
+  that are specific to that type. Functions declared within an impl block are called methods.
 
 ## Enums
 
-- ability to have a datatype whose value can only be one of a particular set of variants.
-- declared using the enum keyword.
-- follow the PascalCase naming convention.
+- The ability to have a datatype whose value can only be one of a particular set of variants. It is declared using the enum keyword, follows the PascalCase naming convention.
 
 ```rust
 
@@ -1716,8 +1643,7 @@ enum InnerPlanets {
 let home = InnerPlanets::Earth;
 
 ```
-- Since enums can only be of a particular value, matching on an enum is a very common and useful pattern.
-- When matching on an enum all variants must be handled otherwise code will not compile.
+- Since enums can only be of a particular value, matching on an enum is a very common and useful pattern. When matching on an enum all variants must be handled otherwise code will not compile.
 - One can use the _ operator to handle the remaining unspecified variants.
 
 ```rust
@@ -1737,8 +1663,7 @@ match vacation_location {
 
 ## Variant values
 
-- Enum variants can also contain values.
-- This is possible because enum variants are actually structs in Rust.
+- Enum variants can also contain values. This is possible because enum variants are actually structs in Rust.
 
 ```rust
 
@@ -1762,8 +1687,7 @@ let dinner = Meal::Burrito {
 
 ```
 
-- Like structs, enums are our own custom data type.
-- We can provide methods for our enums through an impl block.
+- Like structs, enums are our own custom data type. We can provide methods for our enums through an impl block.
 
 ## Monads and Option
 
@@ -1771,8 +1695,7 @@ let dinner = Meal::Burrito {
 
 ### Option
 
-- is a two variant enum with generic types on at least one of the variants
-- The Option<T> is an enum with two variants Some(T) and None
+- This is a two variant enum with generic types on at least one of the variants. The Option<T> is an enum with two variants Some(T) and None.
 
 ```rust
 
@@ -1787,13 +1710,11 @@ let no_str = None;
 ```
 
 - Since it only has two variants and we can pass along its Some(T) variant, it somehow acts as a boolean expression that is capable of passing a value with it.
-- Useful for situations where the result is unknown, can either be there or missing i.e database request.
-- use the unwrap() method to access data of a monadic result. Data for Some() and panic for None.
+- Useful for situations where the result is unknown, can either be there or missing i.e database request. Use the unwrap() method to access data of a monadic result. Data for Some() and panic for None.
 
 ## Result monad
 
-- Result<T, E> is also another monadic type.
-- clever way of handling the propagation of errors in a sensible way using characteristics of monads.
+- Result<T, E> is also another monadic type. It is a clever way of handling the propagation of errors in a sensible way using characteristics of monads.
 - It is an enum of two variants: Ok<T> denotes success and Err<E> denotes error.
 
 ```rust
@@ -1817,24 +1738,20 @@ fn crib(number:i32) -> Result<bool, String>
 }
 
 ```
-- Thanks to the capacity of monadsto pass generic data on both variant arms, we can both pass a successful boolean result and treat the overall successful operation  of the function as its own boolean result. At the same time able to provide context to our errors.
+- Thanks to the capacity of monads to pass generic data on both variant arms, we can both pass a successful boolean result and treat the overall successful operation  of the function as its own boolean result. At the same time able to provide context to our errors.
 
 ### Error propagation
 
-- as with Option<>, we use unwrap() to access values
-- we can utilize if with is_ok() and is_err() methods.
-- unwrap discouraged because of program panic, use if let for safer erro patterns.
+- As with Option<>, we use unwrap() to access values. We can utilize if with is_ok() and is_err() methods. unwrap discouraged because of program panic, use if let for safer erro patterns.
 
 ### ? operator
 
-- Being able to propagate errors without a lot of syntax is crucial when keeping code clean. more time to focus on the good side of code.
-- ? operator used to achieve this exactly.
+- Being able to propagate errors without a lot of syntax is crucial when keeping code clean. more time to focus on the good side of code. ? operator used to achieve this exactly.
 - When we have a function that returns a Result, any expression within its body that also returns a Result can be appended with ? to force any Err result to be returned immediately.
 
 ### Custom Error Types
 
-- While we can utilize any type for defining error context, enums are a great canditate for errors.
-- To allow other errors types to be carried into their own ? operator, we must implement From<T> for the desired type.
+- While we can utilize any type for defining error context, enums are a great canditate for errors. To allow other errors types to be carried into their own ? operator, we must implement From<T> for the desired type.
 
 ## Lifetimes
 
@@ -1859,8 +1776,7 @@ let a;
 
 ### Annotating lifetimes
 
-- append the & with a *'label* to annotate a lifetime on a reference.
-- Lifetimes are generic in nature and usually denoted with simple names such as a' and b'.
+- Append the & with a *'label* to annotate a lifetime on a reference. Lifetimes are generic in nature and usually denoted with simple names such as a' and b'.
 
 ```rust
 
@@ -1868,8 +1784,7 @@ let live: &'a str = "This will annotate the lifetime of '`a'.";
 
 ```
 - When we create a data structure with lifetimes, we must annotate the lifetime on the field as well as on our new type directly.
-- LA for custom types occur between <> placed after the name of our data structure.
-- Functions also annotated the same way.
+- LA for custom types occur between <> placed after the name of our data structure. Functions also annotated the same way.
 
 ```rust
 struct Outfielder<'a> {
@@ -1897,7 +1812,7 @@ let NEW_CONST: &'static str = "This gotta stick";
 
 ```
 
-- can solve alot of lifetime issues by declaring them as 'static
+- It can solve alot of lifetime issues by declaring them as 'static.
 - Generics and lifetimes annotaions are located in the same place, when we have both generics and la for the same item we declare lifetimes first.
 
 ## Type Aliasing
@@ -1926,8 +1841,7 @@ fn print_name(person: Name) {
 
 ## Traits
 
-- Used to define shared behaviour between different types.
-- Defines all the methods that a trait must implement to be considered a member of that trait.
+- Used to define shared behaviour between different types. Defines all the methods that a trait must implement to be considered a member of that trait.
 
 ### Define shared behavior
 
@@ -1962,8 +1876,7 @@ impl Harmonize for Human {
 
 ```
 
-- Traits are most useful when applied to multiple types
-- Trait methods are always public
+- Traits are most useful when applied to multiple types. Trait methods are always public.
 - We cannot implement a trait  from an external crate on a type from an external crate, must make an intermediary type to connect them.
 
 ### Generics
@@ -1972,7 +1885,7 @@ impl Harmonize for Human {
 
 ### Deriving Traits
 
-- provides a way to implement certain types without having to declare an impl block.
+- Provides a way to implement certain types without having to declare an impl block.
 - This is called deriving a trait and is accomplished by placing the #[derive(Trait)] before our data structure.
 
 ```rust 
@@ -1996,14 +1909,12 @@ println!("{bird:?}")
 
 ## Generics
 
-- Rust being a strog-types language, we must provide single type signatures for data structures and function parameters.
-- This helps the compiler figure out how to manage its memory safely, can however be limiting to a programmer.
+- Rust being a strong-typed language, we must provide single type signatures for data structures and function parameters. This helps the compiler figure out how to manage its memory safely, can however be limiting to a programmer.
 - Generic types can work across multiple types.
 
 ### When to use
 
-- Imagine working on the velocity of an object, might be measured either in integer or float point numbers.
-- Building separate data structures would mean code duplication.
+- Imagine working on the velocity of an object, might be measured either in integer or float point numbers. Building separate data structures would mean code duplication.
 - Generics help avoid this code repetition by combining them into a single datatype using the generic type T.
 
 ```rust
@@ -2018,10 +1929,8 @@ let velocity_float = Velocity(3.8);
 
 ## Declaring Generics
 
-- we can utilize generics as fields on custom data types and as function parameters.
-- Since generics are situational, any item utilizing  generics must provide a signature declaring the generic types it uses.
-- We annotate genrics the same as lifetimes.
-- Signature is declared within <> following the item we are annotating.
+- We can utilize generics as fields on custom data types and as function parameters. Since generics are situational, any item utilizing generics must provide a signature declaring the generic types it uses.
+- We annotate genrics the same as lifetimes. Signature is declared within <> following the item we are annotating.
 - Generic types are conventionally named with single uppercase letters such as T.
 
 ```rust
@@ -2059,16 +1968,16 @@ impl<T> Wrapper<T> {
 
 ### Trait bounds
 
-- Trait requirements on generic types are called Trait Bounds.
-- We can require multiple constraints on the same generic type.
+- Trait requirements on generic types are called Trait Bounds. We can require multiple constraints on the same generic type.
+
 
 ### impl Trait
 
-- used for function parameters and return values, allows us to utilize generics without having to manually declare them.
+- Used for function parameters and return values, allows us to utilize generics without having to manually declare them.
 
 ### where 
 
-- useful when applying many constraints to generics 
+- Useful when applying many constraints to generics 
 
 ### Turbofish generics
 <!-- REVISIT FROM HERE -->
