@@ -1,9 +1,11 @@
 ---
-title: System Performance Enterprise and the Cloud
+title: System Performance.
 description: Understanding system performance
 date: 2023-08-01
 tags:
   - system performance
+  - Cloud computing
+  - Enterprise
   - Brendan Gregg
 ---
 

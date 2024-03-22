@@ -1968,11 +1968,10 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - Solution is to track modified record ids per query.
     
 - Expression Evaluation
-  - The DBMS represents a WHERE clause as an expression tree.
-  - The nodes in the tree represent different expression types
-    - comparisons, conjuction, arithmetic operators, constant values, tuple attribute references.
+  - The DBMS represents a WHERE clause as an expression tree. The nodes in the tree represent different expression types; comparisons, conjuction, arithmetic operators, constant values, tuple attribute references.
   - Evaluating predicates in this manner is slow as the DBMS traverses the tree and for each node that it visits, it must figure out what the operator needs to do.
-  - JIT compilation can potentially speed times up hence a better approach.
+  - A better approach is to evaluate the expression directly, an even better one being to vectorize it. JIT compilation can potentially speed times up even more hence a better approach.
+  - Velox converts expression trees into a flattened intermediate representation that they then execute during query processing, think of it like an array of function pointers to precomplied (untemplated) primitives.
 
 ### Scheduler
 
@@ -1982,16 +1981,13 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   
 ## Parallel Query Execution
 
-- Multiple workers in the same database.
-- Increased perfomance for potentially the same hardware resources
-  - Higher Throughput
-  - Lower Latency
+- Multiple workers in the same database, increased perfomance for potentially the same hardware resources, i.e Higher Throughput, Lower Latency.
+- The DBMS executes multiple tasks simultaneously to improve hardware utilization, tasks dont need to belong to the same query.
 - Increased responsiveness of the system.
-- Potentially lower TCO(total cost of ownership)
-  - fewer machines means less parts/ physical footprint/ energy consumption.
+- Potentially lower TCO(total cost of ownership), fewer machines means less parts/ physical footprint/ energy consumption.
 
 - Parallel vs Distributed
-  - Database is spread across multiple resources to dealwith large data sets, higher performance and redundancy/fault tolerance.
+  - Database is spread across multiple resources to deal with large data sets, higher performance and redundancy/fault tolerance.
   - Both appear as single logical database instance to a client application or DBMS frontend.
   - SQL query for a single-resource DBMS should have the same results on parallel or distributed DBMS.
   - Resources close vs far from each other
@@ -2024,14 +2020,10 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - DBMS always knows more than the OS.
 
 - Scheduling Goals
-   - Throughput
-    - maximise the number of completed queries.
-   - Fairness
-    - Ensure that no query is starved for resources.
-   - Query Responsiveness
-    - Minimize tail latencies(especially for short queries)
-   - Low Overhead
-    - Workers should spend most of their time executing not figuring out what task to run next.
+   - Throughput: maximise the number of completed queries.
+   - Fairness: ensure that no query is starved for resources.
+   - Query Responsiveness: minimize tail latencies(especially for short queries)
+   - Low Overhead: workers should spend most of their time executing not figuring out what task to run next.
 
 - Worker Allocation
   - Approach: 
@@ -2166,30 +2158,26 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 ### Inter vs Intra Query Parallelism
 
 - Inter-Query 
-  - Execute multiple disparate queries simultaneously improving overall performance.
-  - Increases throughput and reduces latency.
-  - If queries are read-ony then this requires almost no explicit co-ord between queries.
-  - If multiple queries are updating the db at the same time, then this is hard.
+  - Execute multiple disparate queries simultaneously improving overall performance, increasing throughput and reduces latency.
+  - If queries are read-ony then this requires almost no explicit co-ord between queries while if multiple queries are updating the db at the same time, then this is hard.
   - OLAP queries have parallelizable and non-parallelizable phases, goal is to keep all cores active.
   
 - Intra-Query 
-  - Improve the performance of a single query by executing its operators in parallel.
-  - Organisation of operators can be thought of in a producer/consumer paradigm.
+  - Improve the performance of a single query by executing its operators in parallel, organisation of operators can be thought of in a producer/consumer paradigm.
   - There are parallel versions of every operator, can either have multiple threads access centralized data structures or use partitioning to divide work up. 
-  - decreases latency for long-running queries esp for OLAP queries.
+  - Decreases latency for long-running queries esp for OLAP queries.
+  
 - Approaches
   - Intra-operator(Horizontal)
-    - Decompose operators into independent fragments that perform the same function on different subsets of data.
-    - DBMS inserts an exchange operator into the query plan to coalesce/split results from multiple parent/child.
-    - Types: Gather, Distribute, Repartition
+    - Decompose operators into independent fragments that perform the same function on different subsets of data. DBMS inserts an exchange operator into the query plan to coalesce/split 
+      results from multiple parent/child. i.e Gather, Distribute, Repartition
+  
   - Inter-operator(Vertical)
-    - Operations are overlapped in order to pipeline data from one stage to the next without materialization.
-    - Workers execute operators from different segments of a query plan at the same time.
-    - More common in streaming systems, Flink, Kafka, Pulsar, Spark.
-    - Also called pipeline parallelism.
+    - Operations are overlapped to pipeline data from one stage to the next without materialization. Workers execute multiple operators from different segments of a query plan at the 
+      same time. It still needs exchange operators to combine intermediate results from segments. It is also called pipelined parallelism. It is more common in streaming systems, Flink, Kafka, Pulsar, Spark.
+    
   - Bushy
-    - Hybrid of Intra and Inter, where workers execute multiple operators from different segments of a query plan at the same time.
-    - It still needs exchange operators to combine intermediate results from segments.
+    - Hybrid of Intra and Inter, where workers execute multiple operators from different segments of a query plan at the same time. It still needs exchange operators to combine intermediate results from segments.
         
 - Using additional processes/threads to execute queries in parallel wont help if the disk is always the main bottleneck.
 
@@ -2217,119 +2205,115 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Concurrency Issues
   - Resource Contention.
 
+## Adaptive Query Processing
+
+- This allows the execution engine to modify a query's plan and expression trees while it is running. The goal is to use information gathered from executing some part of the query to decide
+  how to proceed with executing the rest of the query. In the extreme case, the DBMS can give up and return the query to the optimizer but with new information.
+- `ref paper:` Adaptive Query Processing in the looking glass.
 
 ## Vectorised Query Execution
   
-- The process of converting an algorithm's scalar implementation that processes a single pair of operands at a time, to a vector implementation that processes one 
-  operation on multiple pairs of operands at once.
-- Why this matters
-  - say we can parallelize our algorithms over 32 cores, assume each core has a 4-wide SIMD registers, speed-up 32x * 4x = 128x.
-- Single Instruction, Multiple Data
-  - a class of CPU instructions that allow the processor to perform the same operation on multiple data points simultaneously.
-  - all major ISAs have microarchitecture support SIMD operations
-    - x86: mmx, sse, sse2, sse3, sse4, avx, avx2, avx512
-    - PowerPC: Altivec
-    - ARM: Neon, SVE
-    - RISC-V: RVV.
+- The process of converting an algorithm's scalar implementation that processes a single pair of operands at a time, to a vector implementation that processes one operation on multiple 
+  pairs of operands at once. This is known as Data Parallelization. Suppose we can parallelize our algorithms over 32 cores, assuming each core has a 4-wide SIMD registers, speed-up 32x * 4x = 128x.
+- Single Instruction, Multiple Data (SIMD): A class of CPU instructions that allow the processor to perform the same operation on multiple data points simultaneously. All major ISAs have microarchitecture support SIMD operations
+  - x86: mmx, sse, sse2, sse3, sse4, avx, avx2, avx512
+  - PowerPC: Altivec
+  - ARM: Neon, SVE
+  - RISC-V: RVV.
+
 - Approaches
-  - Horizontal
-    - Perform operation on all elements together within a single vector.
-  - Vertical
-    - Perform operation in an elementwise manner on elements of each vector.
+  - Horizontal: Perform operation on all elements together within a single vector to produce a scalar output.
+  - Vertical: Perform operation in an elementwise manner on elements of each vector.
 
-- SIMD Instructions
-  - Data movement
-    - move data in and out of vector registers
-  - Arithmetic Operations
-    - apply operation on multiple data items.
-    - ADD, MUL, SUB, DIV, MAX, MIN.
-  - Logical Instructions
-    - logical operations on multiple data items.
-    - AND, OR, XOR, ANDN, ANDPS, ANDNPS.
-  - Comparison Instructions
-    - Compare multiple data items
-  - Shuffle Instructions
-    - move data between SIMD registers
-  - Miscellaneous
-    - Conversion: Transform data between x86 and SIMD registers.
-    - Cache Control: move data directly from SIMD registers to memory(bypass CPU cache)
-  - ref video:`james reinders`
-- SIMD Trade-offs
-  - Advantages
-    - Significant performance gains and resource utilization if an algorithm can be vectorized.
-  - Disadvantage
-    - Implement an algorithm using SIMD is still mostly a manual process.
-    - SIMD may have restrictions on data alignment
-    - Gathering data into SIMD registers and scattering it to the correct locations is tricky and/or inefficient.(no longer true in avx-512f)
-    - *read more on avx-512*
+### SIMD Instructions
 
-- SIMD Implementations
-  - Automatic Vectorization
-    - compiler can identify when instructions inside of a loop can be rewritten as a vectorized operations.
-    - works for simple loops only and is rare in database operators. Require h/w support for SIMD instructions.
-  - Compiler Hints
-    - provide the compiler with additional information about the code to let it know that its safe to vectorize.
-    - Approaches:
-      - Give explicit information about memory locations
-      - Tell the compiler to ignore vector dependencies.
-      - *check languages support for such directives*
-  - Explicit Vectorization
-    - Use CPU intrinsics to manually marshal data between SIMD registers and execute vectorized instructions
-      - not portable across CPUs(ISAs / versions)
-    - There are libraries that hide the underlying calls to SIMD intrinsics.
-      - Google Highway
-      - simd
-      - Expressive Vector Engine
-      - std::simd
+- Data movement: Move data in and out of vector registers.
+- Arithmetic Operations: Apply operation on multiple data items, i.e ADD, MUL, SUB, DIV, MAX, MIN.
+- Logical Instructions: Logical operations on multiple data items, i.e AND, OR, XOR, ANDN, ANDPS, ANDNPS.
+- Comparison Instructions: Compare multiple data items
+- Shuffle Instructions: Move data between SIMD registers
+- Conversion: Transform data between x86 and SIMD registers. 
+- Cache Control: Move data directly from SIMD registers to memory(bypass CPU cache)
+- `ref video:`james reinders
+  
+### SIMD Trade-offs
+
+- Advantages
+  - Significant performance gains and resource utilization if an algorithm can be vectorized.
+- Disadvantage
+  - Implement an algorithm using SIMD is still mostly a manual process.
+  - SIMD may have restrictions on data alignment
+  - Gathering data into SIMD registers and scattering it to the correct locations is tricky and/or inefficient.(no longer true in avx-512f)
+  - *read more on avx-512*
+
+### SIMD Implementations
+
+- Automatic Vectorization
+  - The compiler can identify when instructions inside of a loop can be rewritten as a vectorized operations. It works for simple loops only and is rare in database operators. Require h/w support for SIMD instructions.
+
+- Compiler Hints
+  - We provide the compiler with additional information about the code to let it know that its safe to vectorize.
+  - Approaches:
+    - Give explicit information about memory locations
+    - Tell the compiler to ignore vector dependencies.
+    - *check languages support for such directives*
+
+- Explicit Vectorization
+  - Use CPU intrinsics to manually marshal data between SIMD registers and execute vectorized instructions, not portable across CPUs(ISAs / versions).
+  - There are libraries that hide the underlying calls to SIMD intrinsics, i.e Google Highway, simd, Expressive Vector Engine, std::simd.
+
+- ref paper:` Everything you always wanted to know about compiled and vectorized queries but were afraid to ask`.
+
+### Vectorization Fundamentals
 
 - There are fundamental SIMD operations that the DBMS will use to build more complex functionality
-  - Masking
-    - Almost all avx-512 operations support predication variants whereby the CPU only performs operations on lanes specified by an input bitmask.
-  - Permute
-    - for each lane, copy values in the input vector specified by the offset in the index vector into the destination vector.
-    - prior to avx-512, DBMS had to write data from the SIMD register to memory then back to the SIMD register.
+  - Masking: Almost all avx-512 operations support predication variants whereby the CPU only performs operations on lanes specified by an input bitmask.
+  - Permute: For each lane, copy values in the input vector specified by the offset in the index vector into the destination vector, prior to avx-512, DBMS had to write data from the SIMD register to memory then back to the SIMD register.
   - Selective Load/Store
   - Compress/Expand
   - Selective Gather/Scatter
-  - ref paper:`make the most out of your smid investments: counter control flow divergence in compiled query pipelines`
 
-- Vectorized DBMS algorithms
-  - ref paper:`rethinking simd vectorization for in-memory databases`
-  - principles for efficient vectorization by using fundamental vector operations to construct more advanced functionality.
-    - favor vertical vectorization by processing different input data per lane.
-    - maximize lane utilization by executing unique data items per lane subset(no useless computations)
-  - vectorized operators
-    - Selection Scans
-      - branchless.
-      - key - mask - offset.
-      - bitmasks replace if-clauses.
-      - relaxed operator fusion
-        - ref paper:`relaxed operator fusion for in-memory databases: making compilation, vectorization and prefetching work together at last`
-        - vectorized processing model designed for query compilation execution engines.
-        - decompose pipelines into stages that operate on vectors of tuples
-          - each stage may contain multiple operators
-          - communicate through cache-resident buffers
-          - stages are granularity of vectorization + fusion.
-        - dbms can tell the CPU to grab the next vector while it works on the current batch.
-          - prefetch enabled operators define start of new stage
-          - hides the cache miss latency
-        - any prefetching technique is suitable
-          - group prefetching, s/w pipelining, AMAC.
-          - Group prefetching works and is simple to implement.
-    - Hash Tables
-      - expand linear probing hash table
-      - converge on cache size degradation
-    - Partitioning / Histograms.
-      - use scatter and gathers to increment counts
-      - replicate the histogram to handle collisions.
+- ref paper:`make the most out of your smid investments: counter control flow divergence in compiled query pipelines`
+
+### Vectorized DBMS algorithms
+  
+- ref paper:`rethinking simd vectorization for in-memory databases`
+- They are principles for efficient vectorization by using fundamental vector operations to construct more advanced functionality. They favor vertical vectorization by processing different input data per lane and maximize 
+  lane utilization by executing unique data items per lane subset (no useless computations).
+
+#### Vectorized operators
+
+- Selection Scans
+  - branchless.
+  - key - mask - offset.
+  - bitmasks replace if-clauses.
+  - Relaxed Operator Fusion
+    - ref paper:`relaxed operator fusion for in-memory databases: making compilation, vectorization and prefetching work together at last`
+    - vectorized processing model designed for query compilation execution engines.
+    - decompose pipelines into stages that operate on vectors of tuples, where each stage may contain multiple operators, communicate through cache-resident buffers where stages are granularity of vectorization + fusion.
+    - The DBMS can tell the CPU to grab the next vector while it works on the current batch, i.e prefetch enabled operators define start of new stage, hides the cache miss latency.
+    - Any prefetching technique is suitable, i.e Group prefetching, s/w pipelining, AMAC. Group prefetching works and is simple to implement.
+  
+- Vector Refill Algorithms
+  - Buffered: Use additional SIMD registers to stage results within an operator and procees with next loop iteration to fill in underutilized lanes vectors.
+  - Partial: Use additional SIMD registers to buffer results from underutilized vectors and then return to previous operator to process the next vector. Requires fine-grained bookkeeping to make sure other operators
+    don't clobber deferred vectors.
+  - ref paper: `Make the most out of your SIMD investemtns: counter control flow divergence in compiled query pipelines.`
+    
+- Hash Tables
+  - Expand linear probing hash table.
+  - Converge on cache size degradation.
+
+- Partitioning / Histograms.
+  - Use scatter and gathers to increment counts.
+  - Replicate the histogram to handle collisions.
 
 - Caveat Emptor
-  - AVX-512 is not always faster than AVX2
-  - Some CPUs downgrade their clockspeed when switching to AVX-512 mode
-    - compilers will prefer 256-bit SIMD operations
+  - AVX-512 is not always faster than AVX2.
+  - Some CPUs downgrade their clockspeed when switching to AVX-512 mode, compilers will prefer 256-bit SIMD operations
   - If only a small portion of the process uses AVX-512, then it is not worth the downclock penalty.
-- Vectorization is essential for OLAP queries
-- We can combine all the intra-query parallelism optimizations we've talked about in a DBMS
+  
+- Vectorization is essential for OLAP queries, but implementing an algorihtm using SIMD is still a manual process. We can combine all the intra-query parallelism optimizations we've talked about in a DBMS
   - Multiple threads processing the same query.
   - Each thread can execute a compiled plan
   - The compiled plan can invoke vectorized operations.
@@ -2494,91 +2478,84 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 ## Query Compilation and Code Generation
 
 - Optimization goals:
-  - Reduce Instruction count
-    - focus of this segment
-    - use fewer instructions to do the same amount of work.
-  - Reduce Cycles per Instruction
-  - Parallelize Execution
+  - Reduce Instruction count: Use fewer instructions to do the same amount of work.
+  - Reduce Cycles per Instruction: Execute more CPU instructions in fewer cycles.
+  - Parallelize Execution: Use multiple threads to compute each query in parallel.
+  
 - Ref paper:`Compilation in the microsoft sql server hekaton engine`
-  - after minimizing disk i/o during query execution, only way to increase throughput is to reduce the number of instructions executed.
-    - to go 10x faster. DBMS must execute 90% fewer instructions.
-    - to go 100x faster, DBMS must execute 99% fewer instructions.*very hard*.
-- Obs:
-  - One way to achieve such a reduction in instructions is through code specialization
-  - This means generating code that is specific to a task in the DBMS.
-  - Most code is written to make it easy for humans to understand rather than performance.
-- Code specialization
-  - The DBMS generates code for any CPU-intensive task that has a similar execution pattern on different inputs
-    - Access Methods
-    - Stored Procedures
-    - Query Operator execution
-    - Predicate Evaluation *most common
-    - Logging Operations
-  - Approaches:
-    - Transpilation
-      - Write code that converts a relational query plan into imperative language source code and then run it through a conventional compiler to generate native code.
-    - JIT Compilation
-      - generate an IR of the query that the DBMS then compiles into native code.
-- Hique - code generation
-  - ref paper:`generating code for holistic query evaluation`
-  - For a given query plan, create a c/cpp program that implements that query's execution
-    - bake in all the predicates and type conversions
-  - Use an off-self compiler to convert the code into a shared object, link it to the DBMS process and then invoke the exec function.
-  - The generates query code can invoke any other function in the DBMS. This allows it to use all the same components as interpreted queries
-    - Network Handlers
-    - Buffer Pool Manager
-    - Concurrency control
-    - Logging / Checkpoints
-    - Indexes
-  - Debugging is relatively easy because you step through the generated source code.
-  - Watch Query Compilation cost
-  - Hique does not support full pipelining.
-- Relational operators are a useful way to reason about a query but are not the most efficient way to execute it.
-- It takes a relatively long time to compile a c/cpp source file into executable code.
-- Hyper - JIT Query Compilation
-  - ref paper:`efficiently compiling efficient query plans for modern h/w`
-  - Compile queries in-memory into native code using LLVM toolkit
-    - emits LLVM IR.
-  - Aggressive operator function within pipelines to keep a tuple in CPU registers for as long as possible.
-    - push-based vs pull-based.
-    - data centric vs operator centric.
-  - Query compilation time grows super-linearly relative to the query size.
-    - no of joins
-    - no of predicates
-    - no of aggregates
-  - not a big issue with OLTP as opposed to OLAP workloads.
-- Hyper - adaptive execution
+  
+- After minimizing disk i/o during query execution, only way to increase throughput is to reduce the number of instructions executed, To go 10x faster, DBMS must execute 90% fewer instruction while 
+  to go 100x faster, DBMS must execute 99% fewer instructions.*very hard*.
+  
+- One way to achieve such a reduction in instructions is through code specialization. This means generating code that is specific to a task in the DBMS. Most code is written to make it easy for humans 
+  to understand rather than performance.
+
+### Code specialization
+
+- The DBMS generates code for any CPU-intensive task that has a similar execution pattern on different inputs.
+  - Access Methods
+  - Stored Procedures
+  - Query Operator execution
+  - Predicate Evaluation *most common
+  - Logging Operations
+  
+- For query-focused compilation, the DBMS specializes it after generating the physical plan for a query.
+
+- Code specialization benefits
+  - Attribute types are known a priori, data access function calls can be converted to inline pointer casting.
+  - Predicates are known a priori, they can be evaluated using primitive data comparisons.
+  - No function calls in loops, allows the compiler to efficiently distribute data to registers and increase cache reuse.
+
+- Code specialization methods 
+  - Transpilation: Write code that converts a relational query plan into imperative language source code and then run it through a conventional compiler to generate native code.
+  - JIT Compilation: Generate an IR of the query that the DBMS then compiles into native code.
+
+### Hique: Holistic Code Generation
+
+- ref paper:`Generating code for holistic query evaluation`
+- For a given query plan, create a c/cpp program that implements that query's execution, bake in all the predicates and type conversions. Use an off-self compiler to convert the code 
+  into a shared object, link it to the DBMS process and then invoke the exec function.
+
+- The generated query code can invoke any other function in the DBMS. This allows it to use all the same components as interpreted queries, i.e network handlers, Buffer Pool Manager, Concurrency control, 
+  Logging / Checkpoints and Indexes. Debugging is also relatively easy because you step through the generated source code.
+  
+- Relational operators are a useful way to reason about a query but are not the most efficient way to execute it. It takes a relatively long time to compile a c/cpp source file into executable code. Hique 
+  also does not support full pipelining.
+
+### Hyper - JIT Query Compilation
+
+- ref paper:`efficiently compiling efficient query plans for modern h/w`
+- Here we compile queries in-memory into native code using LLVM toolkit, instead of emitting Cpp code, Hyper emits LLVM IR.
+- Aggressive operator fusion within pipelines to keep a tuple in CPU registers for as long as possible.
+  - push-based vs pull-based.
+  - data centric vs operator centric.
+- Query compilation time grows super-linearly relative to the query size, i.e no of joins, no of predicates, no of aggregations. It is not a big issue with OLTP as opposed to OLAP workloads.
+
+- Hyper: Adaptive Execution
   - ref paper:`adaptive execution of compiled queries`
-  - generate LLVMIR for the query and immediately start executingthe IR using an interpreter.
-  - Then the DBMS compiles the query in the background.
-  - When the compiled query is ready, seamlessly replace the interpretive execution
-    - for each morsel, check to see whether the compiled version is available.
-- Real-world implementations
-  - Custom
-    - System R.
-    - Actian Vector
-      - ref paper:`micro adaptivity in vectorwise`
-    - Amazon Redshift
-      - ref paper:`amazon redshift re-invented`
-    - Oracle
-    - Ms Hekaton
-      - ref paper:`compilation in the microsoft sql server hekaton engine`
-    - SQLite
-      - converts a query plan into opcodes, then executes them in a custom VM.(bytecode engine)
-      - Virtual Database Engine(VDBE)
-      - VM ensures queries execute the same in any possible environment.
-    - TUM Umbra
-      - ref paper:`tidy tuples and flying start: fast compilation and fast execution of relational queries in umbra`*
-  - JVM-BASED
-    - Apache Spark
-      - ref paper:`spark sql: relational data processing in spark`
-    - Neo4j
-    - Presto/Trino
-  - LLVM
-    - Single store
-      - MemSQL programming language(MPL)
-    - VitesseDB
-    - PostgesSQL 2018
+  - Generate LLVM IR for the query and immediately start executing the IR using an interpreter. Then the DBMS compiles the query in the background. When the compiled query is ready, seamlessly replace 
+    the interpretive execution, for each morsel, check to see whether the compiled version is available.
+
+### Real-world implementations
+
+- Custom
+  - System R: ref paper: `A history and evaluation of system R`
+  - Actian Vectorwise: ref paper:`Micro adaptivity in vectorwise`
+  - Amazon Redshift: ref paper:`Amazon Redshift re-invented`
+  - Oracle
+  - Ms Hekaton: ref paper:`Compilation in the microsoft sql server hekaton engine`
+  - SQLite: converts a query plan into opcodes, then executes them in a custom VM(bytecode engine also known as Virtual Database Engine(VDBE). VM ensures queries execute the same in any possible environment.
+  - TUM Umbra: ref paper:`Tidy tuples and flying start: fast compilation and fast execution of relational queries in umbra`, `on another levle; how to debug compiling query engines`*
+
+- JVM-BASED
+  - Apache Spark: ref paper:`spark sql: relational data processing in spark`
+  - Neo4j
+  - Presto/Trino
+
+- LLVM
+  - Single store: MemSQL programming language(MPL)
+  - VitesseDB
+  - PostgesSQL 2018
     
     
 ## Concurrency Control Theory
@@ -3776,7 +3753,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Query ->FRONTEND(parser) ->PLANNER(binder,rewriter,optimizer+cost models) ->CATALOG(metadata,data locations, statistics, data discovery) ->SCHEDULER(plan fragments) ->EXECUTION ENGINE(block requests) ->I/O SERVICE
 
 
-#### Data categories
+### Data categories
 
 - ref paper:`Building an elastic query engine on disaggregated storage`
 - Persistent Data
@@ -3786,7 +3763,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Short-lived artifiacts produced by query operators during execution and then consumed by other operators, it however has no correlation to the amount of persistent data that it reads
     or the execution time.
     
-#### Distributed System Architecture
+### Distributed System Architecture
 
 - ref paper:`The case of shared nothing`
 - A distributed DBMS system architecture specifies the location of the database persisten data files and this affects how nodes coordinate with each other and where 
@@ -3802,7 +3779,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     
 - Shared Nothing vs Shared Disk
 
-#### Object Stores
+### Object Stores
 
 - Database tables are partitioned into large, immutable files stored in an object store where all attributes for a tuple are stored in the same file in a columnar layout(PAX),
   and the header(or footer) contains meta-data about columnar offsets, compression schemes, indexes and zone maps.
