@@ -1994,60 +1994,50 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Resources communicate fast vs slow.
   - Communication cheap and reliable vs very opposite.
 
-- Process Models
+- Process Model
   - A process model defines how a system is architectured to support concurrent requests / queries from a multi-user application.
   - A worker is the DBMS component that is responsible for executing tasks on behalf of the client and returning the results.
   
 ### Approaches
 
 - Process per DBMS worker
-  - Each worker is a separate OS process.
-  - Relies on OS scheduler.
-  - Uses shared memory for gloabl data structures.
-  - A process crash does not take down the entire system.
+  - Each worker is a separate OS process. Relies on OS scheduler. Uses shared memory for global data structures. A process crash does not take down the entire system.
 
 - Thread per DBMS worker
-  - Single process with multiple worker threads.
-  - DBMS manages its own scheduling
-  - It may or not use a dispatcher thread.
-  - Thread crash may kill the entire system.
+  - Single process with multiple worker threads. DBMS manages its own scheduling. It may or not use a dispatcher thread. Thread crash may kill the entire system.
 
 - Query Scheduling
   - How many tasks should it use?
   - How many CPU cores should it use.
   - What CPU core should the tasks eecute on
   - Where should a task store its output
+
 - DBMS always knows more than the OS.
 
-- Scheduling Goals
-   - Throughput: maximise the number of completed queries.
-   - Fairness: ensure that no query is starved for resources.
-   - Query Responsiveness: minimize tail latencies(especially for short queries)
-   - Low Overhead: workers should spend most of their time executing not figuring out what task to run next.
+### Scheduling Goals
+
+- Throughput: maximise the number of completed queries.
+- Fairness: ensure that no query is starved for resources.
+- Query Responsiveness: minimize tail latencies(especially for short queries)
+- Low Overhead: workers should spend most of their time executing not figuring out what task to run next.
 
 - Worker Allocation
-  - Approach: 
-    - One worker per core
-      - each core is assigned one thread that is pinned to that core in the OS.
-      - sched_setaffinity
-    - Multiple workers per core
-      - Use a pool of workers per core or per socket.
-      - Allows CPU cores to be fully utilized in case one worker at a core blocks.
+  - One worker per CPU core.
+    - Each core is assigned one thread that is pinned to that core in the OS via syscalls. see sched_setaffinity.
+  - Multiple workers per core
+    - Use a pool of workers per core or per socket. Allows CPU cores to be fully utilized in case one worker at a core blocks.
 
 - Task Assignment
-  - Approach:
-    - Push
-      - A centralized dispatcher assigns taks to workers and monitors their progress.
-      - When the worker notifies the dispatcher that it is finished, it is given a new task.
-    - Pull
-      - Workers pull the next task form a queue, process it and then return to get the next task.
+  - Push
+    - A centralized dispatcher assigns taks to workers and monitors their progress. When the worker notifies the dispatcher that it is finished, it is given a new task.
+  - Pull
+    - Workers pull the next task from a queue, process it and then return to get the next task.
 
-- The DBMS scheduler must be aware of its hardware memory layout
-  - Uniform vs Non-Uniform Memory Access.
+- Regardless of what worker allocation or task assignment policy the DBMS uses, it's important that workers operate on local data. The DBMS scheduler must be aware of the location of data and 
+  each node's memory layout, i.e Uniform vs Non-Uniform Memory Access, Attached Cached vs Nearby Cache vs Remote Storage.
 
 - Data Placement
-  - DBMS can partition memory for a database and assign each partition to a CPU.
-  - By controlling and tracking the location of partitions, it can schedule operators to execute on workers at the closest CPU core.
+  - DBMS can partition memory for a database and assign each partition to a CPU. By controlling and tracking the location of partitions, it can schedule operators to execute on workers at the closest CPU core.
   - Linux move_pages and numactl
 
 - Memory Allocation
@@ -2058,12 +2048,12 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - But this new virtual memory is not immediately backed by physical memory
       - OS allocates physical memory when there is a page fault on access.
     - After a page fault, where does theOS allocate physical memory in a NUMA system.
+  
   - Memory Allocation Location
-    - Approach:
-      - Interleaving
-        - Distribute allocated memory uniformly across CPUs
-      - First Touch
-        - at the CPU of the thread that access the memory location that caused the page fault.
+    - Interleaving
+      - Distribute allocated memory uniformly across CPUs
+    - First Touch
+      - at the CPU of the thread that access the memory location that caused the page fault.
     - OS can try to move memory to another NUMA region from observed access patterns.
 
 - Partitioning vs Placement
@@ -2072,52 +2062,56 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - Attribute Ranges
     - Hashing
     - Partial/Full Replication
+  
   - A placement scheme then tell the DBMS where to put those partitions
     - Round-robin
     - Interleave across cores
 
 - How do we decide how to create a set of tasks from a logical query plan?
-  - Static scheduling
-    - DBMS decided how many threads to use to execute the query when it generates the plan.
-    - It does not change while the query executes
-      - Easiest approach is to just use the same # of tasks as the # of cores.
-      - Can still assing tasks to threads based on data location to maximize local data processing.
   
-  - Morsel-driven scheduling
-    - ref paper: `morsel-driven parallelism: numa-aware query evaluation framewrok for the many-core age`
-    - Dynamic scheduling of tasks that operate over horizontal partitions called morsels distributed across cores
-      - One worker per core.
-      - One morseld per task.
-      - Pull-based task assignment.
-      - Round-robin data placement
-    - Supports parallel, NUMA-aware operator implementations.
-    - Because there is only one worker per core and oe morsel per task, HyPer must use work stealing because otherwise threads could sit idle waiting for stragglers
-    - DBMS uses a lock-free has table to maintain the global work queues.
-    - Tasks can have different execution costs per tuple
-      - Simple selection vs string matching
-    - HyPer has no notion of execution priorities...
-      - Short-running queries get blocked behind long-running queries
-      - All query tasks are executed with same priority
-    - Umbra - Morsel scheduling 2.0
-      - ref paper:`self-tuning query scheduling for analytical workloads`
-      - taks are not created statically at runtime.
-      - each task may contain multiple morsels.
-      - implementation of stride scheduling
-        - each worker maintains its own thread-local meta-data about the available tasks to execute.
-          - active slots - which entries in the global slot arrat have active task sets available.
-          - change mask - indicates when a new task set is added to the global slot array.
-          - return mask - indicates when a worker completes a task set.
-        - workers perform CaS updates to TLS meta-data to broadcasr changes
-      - priority decay - query arrival times.
+- Static scheduling
+  - DBMS decided how many threads to use to execute the query when it generates the plan. It does not change while the query executes. The easiest approach is to just use the same # of tasks 
+    as the # of cores. One can still assing tasks to threads based on data location to maximize local data processing.
+  - Slower tasks will hurt query latency because dependent tasks must wait until that pipeline completes.
+
+- Morsel-driven scheduling
+  - ref paper: `morsel-driven parallelism: numa-aware query evaluation framewrok for the many-core age`
+  - Dynamic scheduling of tasks that operate over horizontal partitions called morsels distributed across cores
+    - One worker per core.
+    - One morseld per task.
+    - Pull-based task assignment.
+    - Round-robin data placement.
+  - Supports parallel, NUMA-aware operator implementations.
+  - The workers perform cooperative scheduling for each query plan using a single global task queue, each worker tries to select tasks that will execute on morsels that are local to it. If there are 
+    no local tasks, then the worker just pulls the next task from the global work queue.
+  - Because there is only one worker per core and oe morsel per task, HyPer must use work stealing because otherwise threads could sit idle waiting for stragglers. DBMS uses a lock-free hash table to maintain the global work queues.
+  - Tasks can have different execution costs per tuple, i.e Simple selection vs string matching.
+  - HyPer has no notion of execution priorities, short-running queries get blocked behind long-running queries and all query tasks are executed with same priority.
   
-  - SAP HANA - NUMA-AWARE SCHEDULER
+  - Umbra: Morsel scheduling 2.0
+    - ref paper:`self-tuning query scheduling for analytical workloads`
+    - Rather than scheduling tasks based chunks on data(morsels), the DBMS schedules tasks based on time. Tasks are not created statically at runtime. System exponentially grow morsel sizes per task set until an 
+      individual task takes 1ms to execute.
+    - Automatic priority decay for query tasks, ensures that short-running queries finish quickly and long-running queries are not starved for resources.Modern implementation of stride scheduling.
+    - Scheduling state
+      - Each worker maintains its own thread-local meta-data about the available tasks to execute.
+        - Active slots - which entries in the global slot array have active task sets available.
+        - Change mask - indicates when a new task set is added to the global slot array.
+        - Return mask - indicates when a worker completes a task set.
+      - Workers perform CaS updates to TLS meta-data to broadcast changes.
+      - When a worker completes the last morsel for a query's active task set, it inserts the next task set into the global slot array and updates the Return Mask for all workers. When a new query arrives, the scheduler
+        updates the workers' Change Mask to inform them of the new query tasks in a slot.
+    - Priority decay
+      - Each worker maintains additional thread-local meta-data to compute the priorities of queries in real time: 
+        - Global pass - How many quantum rounds the DBMS has completed.
+        - Pass Values - How much time a query has consumed.
+        - Priorities - Decremented as the query runs longer.
+  
+  - SAP HANA: NUMA-AWARE SCHEDULER
     - ref paper: `scaling up concurrent main-memory column store scans:towards adaptive numa-aware data and task placement`
-    - pull-based scheduling with multiple worker threads that are organized into groups
-      - each CPU can have multiple groups
-      - each group has a soft and hard priority queue
-    - uses a separate "watchdog" thread to check whether groups are saturated and can reassingn tasks dynamically.
-    - DBMS maintains soft and hard priority task queues for each thread group.
-      - threads can steal tasks from other groups soft queue
+    - Pull-based scheduling with multiple worker threads that are organized into groups, i.e Each CPU can have multiple groups, each group has a soft and hard priority queue.
+    - Uses a separate "watchdog" thread to check whether groups are saturated and can reassingn tasks dynamically.
+    - DBMS maintains soft and hard priority task queues for each thread group. Threads can steal tasks from other groups soft queue.
     - Four different pools of thread per group
       - Working: actively executing a task.
       - Inactive: blocked inside of the kernel due to a latch
@@ -2126,10 +2120,11 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - Dynamically adjust thread pinning based on whether a task is CPU or memory bound.
 
 - SQLOS 
-  - user-level OS layer that runs inside the DBMS and manages provisioned hardware resources.
-    - determines which taks are schedules onto which threads.
-    - Also manages I/O scheduling and higher-level concepts like logical database locks.
+  - User-level OS layer that runs inside the DBMS and manages provisioned hardware resources. It determines which tasks are scheduled onto which threads. It also manages I/O scheduling and higher-level concepts like logical database locks.
     - ref: `Ms sql server 2012 interals`
+
+- Dynamic scaling vs Work stealing
+  - There are two desing decisions on how to handle queries that take longer to complete than expected, dynamic scaling involves provision of additional workers before a query starts while work stealing is taking tasks from a peer.
 
 - Non-preemptive thread scheduling through instrumented DBMS code.
 - If requests arrive at the DBMS faster than it can execute them, then the system becomes overloaded.
@@ -2155,6 +2150,67 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - do not have to manage shread memory.
     - thread per worker does not mean that DBMS supports intra-query parallelism
 
+## Parallel Join Algorithms
+  
+- Perform a join between two relations on multiple threads simultaneously to speed up operation. The two main approaches are Hash join and Sort-Merge Join.
+- `ref paper:`An experimental comparison of thirteen relational equi-joins in main memory.
+
+- Design goals (goals matter whether DBMS is using hardware-conscious or hardware-oblivious algorithms for joins)
+  - Minimize synchronization, avoid taking latches during execution.
+  - Minimize memory access cost, ensure that data is always local to worker thread, reuse data while it exists in CPU cache. 
+  
+- Improving cache behaviour
+  - Factors that affect cache misses in a DBMS, cache + TLB capacity, locality (temporal and spatial)
+  - Non-random access (Scan), clustering data to a cache line, execute more operations per cache line.
+  - Random Access (Lookups), partition data to fit in cache + TLB.
+  
+- Hash join is one of the most important operators in a DBMS for OLAP workloads, but still not the dominant cost.
+- It is important that we speed up our DBMS's join algorithm by taking advantage of multiple cores, we want to keep all cores busy without becoming memory bound due to cache misses.
+
+- Hash Join
+  - Partition: Divide the tuples of R and S into disjoint subsets using a hash funcion on the join key.
+  - Build: Scan relation R and create a hash table on join key.
+  - Probe: For each tuple in S, look up its join key in hash table for R. If a match is found, output combined tuple.
+
+- Partition Phase
+  - Split the input relations into partitioned buffers by hashing the tuples' join key(s). Divide the inner/outer relations and redistribute among the CPU cores. Ideally the cost of partitioning
+    is less that the cost of cache misses during build phase.
+  - Explicitly partitioning the input relations before a join operator is sometimes called Grace Hash Join.
+
+- Approaches
+  - Non-blocking partitioning: Only scan the input relation once. Produce output incrementally and let other threads build hash table at the same time.
+    - Shared partitions: Single global set of partitions that all threads update. Must use a latch to synchronize threads.
+    - Private partitions: Each thread has its own set of partitions, must consolidate them after all threads finish.
+    
+  - Blocking Partitioning (Radix): Scan the input relation multiple times to generate the partitions, only materialize results all at once. Sometimes called Radix Hash Join.
+    - Step 1: Scan R and compute a histogram of the # of tuples per hash key for the radix at some offset.
+    - Step 2: Use this histogram to determine per-thread output offsets by computing the prefix sum.
+    - Step 3: Scan R again and partition them according to the hash key. 
+    - The Radix of a key is the value of an integer at a position (using its base), efficient to compute with bitshifting + multiplication. Compute radix for each key and populate histogram of counts per radix.
+    - The prefix sum of a sequence of numbers is a second sequence of numbers that is a running total of the input sequence.
+  
+  - Optimizations
+    - Software Write Combine Buffers: Each worker maintains local output buffer to stage writes, when buffer full, write changes to global partition. Similar to private partitions but without a separate write phase at the end.
+    - Non-temporal streaming writes: Workers write data to global partition memory using streaming instructions to bypass CPU caches.
+    - `ref paper:` On the surprising difficulty of simple things: the case of radix partitioning.
+
+- Build Phase
+  - The threads are then to scan either the tuples or partitions of R. For each tuple, hash the join key attribute(s) for that tuple and add it to the appropriate bucket in the hash table, buckets should be a few cache lines in size.
+
+- Hash tables design decisions
+  - Hash function: How to map a large key space into a smaller domain and the trade-off between being fast vs collision rate.
+    - Do not want use a crypto hash functions for our join algorithm, need one that is fast and has a low collision rate. SMhasher site for reference.
+  - Hashing scheme: How to handle collisions after hashing and trade-off between allocating a large hash table vs additional instructions to find/insert keys.
+
+- Hash Table contents
+  - Tuple Data vs Pointers/Offsets to data: Whether to store the tuple directly inside of the hash table, storing tuples inside of the table not possible in open-addressing if there is variable length data.
+  - Join Keys vs Hashes: Whether to store the original join keys in the hash table or the computed hashed key (can store both).
+  
+- Probe Phase
+  - For each tuple in S, hash its join key and check to see whether there is a match for each tuple in corresponding bucket in the hash table constructed for R. If inputs were partitioned then assign each thread a unique partition
+    otherwise synchronize their access to the cursor on S.
+  - Sideways information passing via the use of a bloom filter.
+  
 ### Inter vs Intra Query Parallelism
 
 - Inter-Query 
@@ -2199,6 +2255,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Database Partitioning
   - some DBMS allow you to specify the disk location of each individual database.
   - *discussed further below*
+
 - Issues:
   - Coordination Overhead.
   - Scheduling
@@ -2788,8 +2845,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Applications dont acquire a txn's locks manually.
 - Need to provide the DBMS with hints to help it improve concurrency.
 - Explicit locks are also useful when doing major changes to the database.
-- Lock Table
-  
+- Lock Table  
   
 ## Timestamp-Ordering Concurrency Control
   
@@ -2893,10 +2949,12 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
         - Repeatable Reads: Same as above but no index locks.
         - Read Committed: Same as abov, but S locks are released immediately.
         - Read Uncommitted: Same as above but allows dirty reads(no S locks).
-`ref paper: Critique of SQL Isolation Levels`
+
+- `ref paper: Critique of SQL Isolation Levels`
         
 ## Multi-Version Concurrency Control
-`ref paper: An Empirical evaluation of In-Memory MVCC, The Hekaton Memory-Optimized OLTP Engine`  
+
+-`ref paper: An Empirical evaluation of In-Memory MVCC, The Hekaton Memory-Optimized OLTP Engine`  
 
 - DBMS maintains multiple physical versions of a single logical object in the database.
   - When a txn writes to an object, the DBMS creates a new verison of that object.
