@@ -6,6 +6,7 @@ tags:
   - Apache Arrow
   - Flight SQL
   - Apache Parquet
+  - Protobufs
   - Datafusion
   - Ballista 
   - Arrow Flight
@@ -55,3 +56,30 @@ tags:
 - Arrow libraries provide functionalities for reading data from and interacting with multiple data formats in different locations.
 
 
+## Protocol Buffers
+
+### Serialization goals
+
+- Serialization enables us to handle data seamlessly across time and machines, this is relevant because we have more data we process in batches and more distributed systems that need to send
+  data on the wire. In order to make sense of the data it needs to have a certain structure, data format. This is a way of encoding data that is understood by the deserialization process in order
+  to recreate the original data. Protobuf is one such data format.
+- Text(JSON, XML) and Binary(Protobuf, Avro, Cap'n Proto) are examples of general data format classes. Serialized data size, Availability of data and Readability of data are some of the criteria used
+  to base comparisons. Type safety and Readability of schema are also some considerations for formats that rely on data schema to define structure of the data.
+- Protobuf data is represented as raw bytes, on top of which we have optimizations such as bitpacking and use of varints(variable-size integers, map smaller integers to smaller number of bytes).
+
+### Protobuf Language
+
+- Top-level statements.
+  - syntax, edition, package, import, option.
+- User-defined types.
+  - enum.
+  - message - option, field, reserved, mapfield, oneof, message.
+- Out-of-the-box types, well-known types.
+  - Duration, timestamp, fieldmask, any, struct.
+- Services.
+  - designed for protobuf interaction with RPC frameworks such as gRPC, defining a type-safe contract that the server should implement and that the client can call.
+
+### Protobuf Text Format
+
+- txtpb files, this is the text representation of the data that we deserialize from the binary form or the data that we want to serialize into binary form. This is helpful when it comes to
+  debugging and configuration. It also has less boilerplate, type safety and we can have metadata right next to the data in headers and comments.

@@ -2353,6 +2353,7 @@ lock
 - RDP - IP 26
 - SCTP - IP 132
 
+
 ## Virtualization
 
 - Type 1 hypervisor: runs directly on hardware, no need for host OS.
@@ -2593,25 +2594,32 @@ lock
 
 - They share base OS, have different set of libraries, utilities, root filesystem, view of process tree, networking, IPC endpoints, users.
 - Containers offer lightweight virtualization with less overhead that VMs but also lesser isolation.
+- The difference between a process and a VM is the ABI exposed, processes have network sockets, file descriptors while OS virtualization has virtual NICs, virtual CPU and virtual disks.
 - Containers are built on
-  - Namespace
-    - A way to provide isolated view of a certain global resource to a set of processes, processes within a namespace see only their slice of the global resource.
-    - Default namespace for all processes in Linux, system calls to create new namespaces and place processes in them.
-      - Mount namespace, isolates the filesystem mountpoints seen by a group of processes.
-      - PID namespace, isolates PID numberspace seen by processes, A process can see all other processes in its own or nested namespaces but not in its parent namespace.
-      - Network namespace, isolates network resources like IP addresses, routing tables, port numbers, create a virtual ethernet linkto connect parent namespace to new child namespace.
-      - UTS namespace, isolates the hostname seen by processes.
-      - User namespace, isolates UID/GID numberspace.
-      - IPC namespace, isolates IPC endpoints like POSIX message queues.
-    - Namespaces API
-      - clone(), used to create a new process and place it into a new namespace, general version of fork().
-      - setns(), lets a process join an existing namespace,args specify which namespace and which type.
-      - unshare(), creates a new namespace and places calling process into it, flags indicate which namespace to create.
-  - Cgroups
-    - A way to set resource limits on a group of processes.
-    - Create separate hierarchies for each resource, or a combined hierarchy for multiple resources together.
-    - No new sysstem calls, a special cgroup filesystem is mounted at sys/fs/cgroup.
-    - Create directories and sub-directories for different resources and different user classes.
+
+### Namespace
+
+- A way to provide isolated view of a certain global resource to a set of processes, processes within a namespace see only their slice of the global resource.
+- Default namespace for all processes in Linux, system calls to create new namespaces and place processes in them.
+  - Mount namespace, isolates the filesystem mountpoints seen by a group of processes.
+  - PID namespace, isolates PID numberspace seen by processes, A process can see all other processes in its own or nested namespaces but not in its parent namespace.
+  - Network namespace, isolates network resources like IP addresses, routing tables, port numbers, create a virtual ethernet linkto connect parent namespace to new child namespace.
+  - UTS namespace, isolates the hostname seen by processes.
+  - User namespace, isolates UID/GID numberspace.
+  - IPC namespace, isolates IPC endpoints like POSIX message queues.
+
+- Namespaces API
+  - clone(), used to create a new process and place it into a new namespace, general version of fork().
+  - setns(), lets a process join an existing namespace,args specify which namespace and which type.
+  - unshare(), creates a new namespace and places calling process into it, flags indicate which namespace to create.
+
+### Cgroups
+
+- A way to set resource limits on a group of processes.
+  - Create separate hierarchies for each resource, or a combined hierarchy for multiple resources together.
+  - No new sysstem calls, a special cgroup filesystem is mounted at sys/fs/cgroup.
+  - Create directories and sub-directories for different resources and different user classes.
+
 - Implementations include LXC, Docker leverage these mechanisms to build the container abstractions.
 - Kubernetes and Swarm are used to manage multiple containers across hosts, along with autoscaling, lifecycle management and so on.
 - Kubernetes
