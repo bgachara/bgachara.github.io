@@ -961,8 +961,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - The DBMS stores the values of a single attribute for all tuples contiguously in a page, also known as a column store.
 - It is ideal for OLAP workloads where read-only queries perform large scans over a subset of the table's attrbutes, use a batched vectorized processing model.
 - DBMS is responsible for combining/splitting a tuple's attributes when reading/writing.
-- It stores attributes and meta-data in separate arrays of fixed-length values.
-  - most systems identify unique physical tuples using offsets into these arrays
+- It stores attributes and meta-data in separate arrays of fixed-length values, most systems identify unique physical tuples using offsets into these arrays.
   - need to handle variable-length values.
     - padding variable length fields to ensure they are fixed-length is wasteful, especially for large attributes.
     - better approach is to use dictionary compression to convert repetitive variable-length data into fixed-lenght values(typically 32-bit integers)
@@ -970,34 +969,33 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Tuple identification across pages, i.e in queries that access more than one column.
   - Fixed-length offsets, each value is the same length for an attribute, use simple arithmetic to jump to an offset to find a tuple. Need to convert variable-length data into fixed-length values.
   - Embedded tuple ids, value is stored with it tuple id in a column. Need auxiliary data structures to find offset within a column for a given tuple id.
+
 - Advantages: 
   - Reduces amount wasted i/o because DBMS only reads data it needs.
   - Better query processing and data compression because of increased locality and cached data reuse.
   - Better data compression.
+
 - Disadvantages:
   - Slow for point queries, inserts, updates and deletes because of tuple splitting/stitching.
+
 - See: Cantor DBMS, DSM proposal, SybaseIQ, Vertica, MonetDB, Parquet/ORC.
   
 #### Observation
   
 - OLAP queries almost never access a single column in a table by itself, at some point during query execution, the DBMS must get other columns and stitch the original tuple back together.
-- We still need to store data in a columnar format to get the storage + execution benefits.
-- We need columnar scheme that still stores attributes separately but keeps the data for each tuple physically close to each other.
+- We still need to store data in a columnar format to get the storage + execution benefits. We need columnar scheme that still stores attributes separately but keeps the data for each tuple physically close to each other.
   
 ### PAX storage model
 
 - ref paper: `data page layouts for relational databases on deep memory hierarchies`
-- Partition Attributes Across(PAX) is a hybrid storage model that vertically partitions attributes within a database page
-  - Parquet and Orc
+- Partition Attributes Across(PAX) is a hybrid storage model that vertically partitions attributes within a database page, i.e Parquet and Orc
 - The goal is to get the benefit of faster processing on columnar storage while retaining the spatial locality benefits of row storage.
-- Horizontally partition data into row groups. Then vertically partition their attributes into column chunks.
-- Global header contains directory with the offsets to the file's row groups
-  - This is stored in the footer if the file is immutable(Parquet, Orc)
+- Horizontally partition data into row groups. Then vertically partition their attributes into column chunks. Global header contains directory with the offsets to the file's row groups.
+  This is stored in the footer if the file is immutable(Parquet, Orc)
 - Each row group contains its own meta-data header about its contents.
 
 - Transparent Huge Pages(THP)
-  - Instead of always allocating memory in 4KB pages, linux supports creating larger pages.
-  - reduced the # of TLB entries.
+  - Instead of always allocating memory in 4KB pages, linux supports creating larger pages, reduced the # of TLB entries.
 
 ### Hybrid storage model.
 
@@ -1026,8 +1024,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 ## OLAP INDEXES
 
 - OLTP DBMS use indexes to find individual tuples without performing sequential scans
-  - tree-based indexes are meant for queries with low selectivity predicates
-  - also need to accomodate incremental updates
+  - tree-based indexes are meant for queries with low selectivity predicates and also need to accomodate incremental updates
 - OLAP don't necessarily need to find individual tuples and data files are read-only.
 
 ### Sequential scans optimizations
@@ -1036,22 +1033,18 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Task parallelization/Multi-threading
 - Clustering / Sorting.
 - Late Materialization
-- Materialized Views / Result Caching
+- Materialized Views / Result Caching - *read more
 - Data Skipping
   - Approaches:
     - Approximate Queries(Lossy)
-      - Execute queries on a sampled subset of the entire table to produce approximate results
-      - Examples: BlinkDB, Redshift, Snowflake, BigQuery, DataBricks.
+      - Execute queries on a sampled subset of the entire table to produce approximate results, i.e BlinkDB, Redshift, Snowflake, BigQuery, DataBricks.
     - Data Pruning(Loseless)
       - use auxiliary data structure for evaluating predicates to quickly identify portions of a tbale that the DBMS can skip instead of examining tuples individually
       - DBMS must consider tradeoffs between scope(size) vs filter efficacy, manual vs automatic
       - Considerations
-        - Predicate Selectivity
-          - How many tuples will satisfy a query's predicates
-        - Skewness
-          - Whether an attribute has all unique values or contain repeated values
-        - Clustering/Sorting
-          - Whether the table is pre-sorted on the attributes accessed in a query's predicates.
+        - Predicate Selectivity: How many tuples will satisfy a query's predicates
+        - Skewness: Whether an attribute has all unique values or contain repeated values
+        - Clustering/Sorting: Whether the table is pre-sorted on the attributes accessed in a query's predicates.
       
       - Zone Maps
         - ref paper:`small materialized aggregates: a lightweight index structure for data warehousing`
@@ -3679,10 +3672,40 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Data can be transferred between processes efficiently without much serialization overhead because memory format is also network format.
   - It is also easier to build connectors,drivers and integrations between various open source and commercial projects.
 
+#### Format Design Decisions
+
+- File Meta-Data
+  - Files are self-contained to increase portability, they contain all the necessary information to interpret their contents without external data dependencies.Each file maintains 
+    global meta-data about its contents; table schema(protobuf, thrift), row group offsets/length, tuple counts / zone maps.
+  
+- Format Layout
+  - The most common formats use the PAX storage model tha splits data row gorups that contain one or more column chunks. The size of row groups varies per implementation and makes 
+    compute/memory trade-offs.
+    
+- Type System
+  - Defines the data types that the format supports; physical - low-level byte representation, logical - auxilliary types that map to physical types. Formats vary in the complexity of their
+    type systems that determine how much upstream producer/consumers need to implement.
+     
+- Encoding Schemes
+  - An encoding scheme specifies how the format stores the bytes for contiguous/related data, can apply multiple encoding schemes on top of each other to further improve compression, i.e Dictionary encoding,
+    RLE, Bitpacking, Delta encoding. ref paper:`Procella`
+    
+- Block Compression
+  - Compress data using a general purpose algorithm, scope of compression is only based on the data provided as input with considerations given to computational overhead, compress vs decompress speed
+    and data opaqueness, i.e LZO, LZ4, Snappy, Ztsd.
+     
+- Filters
+  - Zone Maps, maintain min/max values per column at the file-level and row group-level, mostly stored in the header of each row group.
+  - Bloom Filters, track the existence of values for each column in a row group, more effective if values are clustered.
+  
+- Nested Data
+  - Real-world data sets often contain semi-structured objects, JSON, Protobufs. A file format will want to encode the contents of these objects as if they were regular columns. i.e 
+    record shredding, length+presence encoding. 
+
 - Examples:
   - Apache Parquet
     - compressed columnar storage from cloudera/twitter
-    - writeonce read many
+    - write once read many
   - Apache ORC
     - compressed columnar storage from Apache Hive
   - Apache CarbonData
@@ -3696,6 +3719,12 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - It is efficient for vectorised processing on modern h/w.
     - IPC format is defined for exchanging metadata such as schema information, Google Flatbuffers.
     - Flight protocol is used for efficiently streaming Arrow data over the network.
+
+- Critiques of existing formats
+  - Variable-sized runs, not SIMD friendly.
+  - Eager decompression, no random access if using block compression.
+  - Dependencies between adjacent values, i.e RLE, delta encoding.
+  - Vectorization portability, ISAs have different SIMD capabilities.
 
 #### Apache Arrow
 
@@ -3731,7 +3760,18 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Standalone libraries for executing vectorised query operators on columnar data, input is a DAG of physocal operators and require external scheduling and orchestration.
   - example: Velox, Datafusion, Intel OAP.
 
+### DBMS
 
+- Storage system(stores actual data)
+- Catalog (store metadata about what is in the storage system)
+- Query Engine (query and retrieve requested data)
+- Access control and Authorization (users, groups and permissions)
+- Resource management (divide resources between users)
+- Administration utilities (monitor resource usage, set policies)
+- Clients for for network connectivity (JDBC, ODBC)
+- Multi-node coordination and management
+
+ 
 #### Architecture Overview
 
 - Query ->FRONTEND(parser) ->PLANNER(binder,rewriter,optimizer+cost models) ->CATALOG(metadata,data locations, statistics, data discovery) ->SCHEDULER(plan fragments) ->EXECUTION ENGINE(block requests) ->I/O SERVICE
@@ -3898,46 +3938,9 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 
 - OLAP workloads perform sequential scans on large segments of read-only data as the DBMS only needs to find individual tuples to stitch them back together while OLTP workloads
   use indexes to find individual tuples without performing sequential scans i.e tree based indexes are meant for queries with low selectivity predicates and the need to accomodate
-  incremental updates. 
-  
-### Format Design Decisions
-
-- File Meta-data
-  - Files are self-contained to increase portability as they contain all the necessary information to interpret their contents without external data dependencies with each file
-    maintaining global meta-data about its contents, i.e table schema, row group offsets/length, tuple counts/zone maps.
-
-- Format layout
-  - The most common formats use the PAX storage models that splits data row groups that contain one or more column chunks, the size of row groups varies per implementation and makes
-    compute/memory trade-offs, i.e Parquet(1m tuples), Orc(250mb), Arrow(1024*1024 tuples)
+  incremental updates.   
     
-- Type system
-  - It defines the data types that the format supports, physical(low level byte representation), logical(auxiliary types that map to physcial types). Formats vary in the complexity
-    of their type systems that determine how much upstream producer/consumers need to implement.
-    
-- Encoding schemes
-  - It specifies how the format stores the bytes for contiguous/related data, can apply multiple encoding schemes on top of each other to further improve compression. i.e bitpacking,
-    run-length encoding, dictionary encoding, delta encoding and frame-of-reference.
-    
-- Block compression
-  - Compress data using a general-purpose algorithm with the scope of compression being absed on the data provided as input.Notable considerations include computational overhead, 
-    compress vs decompress speed and data opaqueness. i.e LZO, LZ4, Snappy and Zstd.
-    
-- Filters
-  - Zone maps, maintain min/max values per column at the file-level and row group-level.
-  - Bloom filters, track existence of values for each column in a row group, more effective if values are clustered.
-  
-- Nested data
-  - Real world data sets often contain semi-structured objects(JSON, protobufs)., a file format will want to encode the contents of these objects as if they were regular columns.
-    This can either be through record shredding(store paths in nested structure as separate columns with additional meta-data about paths.) or length+presence encoding(same as shredding but maintain additional columsn to track
-    number of entries at each path level and whether a key exists at that level for a record).
-
 - ref paper: `Procella: Unifying serving and analytical data at Youtube`,`Dremel: A decade of interactive sql analysis at web scale`
-
-- Critiques of existing formats
-  - Variable-sized runs, not SIMD friendly.
-  - Eager decompression, no random access if using block compression.
-  - Dependencies between adjacent values, i.e RLE, delta encoding.
-  - Vectorization portability, ISAs have different SIMD capabilities.
   
 ### BTRBLOCKS
 
